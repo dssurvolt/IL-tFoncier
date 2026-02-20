@@ -1,0 +1,125 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Marketplace iLôt
+                </h6>
+                <h1 class="display-5 fw-bold mb-0">Mettre en vente ma parcelle</h1>
+            </div>
+            <a href="{% url 'user_dashboard' user.id %}" class="btn btn-outline-secondary rounded-4">
+                Annuler
+            </a>
+        </div>
+
+        <div class="citizen-card animate-up">
+            <div class="row g-4">
+                <!-- Recap de la parcelle -->
+                <div class="col-md-5 border-end">
+                    <h5 class="fw-bold mb-4">Récapitulatif de l'actif</h5>
+                    <div class="p-4 bg-light rounded-4 mb-4">
+                        <small class="text-muted d-block mb-1">ID Parcelle</small>
+                        <span class="fw-bold d-block mb-3">#{{ property.id|stringformat:"s"|slice:":8" }}</span>
+
+                        <small class="text-muted d-block mb-1">Localisation</small>
+                        <span class="fw-bold d-block mb-3">{{ property.village|default:"Non renseigné" }}</span>
+
+                        <small class="text-muted d-block mb-1">Superficie</small>
+                        <span class="fw-bold d-block">{{ property.area_sqm|default:"-" }} m²</span>
+                    </div>
+
+                    <div class="alert alert-info border-0 rounded-4 small">
+                        <span class="fs-5 me-2">🛡️</span>
+                        Seules les propriétés certifiées et inscrites sur la blockchain peuvent être mises en vente.
+                    </div>
+                </div>
+
+                <!-- Formulaire -->
+                <div class="col-md-7 ps-md-4">
+                    <form id="listingForm">
+                        <input type="hidden" name="property_id" value="{{ property.id }}">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Prix de vente souhaité (FCFA)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white border-end-0 rounded-start-4">💰</span>
+                                <input type="number" class="form-control border-start-0 rounded-end-4" id="price_fiat"
+                                    placeholder="Ex: 5000000" required min="1000">
+                            </div>
+                            <div class="form-text mt-2">Ce prix sera affiché sur la marketplace publique.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Équivalent Crypto (Estimation cUSD)</label>
+                            <div class="p-3 bg-primary bg-opacity-5 border border-primary border-opacity-10 rounded-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h4 mb-0 text-primary fw-bold" id="price_crypto_display">0.00</span>
+                                    <span class="badge bg-primary rounded-pill">cUSD (Celo Stablecoin)</span>
+                                </div>
+                                <input type="hidden" id="price_crypto" value="0.00">
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-4 mb-4 small text-warning-emphasis">
+                            <span class="me-2">⚠️</span>
+                            En mettant ce terrain en vente, vous autorisez le déploiement d'un contrat séquestre qui
+                            bloquera la propriété durant la transaction.
+                        </div>
+
+                        <button type="submit" class="btn btn-citizen btn-lg w-100 py-3 shadow-sm">
+                            Confirmer la mise en vente 🚀
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const priceFiatInput = document.getElementById('price_fiat');
+    const priceCryptoDisplay = document.getElementById('price_crypto_display');
+    const priceCryptoInput = document.getElementById('price_crypto');
+
+    // Taux de conversion simulé (1 cUSD = 655 FCFA)
+    const CONVERSION_RATE = 655;
+
+    priceFiatInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 0;
+        const cryptoVal = (val / CONVERSION_RATE).toFixed(2);
+        priceCryptoDisplay.innerText = cryptoVal;
+        priceCryptoInput.value = cryptoVal;
+    });
+
+    document.getElementById('listingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            property_id: "{{ property.id }}",
+            seller_wallet: "{{ user.wallet_address|default:'' }}",
+            price_fiat: priceFiatInput.value,
+            price_crypto: priceCryptoInput.value
+        };
+
+        try {
+            const res = await fetch('/api/marketplace/listings/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert("Félicitations ! Votre terrain est maintenant listé sur la Marketplace iLôt.");
+                window.location.href = "{% url 'web_marketplace' %}";
+            } else {
+                const err = await res.json();
+                alert("Erreur lors de la mise en vente : " + (err.error || "Erreur inconnue"));
+            }
+        } catch (error) {
+            alert("Erreur réseau. Veuillez réessayer.");
+        }
+    });
+</script>
+{% endblock %}

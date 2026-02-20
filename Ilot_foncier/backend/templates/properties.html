@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <h1 class="h2 fw-bold">Gestion des Propriétés</h1>
+    <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#createFormCollapse">
+        + Nouveau Terrain
+    </button>
+</div>
+
+<!-- Formulaire Création (Collapsible) -->
+<div class="collapse mb-5" id="createFormCollapse">
+    <div class="card border-primary border-opacity-25">
+        <h4 class="fw-bold mb-4 text-white">Enregistrer un Nouveau Terrain</h4>
+        <form id="createPropForm">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label text-white small fw-bold">NOM DU PROPRIÉTAIRE</label>
+                    <input type="text" class="form-control bg-dark bg-opacity-25 border-secondary text-white"
+                        id="ownerName" placeholder="ex: Jean-Pierre M-Almeida" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white small fw-bold">WALLET PROPRIÉTAIRE</label>
+                    <input type="text" class="form-control bg-dark bg-opacity-25 border-secondary text-white"
+                        id="ownerWallet" placeholder="0x... ou tel:+229..." required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white small fw-bold">LATITUDE (Format DD)</label>
+                    <input type="number" step="any" min="-90" max="90"
+                        class="form-control bg-dark bg-opacity-25 border-secondary text-white" id="lat"
+                        placeholder="ex: 6.36" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-white small fw-bold">LONGITUDE (Format DD)</label>
+                    <input type="number" step="any" min="-180" max="180"
+                        class="form-control bg-dark bg-opacity-25 border-secondary text-white" id="lng"
+                        placeholder="ex: 2.42" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label text-white small fw-bold">PIÈCES JOINTES (Photos, Vidéos,
+                        Documents)</label>
+                    <input type="file" class="form-control bg-dark bg-opacity-25 border-secondary text-white"
+                        id="mediaFiles" multiple accept="image/*,video/*,.pdf">
+                    <div class="form-text text-muted small">Vous pouvez sélectionner plusieurs fichiers (Max
+                        10Mo/fichier).</div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary w-100">Créer le Brouillon Digital</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste -->
+<div class="card bg-transparent border-0 p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0 text-white">Registre des Actifs</h5>
+        <div class="input-group w-25">
+            <input type="text" class="form-control form-control-sm bg-dark bg-opacity-25 border-secondary text-white"
+                placeholder="Rechercher...">
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover text-white">
+            <thead>
+                <tr>
+                    <th>ID INTERNE</th>
+                    <th>ON-CHAIN ID</th>
+                    <th>PROPRIÉTAIRE</th>
+                    <th>STATUT</th>
+                    <th>LOCALISATION (GPS)</th>
+                    <th>MÉDIAS</th>
+                </tr>
+            </thead>
+            <tbody id="propList">
+                <!-- JS will populate this -->
+            </tbody>
+        </table>
+    </div>
+    <!-- Légende -->
+    <div class="mt-4 p-3 bg-dark bg-opacity-25 rounded-3 border border-white border-opacity-10">
+        <h6 class="text-white fw-bold small mb-3">Légende des Statuts :</h6>
+        <div class="d-flex flex-wrap gap-4">
+            <div class="d-flex align-items-center">
+                <span class="badge me-2" style="background-color: #64748b; color: #ffffff;">DRAFT</span>
+                <small class="text-muted">Enregistrement local initial.</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge me-2" style="background-color: #eab308; color: #000000;">VALIDATING</span>
+                <small class="text-muted">En attente de consensus communautaire.</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge me-2" style="background-color: #22c55e; color: #ffffff;">ON_CHAIN</span>
+                <small class="text-muted">Sécurisé et certifié sur la Blockchain.</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge me-2" style="background-color: #ef4444; color: #ffffff;">DISPUTED</span>
+                <small class="text-muted">Litige ou fraude signalé.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load Properties
+    fetch('/api/properties/')
+        .then(r => r.json())
+        .then(data => {
+            const tbody = document.getElementById('propList');
+            data.results.forEach(p => {
+                const lat = p.gps_centroid.lat || 0;
+                const lng = p.gps_centroid.lng || 0;
+                const source = p.gps_centroid.source === 'USSD' ? '<span class="badge bg-info bg-opacity-10 text-info ms-2">USSD</span>' : '';
+                const gpsDisplay = `<code class="text-accent">${lat}, ${lng}</code>${source}`;
+
+                // Amélioration de la visibilité des statuts (Contraste maximal)
+                let statusBadge = '';
+                if (p.status === 'ON_CHAIN') {
+                    statusBadge = `<span class="badge" style="background-color: #22c55e; color: #ffffff; border: 1px solid #16a34a;">ON_CHAIN</span>`;
+                } else if (p.status === 'VALIDATING') {
+                    statusBadge = `<span class="badge" style="background-color: #eab308; color: #000000; border: 1px solid #ca8a04;">VALIDATING</span>`;
+                } else if (p.status === 'DISPUTED') {
+                    statusBadge = `<span class="badge" style="background-color: #ef4444; color: #ffffff; border: 1px solid #dc2626;">DISPUTED</span>`;
+                } else {
+                    statusBadge = `<span class="badge" style="background-color: #64748b; color: #ffffff; border: 1px solid #475569;">${p.status}</span>`;
+                }
+
+                const onChainId = p.on_chain_id ? `<span class="badge bg-primary">#${p.on_chain_id}</span>` : '<span class="text-muted small">Non minté</span>';
+                const mediaCount = p.media_count || 0;
+                const mediaDisplay = mediaCount > 0
+                    ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">📁 ${mediaCount} fichiers</span>`
+                    : `<span class="text-muted small">Aucun média</span>`;
+
+                tbody.innerHTML += `
+                        <tr>
+                            <td><span class="text-muted small font-monospace">${p.id.substring(0, 8)}...</span></td>
+                            <td>${onChainId}</td>
+                            <td>
+                                <span class="badge bg-light text-dark fw-bold" style="font-size: 0.9rem;">${p.owner}</span>
+                            </td>
+                            <td>${statusBadge}</td>
+                            <td>${gpsDisplay}</td>
+                            <td>${mediaDisplay}</td>
+                        </tr>
+                    `;
+            });
+        });
+
+    // Create Property
+    document.getElementById('createPropForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('ownerName').value;
+        const wallet = document.getElementById('ownerWallet').value;
+        const lat = parseFloat(document.getElementById('lat').value);
+        const lng = parseFloat(document.getElementById('lng').value);
+        const files = document.getElementById('mediaFiles').files;
+
+        const formData = new FormData();
+        formData.append('owner_name', name);
+        formData.append('owner_wallet', wallet);
+        formData.append('gps_centroid', JSON.stringify({ lat, lng }));
+        formData.append('gps_boundaries', JSON.stringify([]));
+
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        const res = await fetch('/api/properties/', {
+            method: 'POST',
+            body: formData
+            // Note: browser sets Content-Type to multipart/form-data automatically with boundary
+        });
+
+        if (res.ok) {
+            alert('Terrain enregistré avec succès !');
+            location.reload();
+        } else {
+            const err = await res.json();
+            alert('Erreur: ' + err.error);
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,425 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "iLôt Foncier API",
+        "description": "API Hybride pour le registre foncier décentralisé. Permet l'interaction Off-chain (Indexeur) et la préparation des transactions On-chain.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Serveur de développement"
+        }
+    ],
+    "paths": {
+        "/api/identity/profile/{wallet}/": {
+            "get": {
+                "summary": "Profil Utilisateur",
+                "tags": [
+                    "Identity"
+                ],
+                "parameters": [
+                    {
+                        "name": "wallet",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profil public",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/properties/": {
+            "get": {
+                "summary": "Lister les propriétés",
+                "tags": [
+                    "Properties"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Property"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Créer une propriété (Draft)",
+                "tags": [
+                    "Properties"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "owner_wallet": {
+                                        "type": "string",
+                                        "example": "0x123..."
+                                    },
+                                    "gps_centroid": {
+                                        "type": "object",
+                                        "example": {
+                                            "lat": 6.36,
+                                            "lng": 2.42
+                                        }
+                                    },
+                                    "gps_boundaries": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Créé avec succès"
+                    }
+                }
+            }
+        },
+        "/api/properties/{id}/": {
+            "get": {
+                "summary": "Détails d'une propriété",
+                "tags": [
+                    "Properties"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails complets",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Property"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/validation/request/": {
+            "post": {
+                "summary": "Initier une validation (Consensus)",
+                "tags": [
+                    "Consensus"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ValidationRequestPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Demande créée"
+                    }
+                }
+            }
+        },
+        "/api/validation/vote/": {
+            "post": {
+                "summary": "Soumettre un vote (Témoin)",
+                "tags": [
+                    "Consensus"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WitnessVotePayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Vote enregistré"
+                    }
+                }
+            }
+        },
+        "/api/marketplace/listings/": {
+            "get": {
+                "summary": "Lister les offres",
+                "tags": [
+                    "Marketplace"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des terrains à vendre",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "count": {
+                                            "type": "integer"
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Listing"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Mettre en vente",
+                "tags": [
+                    "Marketplace"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ListingPayload"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Offre créée"
+                    }
+                }
+            }
+        },
+        "/ussd/": {
+            "post": {
+                "summary": "USSD Gateway",
+                "tags": [
+                    "USSD"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "sessionId": {
+                                        "type": "string"
+                                    },
+                                    "phoneNumber": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réponse texte (CON/END)"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "wallet_address": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "USER",
+                            "WITNESS",
+                            "CHIEF",
+                            "ADMIN"
+                        ]
+                    },
+                    "reputation_score": {
+                        "type": "integer"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "date_joined": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "Property": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "owner": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "DRAFT",
+                            "VALIDATING",
+                            "ON_CHAIN"
+                        ]
+                    },
+                    "gps_centroid": {
+                        "type": "object"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "ValidationRequestPayload": {
+                "type": "object",
+                "properties": {
+                    "property_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "requester_wallet": {
+                        "type": "string"
+                    },
+                    "gps_at_request": {
+                        "type": "object",
+                        "example": {
+                            "lat": 6.36,
+                            "lng": 2.42
+                        }
+                    }
+                }
+            },
+            "WitnessVotePayload": {
+                "type": "object",
+                "properties": {
+                    "request_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "witness_wallet": {
+                        "type": "string"
+                    },
+                    "vote_result": {
+                        "type": "boolean"
+                    },
+                    "witness_gps": {
+                        "type": "object",
+                        "example": {
+                            "lat": 6.36,
+                            "lng": 2.42
+                        }
+                    }
+                }
+            },
+            "Listing": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "property_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "price_fiat": {
+                        "type": "string"
+                    },
+                    "price_crypto": {
+                        "type": "string"
+                    },
+                    "seller": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "ListingPayload": {
+                "type": "object",
+                "properties": {
+                    "property_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "seller_wallet": {
+                        "type": "string"
+                    },
+                    "price_fiat": {
+                        "type": "number"
+                    },
+                    "price_crypto": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}

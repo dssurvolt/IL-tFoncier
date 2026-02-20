@@ -1,0 +1,275 @@
+{% extends 'base_citizen.html' %}
+{% block sidebar %}{% endblock %}
+{% block main_class %}col-12{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6">
+        <div class="text-center mb-5">
+            <h1 class="display-6 fw-bold mb-2">Créer un Compte</h1>
+            <p class="text-muted">Rejoignez la révolution foncière numérique</p>
+        </div>
+
+        <div class="citizen-card animate-up">
+            <form id="registerForm">
+                <!-- Informations personnelles -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">NOM COMPLET</label>
+                    <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                        id="fullName" placeholder="Nom et Prénoms" required>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">PAYS</label>
+                        <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country"
+                            required>
+                            <option value="Benin" selected>Bénin</option>
+                            <option value="Togo">Togo</option>
+                            <option value="Niger">Niger</option>
+                            <option value="Burkina Faso">Burkina Faso</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">DISTRICT / COMMUNE</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="district" placeholder="Ex: Cotonou">
+                    </div>
+                </div>
+
+                <!-- Email et mot de passe -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">ADRESSE EMAIL</label>
+                    <input type="email" class="form-control form-control-lg rounded-4 border-light bg-light" id="email"
+                        placeholder="votre@email.com" required>
+                    <div class="form-text small">Utilisé pour la connexion et les notifications</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">MOT DE PASSE</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="password" placeholder="••••••••" required>
+                        <button type="button"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            onclick="togglePassword('password')" style="text-decoration: none;">
+                            <span id="eyeIcon1">👁️</span>
+                        </button>
+                    </div>
+
+                    <!-- Indicateur de force du mot de passe -->
+                    <div class="mt-2">
+                        <div class="progress" style="height: 6px;">
+                            <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%">
+                            </div>
+                        </div>
+                        <small id="passwordStrengthText" class="text-muted"></small>
+                    </div>
+
+                    <div class="form-text small mt-2">
+                        <strong>Critères :</strong>
+                        <ul class="mb-0 mt-1" style="font-size: 0.85rem;">
+                            <li id="criteria-length" class="text-muted">Au moins 8 caractères</li>
+                            <li id="criteria-uppercase" class="text-muted">Une lettre majuscule</li>
+                            <li id="criteria-lowercase" class="text-muted">Une lettre minuscule</li>
+                            <li id="criteria-number" class="text-muted">Un chiffre</li>
+                            <li id="criteria-special" class="text-muted">Un caractère spécial (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">CONFIRMER LE MOT DE PASSE</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="confirmPassword" placeholder="••••••••" required>
+                        <button type="button"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            onclick="togglePassword('confirmPassword')" style="text-decoration: none;">
+                            <span id="eyeIcon2">👁️</span>
+                        </button>
+                    </div>
+                    <div id="passwordMatchMessage" class="form-text small"></div>
+                </div>
+
+                <div id="errorMessage" class="alert alert-danger d-none mb-3"></div>
+                <div id="successMessage" class="alert alert-success d-none mb-3"></div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-citizen py-3 fs-5" id="registerBtn" disabled>
+                        CRÉER MON COMPTE
+                    </button>
+                    <a href="{% url 'web_login' %}" class="btn btn-outline-secondary py-2 rounded-3">
+                        Déjà un compte ? Se connecter
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let passwordValid = false;
+    let passwordsMatch = false;
+
+    function togglePassword(fieldId) {
+        const passwordInput = document.getElementById(fieldId);
+        const eyeIcon = document.getElementById(fieldId === 'password' ? 'eyeIcon1' : 'eyeIcon2');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.textContent = '👁️';
+        }
+    }
+
+    function checkPasswordStrength(password) {
+        const criteria = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        // Mettre à jour les critères visuels
+        document.getElementById('criteria-length').className = criteria.length ? 'text-success' : 'text-muted';
+        document.getElementById('criteria-uppercase').className = criteria.uppercase ? 'text-success' : 'text-muted';
+        document.getElementById('criteria-lowercase').className = criteria.lowercase ? 'text-success' : 'text-muted';
+        document.getElementById('criteria-number').className = criteria.number ? 'text-success' : 'text-muted';
+        document.getElementById('criteria-special').className = criteria.special ? 'text-success' : 'text-muted';
+
+        // Calculer le score
+        const score = Object.values(criteria).filter(Boolean).length;
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+
+        let strength = '';
+        let color = '';
+        let width = 0;
+
+        if (score === 0) {
+            strength = '';
+            color = '';
+            width = 0;
+        } else if (score <= 2) {
+            strength = 'Faible';
+            color = 'bg-danger';
+            width = 33;
+        } else if (score === 3) {
+            strength = 'Moyen';
+            color = 'bg-warning';
+            width = 66;
+        } else if (score === 4) {
+            strength = 'Bon';
+            color = 'bg-info';
+            width = 85;
+        } else {
+            strength = 'Excellent';
+            color = 'bg-success';
+            width = 100;
+        }
+
+        strengthBar.className = `progress-bar ${color}`;
+        strengthBar.style.width = `${width}%`;
+        strengthText.textContent = strength ? `Force : ${strength}` : '';
+
+        passwordValid = score >= 4; // Au moins 4 critères sur 5
+        updateSubmitButton();
+        return passwordValid;
+    }
+
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const matchMessage = document.getElementById('passwordMatchMessage');
+
+        if (confirmPassword === '') {
+            matchMessage.textContent = '';
+            passwordsMatch = false;
+        } else if (password === confirmPassword) {
+            matchMessage.textContent = '✓ Les mots de passe correspondent';
+            matchMessage.className = 'form-text small text-success';
+            passwordsMatch = true;
+        } else {
+            matchMessage.textContent = '✗ Les mots de passe ne correspondent pas';
+            matchMessage.className = 'form-text small text-danger';
+            passwordsMatch = false;
+        }
+        updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+        const registerBtn = document.getElementById('registerBtn');
+        const email = document.getElementById('email').value;
+        const fullName = document.getElementById('fullName').value;
+
+        registerBtn.disabled = !(passwordValid && passwordsMatch && email && fullName);
+    }
+
+    // Event listeners
+    document.getElementById('password').addEventListener('input', (e) => {
+        checkPasswordStrength(e.target.value);
+        checkPasswordMatch();
+    });
+
+    document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+    document.getElementById('email').addEventListener('input', updateSubmitButton);
+    document.getElementById('fullName').addEventListener('input', updateSubmitButton);
+
+    document.getElementById('registerForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        const registerBtn = document.getElementById('registerBtn');
+
+        errorDiv.classList.add('d-none');
+        successDiv.classList.add('d-none');
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Création du compte...';
+
+        const formData = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            full_name: document.getElementById('fullName').value,
+            country: document.getElementById('country').value,
+            district: document.getElementById('district').value || null
+        };
+
+        try {
+            const response = await fetch('/api/auth/register/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successDiv.textContent = 'Compte créé avec succès ! Redirection...';
+                successDiv.classList.remove('d-none');
+
+                // Stocker l'ID utilisateur et rediriger
+                localStorage.setItem('ilot_user_id', data.user_id);
+                localStorage.setItem('ilot_user_email', formData.email);
+
+                setTimeout(() => {
+                    window.location.href = `/dashboard/${data.user_id}/`;
+                }, 1500);
+            } else {
+                errorDiv.textContent = data.error || 'Erreur lors de la création du compte';
+                errorDiv.classList.remove('d-none');
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'CRÉER MON COMPTE';
+            }
+        } catch (error) {
+            errorDiv.textContent = 'Erreur de connexion. Veuillez réessayer.';
+            errorDiv.classList.remove('d-none');
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'CRÉER MON COMPTE';
+        }
+    };
+</script>
+{% endblock %}

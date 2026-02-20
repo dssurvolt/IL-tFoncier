@@ -1,0 +1,658 @@
+{% extends 'base_citizen.html' %}
+{% block sidebar %}{% endblock %}
+{% block main_class %}col-12{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-2">Rejoindre iLôt Foncier</h1>
+            <p class="text-muted lead">Sécurisez votre patrimoine foncier sur la blockchain en quelques minutes.</p>
+            <p class="small">Déjà inscrit ? <a href="{% url 'web_login' %}" class="text-primary fw-bold">Connectez-vous
+                    ici</a></p>
+        </div>
+
+        <div class="citizen-card animate-up mb-5">
+            <form id="registerForm">
+                <!-- Section 1: Identité -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">👤</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Votre Identité Digitale</h4>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-muted small">NOM ET PRÉNOMS</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="ownerName" placeholder="ex: Jean Dupont" required>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">PAYS DE RÉSIDENCE</label>
+                            <input list="africa_countries"
+                                class="form-control form-control-lg rounded-4 border-light bg-light" id="user_country"
+                                placeholder="Votre pays de vie..." required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">DATE DE NAISSANCE</label>
+                            <input type="date" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="birthDate" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Localisation Administrative -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">🌍</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Localisation Administrative</h4>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted small">PAYS DE LA PARCELLE</label>
+                            <input list="africa_countries"
+                                class="form-control form-control-lg rounded-4 border-light bg-light" id="country"
+                                placeholder="Rechercher le pays du terrain..." required>
+
+                            <datalist id="africa_countries">
+                                <option value="Bénin">Bénin 🇧🇯</option>
+                                <option value="Togo">Togo 🇹🇬</option>
+                                <option value="Côte d'Ivoire">Côte d'Ivoire 🇨🇮</option>
+                                <option value="Nigeria">Nigeria 🇳🇬</option>
+                                <option value="Sénégal">Sénégal 🇸🇳</option>
+                                <option value="Mali">Mali 🇲🇱</option>
+                                <option value="Burkina Faso">Burkina Faso 🇧🇫</option>
+                                <option value="Niger">Niger 🇳🇪</option>
+                                <option value="Cameroun">Cameroun 🇨🇲</option>
+                                <option value="Gabon">Gabon 🇬🇦</option>
+                                <option value="Congo">Congo 🇨🇬</option>
+                                <option value="RD Congo">RD Congo 🇨🇩</option>
+                                <option value="Guinée">Guinée 🇬🇳</option>
+                                <option value="Ghana">Ghana 🇬🇭</option>
+                                <option value="Algérie">Algérie 🇩🇿</option>
+                                <option value="Maroc">Maroc 🇲🇦</option>
+                                <option value="Tunisie">Tunisie 🇹🇳</option>
+                                <option value="Égypte">Égypte 🇪🇬</option>
+                                <option value="Afrique du Sud">Afrique du Sud 🇿🇦</option>
+                                <option value="Kenya">Kenya 🇰🇪</option>
+                                <option value="Éthiopie">Éthiopie 🇪🇹</option>
+                                <option value="Rwanda">Rwanda 🇷🇼</option>
+                                <option value="Madagascar">Madagascar 🇲🇬</option>
+                                <option value="Mauritanie">Mauritanie 🇲🇷</option>
+                                <option value="Tchad">Tchad 🇹🇩</option>
+                                <option value="Tanzanie">Tanzanie 🇹🇿</option>
+                                <option value="Ouganda">Ouganda 🇺🇬</option>
+                                <option value="Angola">Angola 🇦🇴</option>
+                                <option value="Mozambique">Mozambique 🇲🇿</option>
+                                <option value="Gambie">Gambie 🇬🇲</option>
+                                <option value="Liberia">Liberia 🇱🇷</option>
+                                <option value="Sierra Leone">Sierra Leone 🇸🇱</option>
+                                <option value="Burundi">Burundi 🇧🇮</option>
+                                <option value="Érythrée">Érythrée 🇪🇷</option>
+                                <option value="Djibouti">Djibouti 🇩🇯</option>
+                                <option value="Botswana">Botswana 🇧🇼</option>
+                                <option value="Namibie">Namibie 🇳🇦</option>
+                                <option value="Lesotho">Lesotho 🇱🇸</option>
+                                <option value="Eswatini">Eswatini 🇸🇿</option>
+                                <option value="Malawi">Malawi 🇲🇼</option>
+                                <option value="Zambie">Zambie 🇿🇲</option>
+                                <option value="Zimbabwe">Zimbabwe 🇿🇼</option>
+                                <option value="Centrafrique">Centrafrique 🇨🇫</option>
+                                <option value="Guinée Équatoriale">Guinée Équatoriale 🇬🇶</option>
+                                <option value="Somalie">Somalie 🇸🇴</option>
+                                <option value="Soudan">Soudan 🇸🇩</option>
+                                <option value="Soudan du Sud">Soudan du Sud 🇸🇸</option>
+                                <option value="Libye">Libye 🇱🇾</option>
+                                <option value="Maurice">Maurice 🇲🇺</option>
+                                <option value="Seychelles">Seychelles 🇸🇨</option>
+                                <option value="Cap-Vert">Cap-Vert 🇨🇻</option>
+                                <option value="Comores">Comores 🇰🇲</option>
+                                <option value="Sao Tomé-et-Principe">Sao Tomé-et-Principe 🇸🇹</option>
+                                <option value="France">France 🇫🇷</option>
+                                <option value="USA">USA 🇺🇸</option>
+                                <option value="Other">Autre 🌐</option>
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small"
+                                id="label_district">ARRONDISSEMENT</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="district" placeholder="..." required>
+                            <div id="districtStatus" class="small mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small" id="label_village">QUARTIER /
+                                VILLAGE</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="village" placeholder="..." required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Enquête Technique -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">👷</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Enquête Technique</h4>
+                    </div>
+                    <div class="p-4 bg-light rounded-4 border">
+                        <label class="form-label fw-bold text-muted small">INGÉNIEUR GÉOMÈTRE AGRÉÉ</label>
+                        <select class="form-select form-select-lg rounded-4 border-white bg-white mb-3"
+                            id="surveyor_id">
+                            <option value="">-- Sélectionner un géomètre agréé par l'État --</option>
+                            {% for s in surveyors %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.license_number }})</option>
+                            {% endfor %}
+                            <option value="MANUAL">Autre (Saisie manuelle)</option>
+                        </select>
+
+                        <div id="manual_surveyor_box" style="display:none;">
+                            <label class="form-label fw-bold text-muted small">NOM DU GÉOMÈTRE (HORS LISTE)</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-white bg-white"
+                                id="surveyor_name" placeholder="Nom et Prénoms de l'ingénieur">
+                            <div class="form-text text-warning mt-2 small">
+                                ⚠️ Note: Le choix d'un géomètre non agréé peut ralentir la validation de votre dossier.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: La Parcelle -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">📐</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Dimensions & Géométrie</h4>
+                    </div>
+
+                    <!-- Superficie -->
+                    <div class="p-4 bg-light rounded-4 mb-4 border border-warning border-opacity-25">
+                        <h6 class="fw-bold mb-3 d-flex justify-content-between">
+                            <span>Superficie de la Parcelle</span>
+                            <span class="badge bg-warning text-dark">Calcul Automatique / Manuel</span>
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">FORME MÉTRIQUE (m²)</label>
+                                <div class="input-group">
+                                    <input type="number" step="any" class="form-control rounded-3 border-0"
+                                        id="area_sqm" placeholder="ex: 500">
+                                    <span class="input-group-text bg-white border-0">m²</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">FORME CADASTRALE</label>
+                                <input type="text" class="form-control rounded-3 border-0" id="area_cadastral"
+                                    placeholder="ex: 05a 00ca">
+                                <div class="form-text x-small">Format: [ha] [a] [ca]</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light rounded-4 mb-4">
+                        <h6 class="fw-bold mb-3">Point Central (Calculé automatiquement)</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">LATITUDE</label>
+                                <input type="number" step="any" class="form-control rounded-3 border-0 bg-white"
+                                    id="lat" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">LONGITUDE</label>
+                                <input type="number" step="any" class="form-control rounded-3 border-0 bg-white"
+                                    id="lng" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Délimitation Précise (Bornes GPS)</h6>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-start-3"
+                                id="addBoundaryPoint">
+                                ➕ Ajouter une borne
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-end-3"
+                                id="removeBoundaryPoint">
+                                ➖ Supprimer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3" id="boundaryPoints">
+                        <!-- Les bornes seront générées ici par JS -->
+                    </div>
+                    <p class="small text-muted mt-2">Note: Une parcelle doit avoir au minimum 3 bornes pour former une
+                        surface.</p>
+                </div>
+
+                <!-- Section: Témoins -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+                                <span class="h4 mb-0">👥</span>
+                            </div>
+                            <h4 class="fw-bold mb-0">Témoins du Voisinage (Min. 3)</h4>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-start-3"
+                                id="addWitnessBtn">
+                                ➕ Ajouter
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-3 rounded-end-3"
+                                id="removeWitnessBtn">
+                                ➖ Retirer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="witnessesContainer">
+                        <!-- Les témoins seront générés ici par JS -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Preuves -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">📸</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Preuves Visuelles & Documents</h4>
+                    </div>
+                    <div class="border-2 border-dashed rounded-4 p-5 text-center bg-light mb-2">
+                        <input type="file" class="form-control d-none" id="mediaFiles" multiple>
+                        <label for="mediaFiles" class="cursor-pointer">
+                            <span class="display-4 d-block mb-3">📤</span>
+                            <span class="fw-bold d-block">Cliquez pour uploader vos fichiers</span>
+                            <span class="text-muted small">Photos du terrain, titre foncier, vidéo drone...</span>
+                        </label>
+                    </div>
+                    <div id="fileList" class="row g-2"></div>
+                </div>
+
+                <div class="p-4 rounded-4 bg-primary bg-opacity-5 border border-primary border-opacity-10 mb-4">
+                    <div class="d-flex">
+                        <span class="me-3">🛡️</span>
+                        <p class="small mb-0 text-muted">
+                            <strong>Protection contre les doublons :</strong> Notre système vérifie instantanément si
+                            une autre personne a déjà déclaré ces coordonnées. En cas de conflit, un litige sera ouvert.
+                        </p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-citizen w-100 py-3 fs-5">
+                    CRÉER MON COMPTE ET SÉCURISER MA PARCELLE
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let boundaryCount = 0;
+    const boundaryContainer = document.getElementById('boundaryPoints');
+
+    let witnessCount = 0;
+    const witnessContainer = document.getElementById('witnessesContainer');
+
+    function createWitness(num) {
+        const div = document.createElement('div');
+        div.className = 'witness-card p-4 border rounded-4 mb-4 bg-light';
+        div.id = `witness_box_${num}`;
+        div.innerHTML = `
+            <h6 class="fw-bold mb-3 text-danger text-uppercase">Témoin #${num}</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">NOM</label>
+                    <input type="text" class="form-control border-0 witness-name" id="w_name_${num}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">PRÉNOMS</label>
+                    <input type="text" class="form-control border-0 witness-firstname" id="w_firstname_${num}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">DATE DE NAISSANCE</label>
+                    <input type="date" class="form-control border-0 witness-birth" id="w_birth_${num}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">SEXE</label>
+                    <select class="form-select border-0 witness-gender" id="w_gender_${num}" required>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">TÉLÉPHONE</label>
+                    <input type="tel" class="form-control border-0 witness-phone" id="w_phone_${num}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted text-primary fw-bold">EMAIL (Pour validation)</label>
+                    <input type="email" class="form-control border-0 witness-email" id="w_email_${num}" placeholder="exemple@mail.com" required>
+                </div>
+                <div class="col-12 mt-3">
+                    <label class="form-label small fw-bold">PIÈCE D'IDENTITÉ (PHOTO/SCAN)</label>
+                    <input type="file" class="form-control border-0 witness-id-card" id="w_idcard_${num}" accept="image/*,application/pdf" required>
+                </div>
+            </div>
+        `;
+        witnessContainer.appendChild(div);
+    }
+
+    document.getElementById('addWitnessBtn').onclick = () => {
+        witnessCount++;
+        createWitness(witnessCount);
+    };
+
+    document.getElementById('removeWitnessBtn').onclick = () => {
+        if (witnessCount > 3) {
+            const lastW = document.getElementById(`witness_box_${witnessCount}`);
+            lastW.remove();
+            witnessCount--;
+        } else {
+            alert("Il faut au minimum 3 témoins.");
+        }
+    };
+
+    function createBoundaryPoint(num) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6';
+        col.id = `point_box_${num}`;
+        col.innerHTML = `
+            <div class="p-3 border rounded-4 bg-white shadow-sm">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary">Borne ${num}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="number" step="any" class="form-control form-control-sm border-0 bg-light boundary-input" 
+                        placeholder="Lat" id="b_lat_${num}" required>
+                    <input type="number" step="any" class="form-control form-control-sm border-0 bg-light boundary-input" 
+                        placeholder="Lng" id="b_lng_${num}" required>
+                </div>
+            </div>
+        `;
+        boundaryContainer.appendChild(col);
+
+        // Auto-calculate centroid on change
+        col.querySelectorAll('.boundary-input').forEach(input => {
+            input.oninput = calculateCentroid;
+        });
+    }
+
+    function calculateCentroid() {
+        let totalLat = 0;
+        let totalLng = 0;
+        let count = 0;
+
+        for (let i = 1; i <= boundaryCount; i++) {
+            const bLat = document.getElementById(`b_lat_${i}`).value;
+            const bLng = document.getElementById(`b_lng_${i}`).value;
+            if (bLat && bLng) {
+                totalLat += parseFloat(bLat);
+                totalLng += parseFloat(bLng);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            document.getElementById('lat').value = (totalLat / count).toFixed(6);
+            document.getElementById('lng').value = (totalLng / count).toFixed(6);
+        }
+    }
+
+    // Area Conversion Logic
+    const areaMetric = document.getElementById('area_sqm');
+    const areaCadastral = document.getElementById('area_cadastral');
+
+    areaMetric.oninput = () => {
+        const sqm = parseFloat(areaMetric.value);
+        if (isNaN(sqm)) return;
+
+        const ha = Math.floor(sqm / 10000);
+        const a = Math.floor((sqm % 10000) / 100);
+        const ca = Math.round(sqm % 100);
+
+        let cadastralStr = "";
+        if (ha > 0) cadastralStr += `${ha}ha `;
+        if (a > 0 || ha > 0) cadastralStr += `${String(a).padStart(2, '0')}a `;
+        cadastralStr += `${String(ca).padStart(2, '0')}ca`;
+
+        areaCadastral.value = cadastralStr.trim();
+    };
+
+    areaCadastral.oninput = () => {
+        const str = areaCadastral.value.toLowerCase().trim();
+        const haMatch = str.match(/(\d+)\s*ha/);
+        const aMatch = str.match(/(\d+)\s*a/);
+        const caMatch = str.match(/(\d+)\s*ca/);
+
+        let totalSqm = 0;
+        if (haMatch) totalSqm += parseInt(haMatch[1]) * 10000;
+        if (aMatch) totalSqm += parseInt(aMatch[1]) * 100;
+        if (caMatch) totalSqm += parseInt(caMatch[1]);
+
+        if (totalSqm > 0) areaMetric.value = totalSqm;
+    };
+
+    // Country & Dynamic Labels Logic
+    const countrySelect = document.getElementById('country');
+    const labelDistrict = document.getElementById('label_district');
+    const labelVillage = document.getElementById('label_village');
+
+    const countryConfig = {
+        'Bénin': { district: 'ARRONDISSEMENT', village: 'QUARTIER / VILLAGE', search: 'Benin' },
+        'Togo': { district: 'PRÉFECTURE', village: 'CANTON / VILLAGE', search: 'Togo' },
+        'Côte d\'Ivoire': { district: 'COMMUNE / SOUS-PRÉFECTURE', village: 'QUARTIER / VILLAGE', search: 'Ivory Coast' },
+        'Sénégal': { district: 'COMMUNE / DÉPARTEMENT', village: 'QUARTIER / VILLAGE', search: 'Senegal' },
+        'Mali': { district: 'CERCLE / COMMUNE', village: 'QUARTIER / VILLAGE', search: 'Mali' },
+        'Cameroun': { district: 'ARRONDISSEMENT / COMMUNE', village: 'QUARTIER / VILLAGE', search: 'Cameroon' },
+        'Gabon': { district: 'DÉPARTEMENT / COMMUNE', village: 'QUARTIER', search: 'Gabon' },
+        'Nigeria': { district: 'LOCAL GOVERNMENT AREA (LGA)', village: 'WARD / STREET', search: 'Nigeria' },
+        'France': { district: 'COMMUNE / VILLE', village: 'RUE / QUARTIER', search: 'France' },
+        'Other': { district: 'COMMUNE / RÉGION', village: 'QUARTIER / VILLAGE', search: '' }
+    };
+
+    countrySelect.oninput = () => {
+        const val = countrySelect.value.trim();
+        const config = countryConfig[val] || countryConfig['Other'];
+        labelDistrict.innerText = config.district;
+        labelVillage.innerText = config.village;
+        if (districtInput.value) districtInput.onblur();
+    };
+
+    // District Verification
+    const districtInput = document.getElementById('district');
+    districtInput.onblur = async () => {
+        const val = districtInput.value.trim();
+        if (val.length < 3) return;
+        const statusDiv = document.getElementById('districtStatus');
+        statusDiv.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> Vérification...</span>';
+
+        const country = countrySelect.value;
+        const config = countryConfig[country] || countryConfig['Other'];
+        const searchQuery = `${val} ${config.search}`.trim();
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&limit=1`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                statusDiv.innerHTML = `<span class="text-success small">✔️ Localisé: ${data[0].display_name.split(',')[0]}</span>`;
+            } else {
+                statusDiv.innerHTML = '<span class="text-warning small">⚠️ Lieu non identifié sur la carte.</span>';
+            }
+        } catch (e) { statusDiv.innerHTML = ''; }
+    };
+
+    // Initialisation
+    countrySelect.oninput();
+
+    // Logic pour le géomètre
+    const surveyorSelect = document.getElementById('surveyor_id');
+    const manualSurveyorBox = document.getElementById('manual_surveyor_box');
+    surveyorSelect.onchange = () => {
+        if (surveyorSelect.value === 'MANUAL') {
+            manualSurveyorBox.style.display = 'block';
+        } else {
+            manualSurveyorBox.style.display = 'none';
+        }
+    };
+
+    // Initialisation avec 4 points par défaut
+    for (let i = 1; i <= 4; i++) {
+        boundaryCount++;
+        createBoundaryPoint(boundaryCount);
+    }
+
+    // Initialisation avec 3 témoins par défaut
+    for (let i = 1; i <= 3; i++) {
+        witnessCount++;
+        createWitness(witnessCount);
+    }
+
+    document.getElementById('addBoundaryPoint').onclick = () => {
+        boundaryCount++;
+        createBoundaryPoint(boundaryCount);
+        calculateCentroid();
+    };
+
+    document.getElementById('removeBoundaryPoint').onclick = () => {
+        if (boundaryCount > 3) {
+            const lastPoint = document.getElementById(`point_box_${boundaryCount}`);
+            lastPoint.remove();
+            boundaryCount--;
+            calculateCentroid();
+        } else {
+            alert("Une parcelle doit avoir au moins 3 bornes.");
+        }
+    };
+
+    document.getElementById('mediaFiles').onchange = function () {
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        for (let i = 0; i < this.files.length; i++) {
+            const f = this.files[i];
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = `
+                <div class="p-2 bg-white border rounded-3 small d-flex align-items-center">
+                    <span class="me-2">📄</span>
+                    <span class="text-truncate">${f.name}</span>
+                </div>
+            `;
+            list.appendChild(col);
+        }
+    };
+
+    document.getElementById('registerForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        // Final centroid calc
+        calculateCentroid();
+        const lat = parseFloat(document.getElementById('lat').value);
+        const lng = parseFloat(document.getElementById('lng').value);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            alert("Veuillez renseigner les coordonnées des bornes.");
+            return;
+        }
+
+        const name = document.getElementById('ownerName').value;
+        const birthDate = document.getElementById('birthDate').value;
+        const user_country = document.getElementById('user_country').value;
+        const country = document.getElementById('country').value;
+        const district = document.getElementById('district').value.trim();
+        const village = document.getElementById('village').value.trim();
+        const surveyor_id = document.getElementById('surveyor_id').value;
+        const surveyor_name = document.getElementById('surveyor_name').value.trim();
+        const area_sqm = document.getElementById('area_sqm').value;
+        const area_cadastral = document.getElementById('area_cadastral').value;
+
+        const boundaries = [];
+        for (let i = 1; i <= boundaryCount; i++) {
+            const bLat = document.getElementById(`b_lat_${i}`).value;
+            const bLng = document.getElementById(`b_lng_${i}`).value;
+            if (bLat && bLng) {
+                boundaries.push({
+                    lat: parseFloat(bLat),
+                    lng: parseFloat(bLng)
+                });
+            }
+        }
+
+        const witnesses = [];
+        for (let i = 1; i <= witnessCount; i++) {
+            witnesses.push({
+                last_name: document.getElementById(`w_name_${i}`).value,
+                first_name: document.getElementById(`w_firstname_${i}`).value,
+                birth_date: document.getElementById(`w_birth_${i}`).value,
+                gender: document.getElementById(`w_gender_${i}`).value,
+                phone: document.getElementById(`w_phone_${i}`).value,
+                email: document.getElementById(`w_email_${i}`).value
+            });
+        }
+
+        const formData = new FormData();
+        formData.append('owner_name', name);
+        formData.append('birth_date', birthDate);
+        formData.append('user_country', user_country);
+        formData.append('country', country);
+        formData.append('district', district);
+        formData.append('village', village);
+
+        if (surveyor_id && surveyor_id !== 'MANUAL') {
+            formData.append('surveyor_id', surveyor_id);
+        } else {
+            formData.append('surveyor_name', surveyor_name);
+        }
+
+        formData.append('area_sqm', area_sqm);
+        formData.append('area_cadastral', area_cadastral);
+        formData.append('gps_centroid', JSON.stringify({ lat, lng }));
+        formData.append('gps_boundaries', JSON.stringify(boundaries));
+        formData.append('witnesses', JSON.stringify(witnesses));
+
+        // ID photos witnesses
+        for (let i = 1; i <= witnessCount; i++) {
+            const fileInput = document.getElementById(`w_idcard_${i}`);
+            if (fileInput.files[0]) {
+                formData.append(`witness_id_${i}`, fileInput.files[0]);
+            }
+        }
+
+        const files = document.getElementById('mediaFiles').files;
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        try {
+            const res = await fetch('/api/properties/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const wallet = data.wallet_address;
+                localStorage.setItem('ilot_wallet', wallet);
+                alert('Félicitations ! Votre compte est créé. Votre identifiant unique est : ' + wallet);
+                window.location.href = `/dashboard/${wallet}/`;
+            } else {
+                const err = await res.json();
+                alert('Attention : ' + err.error);
+            }
+        } catch (err) {
+            alert('Erreur de connexion au réseau iLôt.');
+        }
+    };
+</script>
+{% endblock %}

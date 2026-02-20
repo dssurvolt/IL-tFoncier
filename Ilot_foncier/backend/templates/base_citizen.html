@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iLôt Foncier - Espace Citoyen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --citizen-primary: #10b981;
+            /* Emerald */
+            --citizen-secondary: #059669;
+            --citizen-bg: #f8fafc;
+            --citizen-card: #ffffff;
+            --citizen-text: #1e293b;
+            --citizen-text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--citizen-bg);
+            color: var(--citizen-text);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar-citizen {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--citizen-primary) !important;
+            font-size: 1.5rem;
+        }
+
+        .citizen-card {
+            background: var(--citizen-card);
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .citizen-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-citizen {
+            background: var(--citizen-primary);
+            color: white;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-citizen:hover {
+            background: var(--citizen-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+
+        .sidebar-citizen {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            min-height: calc(100vh - 72px);
+            padding: 2rem 1rem;
+        }
+
+        .nav-link-citizen {
+            color: var(--citizen-text-muted);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-link-citizen:hover {
+            background: #f1f5f9;
+            color: var(--citizen-primary);
+        }
+
+        .nav-link-citizen.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--citizen-primary);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-up {
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        .hover-primary:hover {
+            color: var(--citizen-primary) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-citizen sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'login_home' %}">
+                <span class="me-2">🌿</span> iLôt Foncier
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="me-4 d-none d-md-block">
+                    <a href="{% url 'web_marketplace' %}" class="text-decoration-none text-muted fw-bold hover-primary">
+                        🛒 Marketplace
+                    </a>
+                </div>
+                <div class="me-3 text-end d-none d-md-block">
+                    <small class="text-muted d-block">Connecté en tant que</small>
+                    <span class="fw-bold" id="navUserName">{% if user %}{{ user.full_name }}{% else %}Citoyen{% endif %}</span>
+                </div>
+                <div class="rounded-circle bg-light p-2 border">
+                    👤
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            {% block sidebar %}
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar-citizen collapse">
+                <div class="position-sticky">
+                    <a href="{% url 'web_login' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'user_dashboard' or request.resolver_match.url_name == 'web_login' or request.resolver_match.url_name == 'login_home' %}active{% endif %}"
+                        id="linkDashboard">
+                        <span class="me-3">🏠</span> <span id="dashLabel">Connexion / Dashboard</span>
+                    </a>
+                    <a href="{% url 'web_register' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_register' or request.resolver_match.url_name == 'web_add_property' %}active{% endif %}"
+                        id="linkRegister">
+                        <span class="me-3">➕</span> Déclarer un Terrain
+                    </a>
+                    <a href="{% url 'web_marketplace' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_marketplace' %}active{% endif %}">
+                        <span class="me-3">🛒</span> Marketplace
+                    </a>
+                    <a href="#"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_profile' %}active{% endif %}"
+                        id="linkProfile">
+                        <span class="me-3">👤</span> Mon Profil
+                    </a>
+                    <hr>
+                    <a href="#" onclick="logout()" class="nav-link-citizen text-danger">
+                        <span class="me-3">🚪</span> Déconnexion
+                    </a>
+                </div>
+            </nav>
+            {% endblock %}
+
+            <main class="{% block main_class %}col-md-9 ms-sm-auto col-lg-10{% endblock %} px-md-4 py-4">
+                <div class="animate-up">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Gestion de la session simulée
+        const path = window.location.pathname;
+        const walletMatch = path.match(/\/dashboard\/(.+)\//);
+
+        if (walletMatch) {
+            // On vient de se connecter ou on est sur le dashboard
+            localStorage.setItem('ilot_wallet', walletMatch[1]);
+        }
+
+        const savedWallet = localStorage.getItem('ilot_wallet');
+        const dashLink = document.getElementById('linkDashboard');
+        const profileLink = document.getElementById('linkProfile');
+        const dashLabel = document.getElementById('dashLabel');
+
+        if (savedWallet) {
+            if (dashLink) dashLink.href = `/dashboard/${savedWallet}/`;
+            if (profileLink) profileLink.href = `/profile/${savedWallet}/`;
+            const regLink = document.getElementById('linkRegister');
+            if (regLink) regLink.href = `/add-property/${savedWallet}/`;
+
+            if (dashLabel) dashLabel.innerText = "Mon Patrimoine";
+
+            // Mise à jour du nom dans la nav si c'est "Citoyen" (cas où user n'est pas dans le context Django)
+            const navName = document.getElementById('navUserName');
+            if (navName && navName.innerText.trim() === "Citoyen") {
+                navName.innerText = savedWallet.substring(0, 10) + "...";
+            }
+        } else {
+            if (dashLabel) dashLabel.innerText = "Se Connecter";
+        }
+
+        function logout() {
+            localStorage.removeItem('ilot_wallet');
+            window.location.href = "{% url 'web_logout' %}";
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

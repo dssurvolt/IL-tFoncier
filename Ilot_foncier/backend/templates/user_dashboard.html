@@ -1,0 +1,130 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-danger border-0 shadow-sm rounded-4">{{ error }}</div>
+{% else %}
+<div class="d-flex justify-content-between align-items-end mb-5">
+    <div>
+        <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Tableau de Bord Personnel
+        </h6>
+        <h1 class="display-5 fw-bold mb-0">Bonjour, {{ user.full_name }}</h1>
+    </div>
+    <div class="d-none d-md-block">
+        <div class="p-3 bg-white rounded-4 border shadow-sm">
+            <small class="text-muted d-block">Identifiant Blockchain</small>
+            <code class="text-primary fw-bold">{{ user.wallet_address|truncatechars:20 }}</code>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="citizen-card h-100 d-flex flex-column justify-content-center border-start border-primary border-4">
+            <h6 class="text-muted fw-bold small mb-2">MES PROPRIÉTÉS</h6>
+            <h2 class="display-4 fw-bold mb-0">{{ total_assets }}</h2>
+            <p class="text-muted small mt-2 mb-0">Actifs sécurisés ou en cours.</p>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="citizen-card h-100">
+            <div class="row align-items-center">
+                <div class="col-sm-7">
+                    <h5 class="fw-bold mb-3">Statut de votre compte</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+                            <span class="text-success">✔</span>
+                        </div>
+                        <div>
+                            <span class="fw-bold d-block">Identité Vérifiée</span>
+                            <small class="text-muted">Conforme aux standards iLôt</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-5 text-center border-start">
+                    <div class="p-3">
+                        <span class="h1">🛡️</span>
+                        <h6 class="fw-bold mt-2 mb-0">Protection Active</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Mes Parcelles Enregistrées</h4>
+    <a href="{% url 'web_add_property' user.id %}" class="btn btn-citizen btn-sm">+ Déclarer une nouvelle
+        parcelle</a>
+</div>
+
+<div class="row g-4">
+    {% for prop in properties %}
+    <div class="col-md-6">
+        <div class="citizen-card h-100">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h5 class="fw-bold mb-1">Parcelle #{{ prop.id|stringformat:"s"|slice:":8" }}</h5>
+                    <small class="text-muted">Enregistré le {{ prop.id|stringformat:"s"|slice:":4" }} (ID Local)</small>
+                </div>
+                <span class="status-badge 
+                    {% if prop.status == 'ON_CHAIN' %}bg-success text-white
+                    {% elif prop.status == 'VALIDATING' %}bg-warning text-dark
+                    {% elif prop.status == 'DISPUTED' %}bg-danger text-white
+                    {% else %}bg-light text-muted{% endif %}">
+                    {{ prop.status }}
+                </span>
+            </div>
+
+            <div class="p-3 bg-light rounded-4 mb-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block mb-1">Latitude Centrale</small>
+                        <span class="fw-bold">{{ prop.gps_centroid.lat }}</span>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block mb-1">Longitude Centrale</small>
+                        <span class="fw-bold">{{ prop.gps_centroid.lng }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center mb-4">
+                <div class="me-3">
+                    <span class="h4">📁</span>
+                </div>
+                <div>
+                    <span class="fw-bold d-block">{{ prop.media_count }} Fichiers attachés</span>
+                    <small class="text-muted">Photos, Vidéos & Documents</small>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'web_property_detail' prop.id %}"
+                    class="btn btn-outline-secondary rounded-3 fw-bold">Consulter le dossier complet</a>
+                {% if prop.status == 'DRAFT' %}
+                <button class="btn btn-citizen">Lancer la Validation Communautaire</button>
+                {% endif %}
+
+                <a href="{% url 'web_create_listing' prop.id %}"
+                    class="btn {% if prop.status == 'ON_CHAIN' %}btn-success{% else %}btn-outline-success{% endif %} fw-bold">
+                    Mettre en vente {% if prop.status != 'ON_CHAIN' %}(Pré-listing){% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5 citizen-card border-dashed">
+            <div class="mb-4"><span class="display-1">🏜️</span></div>
+            <h4 class="fw-bold">Aucune parcelle trouvée</h4>
+            <p class="text-muted mb-4">Commencez par déclarer votre premier terrain pour sécuriser votre patrimoine.</p>
+            <a href="{% url 'web_add_property' user.id %}" class="btn btn-citizen">Déclarer ma première
+                parcelle</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

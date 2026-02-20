@@ -1,0 +1,125 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Identité Digitale
+                </h6>
+                <h1 class="display-5 fw-bold mb-0">Mon Profil iLôt</h1>
+            </div>
+            <div class="d-none d-md-block">
+                <span
+                    class="badge bg-primary bg-opacity-10 text-primary p-3 rounded-4 border border-primary border-opacity-10">
+                    Membre depuis {{ user.created_at|date:"M Y" }}
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Colonne Infos -->
+            <div class="col-md-4">
+                <div class="citizen-card text-center">
+                    <div class="mb-4">
+                        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center border"
+                            style="width: 120px; height: 120px; font-size: 3rem;">
+                            👤
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-1">{{ user.full_name }}</h4>
+                    <p class="text-muted small mb-4">{{ user.get_role_display }}</p>
+
+                    <div class="p-3 bg-light rounded-4 mb-3 text-start">
+                        <small class="text-muted d-block mb-1">Date de Naissance</small>
+                        <span class="fw-bold">{{ user.birth_date|date:"d F Y"|default:"Non renseignée" }}</span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-4 mb-3 text-start">
+                        <div class="row g-2">
+                            <div class="col-6 border-end">
+                                <small class="text-muted d-block mb-1">Pays</small>
+                                <span class="fw-bold">
+                                    {% if user.country == 'Benin' %}🇧🇯
+                                    {% elif user.country == 'France' %}🇫🇷
+                                    {% elif user.country == 'Togo' %}🇹🇬
+                                    {% elif user.country == "Cote d'Ivoire" %}🇨🇮
+                                    {% elif user.country == 'Nigeria' %}🇳🇬
+                                    {% elif user.country == 'USA' %}🇺🇸
+                                    {% endif %}
+                                    {{ user.country }}
+                                </span>
+                            </div>
+                            <div class="col-6 ps-3">
+                                <small class="text-muted d-block mb-1">
+                                    {% if user.country == 'Benin' %}Arrondissement
+                                    {% elif user.country == 'France' %}Ville
+                                    {% elif user.country == 'Togo' %}Préfecture
+                                    {% elif user.country == "Cote d'Ivoire" %}S-Préfecture
+                                    {% else %}Circonscription{% endif %}
+                                </small>
+                                <span class="fw-bold text-truncate d-block">{{ user.district|default:"-" }}</span>
+                            </div>
+                        </div>
+                        <hr class="my-2 opacity-10">
+                        <small class="text-muted d-block mb-1">
+                            {% if user.country == 'Benin' %}Quartier / Village
+                            {% elif user.country == 'France' %}Quartier / Rue
+                            {% else %}Localité{% endif %}
+                        </small>
+                        <span class="fw-bold">{{ user.village|default:"-" }}</span>
+                    </div>
+
+                    <div
+                        class="p-3 bg-primary bg-opacity-5 border border-primary border-opacity-10 rounded-4 mb-4 text-start">
+                        <small class="text-muted d-block mb-1">Adresse Wallet</small>
+                        <code class="text-primary small text-break">{{ user.wallet_address }}</code>
+                    </div>
+
+                    <button class="btn btn-outline-primary w-100 rounded-3">Mettre à jour mes informations</button>
+                </div>
+            </div>
+
+            <!-- Colonne Stats & Réputation -->
+            <div class="col-md-8">
+                <div class="citizen-card mb-4">
+                    <h5 class="fw-bold mb-4">Score de Réputation Communautaire</h5>
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-grow-1 me-4">
+                            <div class="progress rounded-pill" style="height: 20px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: {{ user.reputation_score }}%"
+                                    aria-valuenow="{{ user.reputation_score }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        <span class="h2 fw-bold text-success mb-0">{{ user.reputation_score }}<small
+                                class="h6 text-muted">/100</small></span>
+                    </div>
+                    <p class="text-muted small">
+                        Votre score est calculé en fonction de la validité de vos déclarations et de votre participation
+                        aux votes de consensus. Un score élevé facilite vos futures transactions.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-sm-6">
+                        <div class="citizen-card h-100 border-start border-info border-4">
+                            <h6 class="text-muted fw-bold small mb-2">VOTES EFFECTUÉS</h6>
+                            <h2 class="fw-bold mb-0">12</h2>
+                            <small class="text-info">Témoignages certifiés</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="citizen-card h-100 border-start border-warning border-4">
+                            <h6 class="text-muted fw-bold small mb-2">LITIGES RÉSOLUS</h6>
+                            <h2 class="fw-bold mb-0">0</h2>
+                            <small class="text-warning">Aucun conflit actif</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

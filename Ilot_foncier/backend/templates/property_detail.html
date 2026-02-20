@@ -1,0 +1,388 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="mb-5">
+    <a href="#" id="btnBackToDashboard" class="text-decoration-none text-muted small fw-bold">
+        ← Retour à mon patrimoine
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Colonne Gauche: Détails & Statut -->
+    <div class="col-lg-8">
+        <div class="citizen-card mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <div>
+                    <h6 class="text-primary fw-bold text-uppercase mb-1" style="letter-spacing: 0.1em;">Détails de
+                        l'Actif</h6>
+                    <h1 class="fw-bold">Parcelle #{{ property.id|stringformat:"s"|slice:":8" }}</h1>
+                    {% if property.is_certified %}
+                    <span class="badge bg-primary shadow-sm"><span class="me-1">🛡️</span> DOSSIER CERTIFIÉ</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark shadow-sm"><span class="me-1">⚠️</span> EN COURS DE
+                        CERTIFICATION</span>
+                    {% endif %}
+                </div>
+                <span class="status-badge 
+                    {% if property.status == 'ON_CHAIN' %}bg-success text-white
+                    {% elif property.status == 'VALIDATING' %}bg-warning text-dark
+                    {% elif property.status == 'DISPUTED' %}bg-danger text-white
+                    {% else %}bg-light text-muted{% endif %}">
+                    {{ property.status }}
+                </span>
+            </div>
+
+            <!-- Visualisation Géographique Réelle (Map) -->
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+            <div id="propertyMap" class="rounded-4 mb-4 overflow-hidden shadow-sm"
+                style="height: 350px; border: 2px solid #e2e8f0; z-index: 1;">
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-12">
+                    <div
+                        class="p-2 px-3 bg-white rounded-3 shadow-sm border small d-flex justify-content-between align-items-center">
+                        <div>
+                            📍 <strong>Centroïde:</strong> <span class="text-primary fw-bold">{{
+                                property.gps_centroid.lat }}, {{ property.gps_centroid.lng }}</span>
+                        </div>
+                        <div class="text-muted">
+                            <span class="badge bg-success bg-opacity-10 text-success">Vue Satellite HD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Localisation Administrative -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-4 h-100">
+                        <h6 class="fw-bold text-muted small mb-2 uppercase">Pays</h6>
+                        <div class="d-flex align-items-center">
+                            <span class="fs-4 me-2">
+                                {% if property.country == 'Benin' %}🇧🇯
+                                {% elif property.country == 'France' %}🇫🇷
+                                {% elif property.country == 'Togo' %}🇹🇬
+                                {% elif property.country == "Cote d'Ivoire" %}🇨🇮
+                                {% elif property.country == 'Nigeria' %}🇳🇬
+                                {% elif property.country == 'USA' %}🇺🇸
+                                {% else %}🌐{% endif %}
+                            </span>
+                            <span class="fw-bold">{{ property.country }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-4 h-100">
+                        <h6 class="fw-bold text-muted small mb-2 uppercase">
+                            {% if property.country == 'Benin' %}Arrondissement
+                            {% elif property.country == 'France' %}Commune / Ville
+                            {% elif property.country == 'Togo' %}Préfecture
+                            {% elif property.country == "Cote d'Ivoire" %}Commune / S-P
+                            {% elif property.country == 'Nigeria' %}LGA
+                            {% elif property.country == 'USA' %}City / County
+                            {% else %}Région / Ville{% endif %}
+                        </h6>
+                        <span class="fw-bold">{{ property.district }}</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded-4 h-100">
+                        <h6 class="fw-bold text-muted small mb-2 uppercase">
+                            {% if property.country == 'Benin' %}Quartier / Village
+                            {% elif property.country == 'France' %}Rue / Quartier
+                            {% elif property.country == 'Togo' %}Canton / Village
+                            {% elif property.country == "Cote d'Ivoire" %}Quartier / Village
+                            {% elif property.country == 'Nigeria' %}Ward / Street
+                            {% elif property.country == 'USA' %}Neighborhood
+                            {% else %}Localité / Adresse{% endif %}
+                        </h6>
+                        <span class="fw-bold">{{ property.village }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Expertise Technique -->
+            <div class="p-4 border rounded-4 mb-4 bg-white shadow-sm border-start border-4 border-success">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center border-end">
+                        <span class="display-6">📐</span>
+                    </div>
+                    <div class="col-md-5 ps-4">
+                        <h6 class="fw-bold text-muted small mb-1">INGÉNIEUR GÉOMÈTRE</h6>
+                        <span class="fw-bold text-dark">{{ property.surveyor_name|default:"Non renseigné" }}</span>
+                    </div>
+                    <div class="col-md-5 border-start ps-4">
+                        <h6 class="fw-bold text-muted small mb-1">SURFACE CALCULÉE</h6>
+                        <span class="fw-bold text-success">{{ property.area_sqm|floatformat:2 }} m²</span>
+                        <small class="text-muted d-block">{{ property.area_cadastral }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-muted small mb-3">COORDONNÉES DES BORNES</h6>
+                    <div class="list-group list-group-flush">
+                        {% for point in property.gps_boundaries %}
+                        <div
+                            class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-muted">Borne {{ forloop.counter }}</span>
+                            <code
+                                class="text-primary">{{ point.lat|floatformat:6 }}, {{ point.lng|floatformat:6 }}</code>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-muted small mb-3">CERTIFICATION BLOCKCHAIN</h6>
+                    {% if property.on_chain_id %}
+                    <div class="p-3 bg-primary bg-opacity-5 rounded-4 border border-primary border-opacity-10">
+                        <small class="text-muted d-block mb-1">Token ID (ERC-721)</small>
+                        <span class="fw-bold text-primary">#{{ property.on_chain_id }}</span>
+                        <hr class="my-2">
+                        <small class="text-muted d-block mb-1">Contrat de Registre</small>
+                        <code class="small text-break">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</code>
+                    </div>
+                    {% else %}
+                    <div class="p-3 bg-light rounded-4 text-center">
+                        <span class="d-block mb-2">⏳</span>
+                        <small class="text-muted">En attente de validation finale pour inscription sur la
+                            blockchain.</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Témoins -->
+        <div class="citizen-card mb-4">
+            <h5 class="fw-bold mb-4">Témoins du Dossier <span class="badge bg-danger ms-2">{{ property.witnesses.count
+                    }}</span></h5>
+            <div class="row g-3">
+                {% for w in property.witnesses.all %}
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-4 bg-light">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold mb-0">{{ w.first_name }} {{ w.last_name }}</h6>
+                                <small class="text-muted">{{ w.phone }}</small>
+                            </div>
+                            <span class="badge bg-white text-muted border small">{{ w.get_gender_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">Né(e) le {{ w.birth_date|date:"d/m/Y" }}</small>
+                            {% if w.id_card_photo %}
+                            <a href="{{ w.id_card_photo.url }}" target="_blank"
+                                class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                🪪 Voir ID
+                            </a>
+                            {% elif w.ipfs_cid %}
+                            <a href="https://ipfs.io/ipfs/{{ w.ipfs_cid }}" target="_blank"
+                                class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                🌐 IPFS ID
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-4 text-muted">
+                    <p>Aucun témoin enregistré pour cette transaction.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Galerie Médias -->
+        <div class="citizen-card">
+            <h5 class="fw-bold mb-4">Documents & Preuves Visuelles <span class="badge bg-secondary ms-2">{{ media|length
+                    }}</span></h5>
+            <div class="row g-3">
+                {% for m in media %}
+                <div class="col-md-4">
+                    <a href="{% if m.file %}{{ m.file.url }}{% else %}https://ipfs.io/ipfs/{{ m.ipfs_cid }}{% endif %}"
+                        target="_blank" class="text-decoration-none text-dark">
+                        <div class="rounded-4 border p-2 text-center h-100 hover-up position-relative">
+                            <div class="bg-light rounded-3 mb-2 d-flex align-items-center justify-content-center overflow-hidden"
+                                style="height: 120px; background: linear-gradient(45deg, #f8fafc, #f1f5f9);">
+                                {% if m.media_type == 'PHOTO_LAND' %}
+                                <div class="text-center">
+                                    <span class="display-6 d-block mb-1">🖼️</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary small">IMAGE</span>
+                                </div>
+                                {% elif m.media_type == 'VIDEO_DRONE' %}
+                                <div class="text-center">
+                                    <span class="display-6 d-block mb-1">📹</span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning small">VIDÉO</span>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <span class="display-6 d-block mb-1">📄</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary small">DOC</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <small class="fw-bold d-block text-truncate mb-1">{{ m.get_media_type_display }}</small>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <code class="x-small text-muted text-truncate"
+                                    style="max-width: 100px;">{{ m.ipfs_cid }}</code>
+                            </div>
+                            <div class="view-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded-4"
+                                style="background: rgba(16, 185, 129, 0.8); opacity: 0; transition: opacity 0.3s ease;">
+                                <span class="text-white fw-bold">Ouvrir le document ↗</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-4 text-muted">
+                    <p>Aucun document attaché à cette parcelle.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Colonne Droite: Actions & Historique -->
+    <div class="col-lg-4">
+        <div class="citizen-card mb-4 bg-primary bg-opacity-5 border-primary border-opacity-10">
+            <h5 class="fw-bold mb-3">Actions Disponibles</h5>
+            <div class="d-grid gap-2" id="actionButtons">
+                <!-- Les boutons d'action seront injectés par JS selon le rôle (Propriétaire / Acheteur) -->
+                <button class="btn btn-citizen py-3" onclick="contactSeller()">CONTACTER LE VENDEUR</button>
+                <button class="btn btn-outline-secondary py-2">Demander le Dossier Certifié (PDF)</button>
+            </div>
+        </div>
+
+        <div class="citizen-card">
+            <h5 class="fw-bold mb-4">Historique de l'Actif</h5>
+            <div class="timeline-citizen">
+                <div class="timeline-item pb-4 border-start ps-4 position-relative">
+                    <span class="position-absolute start-0 translate-middle-x rounded-circle bg-success"
+                        style="width: 12px; height: 12px; margin-top: 6px;"></span>
+                    <small class="text-muted d-block">Aujourd'hui</small>
+                    <span class="fw-bold">Consultation du dossier</span>
+                </div>
+                <div class="timeline-item pb-4 border-start ps-4 position-relative">
+                    <span class="position-absolute start-0 translate-middle-x rounded-circle bg-primary"
+                        style="width: 12px; height: 12px; margin-top: 6px;"></span>
+                    <small class="text-muted d-block">Il y a 2 jours</small>
+                    <span class="fw-bold">Mise à jour des photos IPFS</span>
+                </div>
+                <div class="timeline-item ps-4 position-relative">
+                    <span class="position-absolute start-0 translate-middle-x rounded-circle bg-secondary"
+                        style="width: 12px; height: 12px; margin-top: 6px;"></span>
+                    <small class="text-muted d-block">Création</small>
+                    <span class="fw-bold">Enregistrement initial</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-citizen {
+        margin-left: 6px;
+    }
+
+    .hover-up {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .hover-up:hover .view-overlay {
+        opacity: 1 !important;
+    }
+
+    .x-small {
+        font-size: 0.65rem;
+    }
+</style>
+
+{{ property.gps_centroid|json_script:"centroid-data" }}
+{{ property.gps_boundaries|json_script:"boundaries-data" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Bouton Retour
+        const backBtn = document.getElementById('btnBackToDashboard');
+        const ownerWallet = "{{ owner.wallet_address }}";
+        const savedWallet = localStorage.getItem('ilot_wallet') || ownerWallet;
+
+        if (savedWallet && savedWallet !== "None") {
+            backBtn.href = "/dashboard/" + savedWallet.toLowerCase().trim() + "/";
+        } else {
+            backBtn.href = "{% url 'web_login' %}";
+        }
+
+        // 2. Initialisation de la Carte
+        try {
+            const centroid = JSON.parse(document.getElementById('centroid-data').textContent);
+            const boundaries = JSON.parse(document.getElementById('boundaries-data').textContent);
+
+            const lat = parseFloat(centroid.lat);
+            const lng = parseFloat(centroid.lng);
+
+            if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+                const map = L.map('propertyMap').setView([lat, lng], 18);
+
+                // Couche Satellite (Esri)
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EBP, and the GIS User Community'
+                }).addTo(map);
+
+                // Couche Labels
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }).addTo(map);
+
+                // Tracer le polygone
+                if (Array.isArray(boundaries) && boundaries.length >= 3) {
+                    const polygonPoints = boundaries.map(p => [parseFloat(p.lat), parseFloat(p.lng)]);
+                    const polygon = L.polygon(polygonPoints, {
+                        color: '#10b981',
+                        fillColor: '#10b981',
+                        fillOpacity: 0.3,
+                        weight: 3
+                    }).addTo(map);
+                    map.fitBounds(polygon.getBounds());
+                }
+
+                // Marqueur
+                L.marker([lat, lng]).addTo(map)
+                    .bindPopup("<b>Parcelle #{{ property.id|stringformat:'s'|slice:':8' }}</b>")
+                    .openPopup();
+            } else {
+                document.getElementById('propertyMap').innerHTML =
+                    '<div class="d-flex align-items-center justify-content-center h-100 text-muted bg-light">Coordonnées GPS non disponibles</div>';
+            }
+        } catch (e) {
+            console.error("Erreur de chargement de la carte:", e);
+            document.getElementById('propertyMap').innerHTML =
+                '<div class="d-flex align-items-center justify-content-center h-100 text-muted bg-danger bg-opacity-10 text-danger">Erreur de rendu cartographique</div>';
+        }
+    });
+
+    function listForSale(propId) {
+        alert("Action: Mise en vente de la parcelle " + propId);
+    }
+
+    function contactSeller() {
+        const isCertified = "{{ property.is_certified }}";
+        if (isCertified === 'True') {
+            alert("✅ Dossier Certifié !\n\nVotre demande de contact a été transmise au propriétaire. Il pourra vous donner accès aux documents complets (géomètre, témoins).");
+        } else {
+            alert("⚠️ Dossier en attente de certification.\n\nVous pouvez contacter le vendeur, mais le dossier n'est pas encore totalement sécurisé par iLôt.");
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,576 @@
+{% extends 'base_citizen.html' %}
+{% block sidebar %}{% endblock %}
+{% block main_class %}col-12{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-2">Ajouter une Parcelle</h1>
+            <p class="text-muted lead">Sécurisez une nouvelle parcelle sur la blockchain pour votre compte.</p>
+        </div>
+
+        <div class="citizen-card animate-up mb-5">
+            <form id="addPropertyForm">
+                <!-- Champs cachés pour l'utilisateur connecté -->
+                <input type="hidden" id="ownerName" value="{{ user.full_name }}">
+                <input type="hidden" id="ownerWallet" value="{{ user.wallet_address }}">
+
+                <!-- Section: Identité (Affichage seulement) -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">👤</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Propriétaire</h4>
+                    </div>
+                    <div class="p-3 bg-light rounded-4 border">
+                        <div class="row">
+                            <div class="col-md-6 mb-2 mb-md-0">
+                                <small class="text-muted d-block">Nom enregistré</small>
+                                <span class="fw-bold">{{ user.full_name }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Wallet</small>
+                                <code class="text-primary">{{ user.wallet_address }}</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Localisation Administrative -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">🌍</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Localisation Administrative</h4>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted small">PAYS</label>
+                            <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country">
+                                <option value="Benin" selected>Bénin 🇧🇯</option>
+                                <option value="France">France 🇫🇷</option>
+                                <option value="Togo">Togo 🇹🇬</option>
+                                <option value="Cote d'Ivoire">Côte d'Ivoire 🇨🇮</option>
+                                <option value="Nigeria">Nigeria 🇳🇬</option>
+                                <option value="USA">USA 🇺🇸</option>
+                                <option value="Other">Autre / International 🌐</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small"
+                                id="label_district">ARRONDISSEMENT</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="district" placeholder="..." required>
+                            <div id="districtStatus" class="small mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small" id="label_village">QUARTIER /
+                                VILLAGE</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="village" placeholder="..." required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Enquête Technique -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">👷</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Enquête Technique</h4>
+                    </div>
+                    <div class="p-4 bg-light rounded-4 border">
+                        <label class="form-label fw-bold text-muted small">INGÉNIEUR GÉOMÈTRE (CARTOGRAPHE)</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-white bg-white"
+                            id="surveyor_name" placeholder="Nom et Prénoms de l'ingénieur" required>
+                    </div>
+                </div>
+
+                <!-- Section: La Parcelle -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">📐</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Dimensions & Géométrie</h4>
+                    </div>
+
+                    <!-- Superficie -->
+                    <div class="p-4 bg-light rounded-4 mb-4 border border-warning border-opacity-25">
+                        <h6 class="fw-bold mb-3 d-flex justify-content-between">
+                            <span>Superficie de la Parcelle</span>
+                            <span class="badge bg-warning text-dark">Calcul Automatique / Manuel</span>
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">FORME MÉTRIQUE (m²)</label>
+                                <div class="input-group">
+                                    <input type="number" step="any" class="form-control rounded-3 border-0"
+                                        id="area_sqm" placeholder="ex: 500">
+                                    <span class="input-group-text bg-white border-0">m²</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">FORME CADASTRALE</label>
+                                <input type="text" class="form-control rounded-3 border-0" id="area_cadastral"
+                                    placeholder="ex: 05a 00ca">
+                                <div class="form-text x-small">Format: [ha] [a] [ca]</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-light rounded-4 mb-4">
+                        <h6 class="fw-bold mb-3">Point Central (Calculé automatiquement)</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">LATITUDE</label>
+                                <input type="number" step="any" class="form-control rounded-3 border-0 bg-white"
+                                    id="lat" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">LONGITUDE</label>
+                                <input type="number" step="any" class="form-control rounded-3 border-0 bg-white"
+                                    id="lng" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">Délimitation Précise (Bornes GPS)</h6>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-start-3"
+                                id="addBoundaryPoint">
+                                ➕ Ajouter une borne
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-end-3"
+                                id="removeBoundaryPoint">
+                                ➖ Supprimer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row g-3" id="boundaryPoints">
+                        <!-- Les bornes seront générées ici par JS -->
+                    </div>
+                </div>
+
+                <!-- Section: Témoins -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+                                <span class="h4 mb-0">👥</span>
+                            </div>
+                            <h4 class="fw-bold mb-0">Témoins du Voisinage (Min. 3)</h4>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-start-3"
+                                id="addWitnessBtn">
+                                ➕ Ajouter
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-3 rounded-end-3"
+                                id="removeWitnessBtn">
+                                ➖ Retirer
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="witnessesContainer">
+                        <!-- Les témoins seront générés ici par JS -->
+                    </div>
+                </div>
+
+                <!-- Section: Preuves -->
+                <div class="mb-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                            <span class="h4 mb-0">📸</span>
+                        </div>
+                        <h4 class="fw-bold mb-0">Preuves Visuelles & Documents</h4>
+                    </div>
+                    <div class="border-2 border-dashed rounded-4 p-5 text-center bg-light mb-2">
+                        <input type="file" class="form-control d-none" id="mediaFiles" multiple>
+                        <label for="mediaFiles" class="cursor-pointer">
+                            <span class="display-4 d-block mb-3">📤</span>
+                            <span class="fw-bold d-block">Cliquez pour uploader vos fichiers</span>
+                            <span class="text-muted small">Photos du terrain, titre foncier, vidéo drone...</span>
+                        </label>
+                    </div>
+                    <div id="fileList" class="row g-2"></div>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-citizen w-100 py-3 fs-5" id="submitBtn">
+                        ENREGISTRER LA NOUVELLE PARCELLE
+                    </button>
+                    <a href="{% url 'user_dashboard' user.id %}" class="btn btn-outline-secondary py-2">
+                        Annuler et retourner au Dashboard
+                    </a>
+                </div>
+            </form>
+
+            <div id="successMessage" class="d-none text-center py-5">
+                <div class="mb-4">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center"
+                        style="width: 80px; height: 80px; font-size: 2.5rem;">
+                        ✔
+                    </div>
+                </div>
+                <h3 class="fw-bold text-success mb-3">Parcelle Enregistrée !</h3>
+                <p class="text-muted mb-4 lead">Votre nouvelle parcelle a été sécurisée avec succès. Vous pouvez
+                    maintenant suivre son statut de validation.</p>
+                <a href="{% url 'user_dashboard' user.id %}" class="btn btn-citizen btn-lg px-5">
+                    Retourner au Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let boundaryCount = 0;
+    const boundaryContainer = document.getElementById('boundaryPoints');
+
+    let witnessCount = 0;
+    const witnessContainer = document.getElementById('witnessesContainer');
+
+    function createWitness(num) {
+        const div = document.createElement('div');
+        div.className = 'witness-card p-4 border rounded-4 mb-4 bg-light';
+        div.id = `witness_box_${num}`;
+        div.innerHTML = `
+            <h6 class="fw-bold mb-3 text-danger text-uppercase">Témoin #${num}</h6>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">NOM</label>
+                    <input type="text" class="form-control border-0 witness-name" id="w_name_${num}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">PRÉNOMS</label>
+                    <input type="text" class="form-control border-0 witness-firstname" id="w_firstname_${num}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">DATE DE NAISSANCE</label>
+                    <input type="date" class="form-control border-0 witness-birth" id="w_birth_${num}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">SEXE</label>
+                    <select class="form-select border-0 witness-gender" id="w_gender_${num}" required>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">TÉLÉPHONE</label>
+                    <input type="tel" class="form-control border-0 witness-phone" id="w_phone_${num}" required>
+                </div>
+                <div class="col-12 mt-3">
+                    <label class="form-label small fw-bold">PIÈCE D'IDENTITÉ (PHOTO/SCAN)</label>
+                    <input type="file" class="form-control border-0 witness-id-card" id="w_idcard_${num}" accept="image/*,application/pdf" required>
+                </div>
+            </div>
+        `;
+        witnessContainer.appendChild(div);
+    }
+
+    document.getElementById('addWitnessBtn').onclick = () => {
+        witnessCount++;
+        createWitness(witnessCount);
+    };
+
+    document.getElementById('removeWitnessBtn').onclick = () => {
+        if (witnessCount > 3) {
+            const lastW = document.getElementById(`witness_box_${witnessCount}`);
+            lastW.remove();
+            witnessCount--;
+        } else {
+            alert("Il faut au minimum 3 témoins.");
+        }
+    };
+
+    function createBoundaryPoint(num) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6';
+        col.id = `point_box_${num}`;
+        col.innerHTML = `
+            <div class="p-3 border rounded-4 bg-white shadow-sm">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary">Borne ${num}</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="number" step="any" class="form-control form-control-sm border-0 bg-light boundary-input" 
+                        placeholder="Lat" id="b_lat_${num}" required>
+                    <input type="number" step="any" class="form-control form-control-sm border-0 bg-light boundary-input" 
+                        placeholder="Lng" id="b_lng_${num}" required>
+                </div>
+            </div>
+        `;
+        boundaryContainer.appendChild(col);
+
+        // Auto-calculate centroid on change
+        col.querySelectorAll('.boundary-input').forEach(input => {
+            input.oninput = calculateCentroid;
+        });
+    }
+
+    function calculateCentroid() {
+        let totalLat = 0;
+        let totalLng = 0;
+        let count = 0;
+
+        for (let i = 1; i <= boundaryCount; i++) {
+            const bLat = document.getElementById(`b_lat_${i}`).value;
+            const bLng = document.getElementById(`b_lng_${i}`).value;
+            if (bLat && bLng) {
+                totalLat += parseFloat(bLat);
+                totalLng += parseFloat(bLng);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            document.getElementById('lat').value = (totalLat / count).toFixed(6);
+            document.getElementById('lng').value = (totalLng / count).toFixed(6);
+        }
+    }
+
+    // Area Conversion Logic
+    const areaMetric = document.getElementById('area_sqm');
+    const areaCadastral = document.getElementById('area_cadastral');
+
+    areaMetric.oninput = () => {
+        const sqm = parseFloat(areaMetric.value);
+        if (isNaN(sqm)) return;
+
+        const ha = Math.floor(sqm / 10000);
+        const a = Math.floor((sqm % 10000) / 100);
+        const ca = Math.round(sqm % 100);
+
+        let cadastralStr = "";
+        if (ha > 0) cadastralStr += `${ha}ha `;
+        if (a > 0 || ha > 0) cadastralStr += `${String(a).padStart(2, '0')}a `;
+        cadastralStr += `${String(ca).padStart(2, '0')}ca`;
+
+        areaCadastral.value = cadastralStr.trim();
+    };
+
+    areaCadastral.oninput = () => {
+        const str = areaCadastral.value.toLowerCase().trim();
+        const haMatch = str.match(/(\d+)\s*ha/);
+        const aMatch = str.match(/(\d+)\s*a/);
+        const caMatch = str.match(/(\d+)\s*ca/);
+
+        let totalSqm = 0;
+        if (haMatch) totalSqm += parseInt(haMatch[1]) * 10000;
+        if (aMatch) totalSqm += parseInt(aMatch[1]) * 100;
+        if (caMatch) totalSqm += parseInt(caMatch[1]);
+
+        if (totalSqm > 0) areaMetric.value = totalSqm;
+    };
+
+    // Country & Dynamic Labels Logic
+    const countrySelect = document.getElementById('country');
+    const labelDistrict = document.getElementById('label_district');
+    const labelVillage = document.getElementById('label_village');
+
+    const countryConfig = {
+        'Benin': { district: 'ARRONDISSEMENT', village: 'QUARTIER / VILLAGE', search: 'Benin' },
+        'France': { district: 'COMMUNE / VILLE', village: 'RUE / QUARTIER', search: 'France' },
+        'Togo': { district: 'PRÉFECTURE', village: 'CANTON / VILLAGE', search: 'Togo' },
+        'Cote d\'Ivoire': { district: 'COMMUNE / SOUS-PRÉFECTURE', village: 'QUARTIER / VILLAGE', search: 'Ivory Coast' },
+        'Nigeria': { district: 'LOCAL GOVERNMENT AREA (LGA)', village: 'WARD / STREET', search: 'Nigeria' },
+        'USA': { district: 'CITY / COUNTY', village: 'NEIGHBORHOOD / ADDRESS', search: 'USA' },
+        'Other': { district: 'REGION / CITY', village: 'LOCALITY / ADDRESS', search: '' }
+    };
+
+    countrySelect.onchange = () => {
+        const config = countryConfig[countrySelect.value] || countryConfig['Other'];
+        labelDistrict.innerText = config.district;
+        labelVillage.innerText = config.village;
+        // Trigger re-validation if district has value
+        if (districtInput.value) districtInput.onblur();
+    };
+
+    // District Verification (Dynamic based on country)
+    const districtInput = document.getElementById('district');
+    districtInput.onblur = async () => {
+        const val = districtInput.value.trim();
+        if (val.length < 3) return;
+
+        const statusDiv = document.getElementById('districtStatus');
+        statusDiv.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> Vérification...</span>';
+
+        const country = countrySelect.value;
+        const config = countryConfig[country] || countryConfig['Other'];
+        const searchQuery = `${val} ${config.search}`.trim();
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&limit=1`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+                statusDiv.innerHTML = `<span class="text-success small">✔️ Localisé: ${data[0].display_name.split(',')[0]}</span>`;
+            } else {
+                statusDiv.innerHTML = '<span class="text-warning small">⚠️ Lieu non identifié sur la carte.</span>';
+            }
+        } catch (e) {
+            statusDiv.innerHTML = '';
+        }
+    };
+
+    // Initialisation
+    countrySelect.onchange();
+
+    // Initialisation avec 4 points par défaut
+    for (let i = 1; i <= 4; i++) {
+        boundaryCount++;
+        createBoundaryPoint(boundaryCount);
+    }
+
+    // Initialisation avec 3 témoins par défaut
+    for (let i = 1; i <= 3; i++) {
+        witnessCount++;
+        createWitness(witnessCount);
+    }
+
+    document.getElementById('addBoundaryPoint').onclick = () => {
+        boundaryCount++;
+        createBoundaryPoint(boundaryCount);
+        calculateCentroid();
+    };
+
+    document.getElementById('removeBoundaryPoint').onclick = () => {
+        if (boundaryCount > 3) {
+            const lastPoint = document.getElementById(`point_box_${boundaryCount}`);
+            lastPoint.remove();
+            boundaryCount--;
+            calculateCentroid();
+        } else {
+            alert("Une parcelle doit avoir au moins 3 bornes.");
+        }
+    };
+
+    document.getElementById('mediaFiles').onchange = function () {
+        const list = document.getElementById('fileList');
+        list.innerHTML = '';
+        for (let i = 0; i < this.files.length; i++) {
+            const f = this.files[i];
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = `
+                <div class="p-2 bg-white border rounded-3 small d-flex align-items-center">
+                    <span class="me-2">📄</span>
+                    <span class="text-truncate">${f.name}</span>
+                </div>
+            `;
+            list.appendChild(col);
+        }
+    };
+
+    document.getElementById('addPropertyForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        // Final check on centroid
+        calculateCentroid();
+        const lat = parseFloat(document.getElementById('lat').value);
+        const lng = parseFloat(document.getElementById('lng').value);
+
+        if (isNaN(lat) || isNaN(lng)) {
+            alert("Veuillez renseigner les coordonnées des bornes.");
+            return;
+        }
+
+        // Feedback visuel de chargement
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Enregistrement en cours...";
+
+        const name = document.getElementById('ownerName').value.trim();
+        const wallet = document.getElementById('ownerWallet').value.trim();
+        const country = document.getElementById('country').value;
+        const district = document.getElementById('district').value.trim();
+        const village = document.getElementById('village').value.trim();
+        const surveyor_name = document.getElementById('surveyor_name').value.trim();
+        const area_sqm = document.getElementById('area_sqm').value;
+        const area_cadastral = document.getElementById('area_cadastral').value;
+
+        const boundaries = [];
+        for (let i = 1; i <= boundaryCount; i++) {
+            const bLat = document.getElementById(`b_lat_${i}`).value;
+            const bLng = document.getElementById(`b_lng_${i}`).value;
+            if (bLat && bLng) {
+                boundaries.push({
+                    lat: parseFloat(bLat),
+                    lng: parseFloat(bLng)
+                });
+            }
+        }
+
+        const witnesses = [];
+        for (let i = 1; i <= witnessCount; i++) {
+            witnesses.push({
+                last_name: document.getElementById(`w_name_${i}`).value,
+                first_name: document.getElementById(`w_firstname_${i}`).value,
+                birth_date: document.getElementById(`w_birth_${i}`).value,
+                gender: document.getElementById(`w_gender_${i}`).value,
+                phone: document.getElementById(`w_phone_${i}`).value
+            });
+        }
+
+        const formData = new FormData();
+        formData.append('owner_name', name);
+        formData.append('owner_wallet', wallet);
+        formData.append('country', country);
+        formData.append('district', district);
+        formData.append('village', village);
+        formData.append('surveyor_name', surveyor_name);
+        formData.append('area_sqm', area_sqm);
+        formData.append('area_cadastral', area_cadastral);
+        formData.append('gps_centroid', JSON.stringify({ lat, lng }));
+        formData.append('gps_boundaries', JSON.stringify(boundaries));
+        formData.append('witnesses', JSON.stringify(witnesses));
+
+        // Witnesses' ID photos
+        for (let i = 1; i <= witnessCount; i++) {
+            const fileInput = document.getElementById(`w_idcard_${i}`);
+            if (fileInput.files[0]) {
+                formData.append(`witness_id_${i}`, fileInput.files[0]);
+            }
+        }
+
+        const files = document.getElementById('mediaFiles').files;
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+
+        try {
+            const res = await fetch('/api/properties/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert('Parcelle ajoutée avec succès ! Redirection vers votre tableau de bord...');
+                window.location.href = `/dashboard/${wallet}/`;
+            } else {
+                const err = await res.json();
+                alert('Erreur : ' + err.error);
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        } catch (err) {
+            alert('Erreur de connexion au réseau iLôt.');
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    };
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="h2 fw-bold">Simulateur USSD Mobile</h1>
+    <p class="text-muted">Testez l'inclusion numérique via le protocole standard (*123#).</p>
+</div>
+
+<div class="phone-container">
+    <div class="phone-frame glass">
+        <div class="speaker"></div>
+        <div class="screen-lcd">
+            <div id="ussdOutput" class="lcd-text">Bienvenue.<br>Tapez *123# pour commencer.</div>
+        </div>
+        <div class="keypad mt-4">
+            <div class="mb-3">
+                <input type="text" class="form-control bg-dark border-secondary text-success font-monospace text-center"
+                    id="ussdInput" placeholder="Saisir...">
+            </div>
+            <div class="row g-2">
+                <div class="col-12">
+                    <button class="btn btn-primary w-100 fw-bold py-2" id="sendBtn">ENVOYER</button>
+                </div>
+                <div class="col-12">
+                    <button class="btn btn-outline-secondary w-100 small py-1" id="resetBtn">RÉINITIALISER
+                        (*123#)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .phone-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+    }
+
+    .phone-frame {
+        width: 320px;
+        padding: 40px 25px;
+        border-radius: 45px;
+        background: #1e293b;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+        border: 4px solid #334155;
+    }
+
+    .speaker {
+        width: 60px;
+        height: 5px;
+        background: #334155;
+        margin: 0 auto 25px;
+        border-radius: 10px;
+    }
+
+    .screen-lcd {
+        background: #94a3b8;
+        height: 280px;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        border: 10px solid #0f172a;
+        overflow-y: auto;
+    }
+
+    .lcd-text {
+        font-family: 'Courier New', Courier, monospace;
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.1rem;
+        line-height: 1.4;
+        white-space: pre-wrap;
+    }
+
+    .keypad {
+        padding: 0 10px;
+    }
+
+    #ussdInput::placeholder {
+        color: rgba(22, 163, 74, 0.5);
+    }
+</style>
+
+<script>
+    let sessionId = 'sim_' + Math.random().toString(36).substr(2, 9);
+    let phoneNumber = '+22997000000';
+
+    async function sendUSSD(text) {
+        const formData = new FormData();
+        formData.append('sessionId', sessionId);
+        formData.append('phoneNumber', phoneNumber);
+        formData.append('text', text);
+
+        const res = await fetch('/ussd/', {
+            method: 'POST',
+            body: formData
+        });
+
+        let responseText = await res.text();
+
+        // Formatage CON/END
+        if (responseText.startsWith('CON ')) {
+            responseText = responseText.substring(4);
+        } else if (responseText.startsWith('END ')) {
+            responseText = "--- FIN ---\n\n" + responseText.substring(4);
+            sessionId = 'sim_' + Math.random().toString(36).substr(2, 9); // Reset session
+        }
+
+        document.getElementById('ussdOutput').innerHTML = responseText.replace(/\n/g, '<br>');
+        document.getElementById('ussdInput').value = '';
+    }
+
+    document.getElementById('sendBtn').onclick = () => {
+        const val = document.getElementById('ussdInput').value;
+        sendUSSD(val);
+    };
+
+    document.getElementById('resetBtn').onclick = () => {
+        sendUSSD('');
+    };
+
+    // Support de la touche Entrée
+    document.getElementById('ussdInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('sendBtn').click();
+        }
+    });
+</script>
+{% endblock %}
