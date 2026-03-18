@@ -180,6 +180,10 @@
                 class="{% if request.resolver_match.url_name == 'web_ussd' %}active{% endif %}">
                 <span class="me-2">📱</span> USSD Sim
             </a>
+            <a href="{% url 'pmf_dashboard' %}"
+                class="{% if request.resolver_match.url_name == 'pmf_dashboard' %}active{% endif %}">
+                <span class="me-2">🚀</span> PMF Metric
+            </a>
             <hr class="mx-3 opacity-10">
             <div class="px-4 mb-2"><small class="text-muted fw-bold text-uppercase" style="font-size: 0.65rem;">Liens
                     Externes</small></div>
@@ -192,6 +196,20 @@
             </a>
         </div>
         <div class="content col-md-10">
+            <div class="d-flex justify-content-end align-items-center mb-4 pb-3 border-bottom">
+                {% if user.is_authenticated %}
+                <div class="text-end me-4">
+                    <small class="text-muted d-block" style="font-size: 0.7rem;">Session Administration</small>
+                    <span class="fw-bold">{{ user.full_name|default:user.email }}</span>
+                    <span class="badge bg-danger bg-opacity-10 text-danger ms-1 small" style="font-size: 0.65rem;">
+                        {{ user.get_role_display }}
+                    </span>
+                </div>
+                <a href="{% url 'web_logout' %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    Déconnexion
+                </a>
+                {% endif %}
+            </div>
             <div class="animate-fade">
                 {% block content %}{% endblock %}
             </div>

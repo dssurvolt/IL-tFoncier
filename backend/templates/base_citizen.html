@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>iLôt Foncier - Espace Citoyen</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -131,7 +132,7 @@
 <body>
     <nav class="navbar navbar-citizen sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'login_home' %}">
+            <a class="navbar-brand" href="{% url 'web_marketplace' %}">
                 <span class="me-2">🌿</span> iLôt Foncier
             </a>
             <div class="d-flex align-items-center">
@@ -140,13 +141,83 @@
                         🛒 Marketplace
                     </a>
                 </div>
+                {% if user.is_authenticated %}
                 <div class="me-3 text-end d-none d-md-block">
                     <small class="text-muted d-block">Connecté en tant que</small>
-                    <span class="fw-bold" id="navUserName">{% if user %}{{ user.full_name }}{% else %}Citoyen{% endif %}</span>
+                    <span class="fw-bold" id="navUserName">
+                        {{ user.full_name|default:user.email }}
+                    </span>
+                    <span
+                        class="badge {% if user.role == 'NOTARY' %}bg-primary{% elif user.role == 'ADMIN' %}bg-danger{% else %}bg-success{% endif %} bg-opacity-10 text-{% if user.role == 'NOTARY' %}primary{% elif user.role == 'ADMIN' %}danger{% else %}success{% endif %} ms-1 small"
+                        style="font-size: 0.65rem;">
+                        {{ user.get_role_display }}
+                    </span>
                 </div>
+                {% endif %}
+
+                {% if not is_notary %}
+                <div class="me-3 position-relative">
+                    <a href="{% if user.is_authenticated %}{% url 'user_dashboard' user.id %}{% else %}#{% endif %}"
+                        class="text-decoration-none" id="notificationBell">
+                        <span class="fs-4">🔔</span>
+                        <span id="notificationBadge"
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if unread_notifications_count == 0 %}d-none{% endif %}"
+                            style="font-size: 0.55rem; padding: 0.35em 0.6em; border: 2px solid white;">
+                            {{ unread_notifications_count }}
+                        </span>
+                    </a>
+                </div>
+
+                <script>
+                    // Polling léger pour les notifications
+                    async function checkNotifications() {
+                        if (!currentUserId || currentUserId === "None") return;
+                        try {
+                            const response = await fetch('/api/notifications/unread-count/');
+                            const data = await response.json();
+                            const badge = document.getElementById('notificationBadge');
+                            if (data.count > 0) {
+                                badge.innerText = data.count > 9 ? '9+' : data.count;
+                                badge.classList.remove('d-none');
+                                if (!badge.classList.contains('animate-ping-once')) {
+                                    badge.classList.add('animate-ping-once');
+                                    setTimeout(() => badge.classList.remove('animate-ping-once'), 1000);
+                                }
+                            } else {
+                                badge.classList.add('d-none');
+                            }
+                        } catch (e) { console.error("Notif Error:", e); }
+                    }
+                    if (userIsAuthenticated) {
+                        setInterval(checkNotifications, 10000);
+                    }
+                </script>
+                <style>
+                    @keyframes ping-once {
+                        0% {
+                            transform: translate(-50%, -50%) scale(1);
+                            opacity: 1;
+                        }
+
+                        70% {
+                            transform: translate(-50%, -50%) scale(2);
+                            opacity: 0;
+                        }
+
+                        100% {
+                            transform: translate(-50%, -50%) scale(1);
+                            opacity: 0;
+                        }
+                    }
+
+                    .animate-ping-once {
+                        animation: ping-once 0.6s ease-out;
+                    }
+                </style>
                 <div class="rounded-circle bg-light p-2 border">
                     👤
                 </div>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -156,25 +227,58 @@
             {% block sidebar %}
             <nav class="col-md-3 col-lg-2 d-md-block sidebar-citizen collapse">
                 <div class="position-sticky">
-                    <a href="{% url 'web_login' %}"
-                        class="nav-link-citizen {% if request.resolver_match.url_name == 'user_dashboard' or request.resolver_match.url_name == 'web_login' or request.resolver_match.url_name == 'login_home' %}active{% endif %}"
-                        id="linkDashboard">
-                        <span class="me-3">🏠</span> <span id="dashLabel">Connexion / Dashboard</span>
+                    {% if user.is_authenticated %}
+                    {% if not is_notary %}
+                    <a href="{% url 'user_dashboard' wallet=user.id %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'user_dashboard' %}active{% endif %}">
+                        <span class="me-3">🏠</span> Mon Patrimoine
                     </a>
-                    <a href="{% url 'web_register' %}"
-                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_register' or request.resolver_match.url_name == 'web_add_property' %}active{% endif %}"
-                        id="linkRegister">
+                    <a href="{% url 'web_add_property' wallet=user.id %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_add_property' %}active{% endif %}">
                         <span class="me-3">➕</span> Déclarer un Terrain
                     </a>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'web_login' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_login' %}active{% endif %}">
+                        <span class="me-3">🏠</span> Connexion
+                    </a>
+                    <a href="{% url 'web_register' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_register' %}active{% endif %}">
+                        <span class="me-3">➕</span> S'inscrire
+                    </a>
+                    {% endif %}
+
                     <a href="{% url 'web_marketplace' %}"
                         class="nav-link-citizen {% if request.resolver_match.url_name == 'web_marketplace' %}active{% endif %}">
                         <span class="me-3">🛒</span> Marketplace
                     </a>
-                    <a href="#"
-                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_profile' %}active{% endif %}"
-                        id="linkProfile">
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'web_profile' wallet=user.id %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_profile' %}active{% endif %}">
                         <span class="me-3">👤</span> Mon Profil
                     </a>
+                    {% if not is_notary %}
+                    <a href="{% url 'user_transactions' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'user_transactions' or request.resolver_match.url_name == 'web_transaction_status' %}active{% endif %}">
+                        <span class="me-3">🛡️</span> Mes Transactions
+                    </a>
+                    <a href="{% url 'web_my_chats' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'web_my_chats' or request.resolver_match.url_name == 'web_chat_room' %}active{% endif %}">
+                        <span class="me-3">💬</span> Mes Discussions
+                    </a>
+                    {% endif %}
+                    {% endif %}
+
+                    {% if is_notary %}
+                    <div class="mt-4 mb-2 small text-muted text-uppercase fw-bold px-3">Espace Notaire</div>
+                    <a href="{% url 'notary_dashboard' %}"
+                        class="nav-link-citizen {% if request.resolver_match.url_name == 'notary_dashboard' %}active{% endif %}">
+                        <span class="me-3">💼</span> Gestion des Folios
+                    </a>
+                    {% endif %}
+
                     <hr>
                     <a href="#" onclick="logout()" class="nav-link-citizen text-danger">
                         <span class="me-3">🚪</span> Déconnexion
@@ -185,6 +289,16 @@
 
             <main class="{% block main_class %}col-md-9 ms-sm-auto col-lg-10{% endblock %} px-md-4 py-4">
                 <div class="animate-up">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-4 shadow-sm mb-4"
+                        role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
                     {% block content %}{% endblock %}
                 </div>
             </main>
@@ -192,38 +306,16 @@
     </div>
 
     <script>
-        // Gestion de la session simulée
-        const path = window.location.pathname;
-        const walletMatch = path.match(/\/dashboard\/(.+)\//);
+        // Synchronisation sécurisée du portefeuille local (lecture seule pour UX)
+        const currentUserId = "{{ user.id }}";
+        const userIsAuthenticated = {% if user.is_authenticated %}true{% else %} false{% endif %};
 
-        if (walletMatch) {
-            // On vient de se connecter ou on est sur le dashboard
-            localStorage.setItem('ilot_wallet', walletMatch[1]);
-        }
-
-        const savedWallet = localStorage.getItem('ilot_wallet');
-        const dashLink = document.getElementById('linkDashboard');
-        const profileLink = document.getElementById('linkProfile');
-        const dashLabel = document.getElementById('dashLabel');
-
-        if (savedWallet) {
-            if (dashLink) dashLink.href = `/dashboard/${savedWallet}/`;
-            if (profileLink) profileLink.href = `/profile/${savedWallet}/`;
-            const regLink = document.getElementById('linkRegister');
-            if (regLink) regLink.href = `/add-property/${savedWallet}/`;
-
-            if (dashLabel) dashLabel.innerText = "Mon Patrimoine";
-
-            // Mise à jour du nom dans la nav si c'est "Citoyen" (cas où user n'est pas dans le context Django)
-            const navName = document.getElementById('navUserName');
-            if (navName && navName.innerText.trim() === "Citoyen") {
-                navName.innerText = savedWallet.substring(0, 10) + "...";
-            }
-        } else {
-            if (dashLabel) dashLabel.innerText = "Se Connecter";
+        if (currentUserId && currentUserId !== "None") {
+            localStorage.setItem('ilot_user_id', currentUserId);
         }
 
         function logout() {
+            localStorage.removeItem('ilot_user_id');
             localStorage.removeItem('ilot_wallet');
             window.location.href = "{% url 'web_logout' %}";
         }

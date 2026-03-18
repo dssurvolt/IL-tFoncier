@@ -8,7 +8,7 @@
     <div>
         <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Tableau de Bord Personnel
         </h6>
-        <h1 class="display-5 fw-bold mb-0">Bonjour, {{ user.full_name }}</h1>
+        <h1 class="display-5 fw-bold mb-0">Bonjour, {{ user.full_name|default:user.email }}</h1>
     </div>
     <div class="d-none d-md-block">
         <div class="p-3 bg-white rounded-4 border shadow-sm">
@@ -49,6 +49,43 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Section: Notifications Récentes -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Alertes & Suivi</h4>
+        {% if notifications %}
+        <span class="badge bg-primary rounded-pill">{{ notifications.count }} nouvelle(s)</span>
+        {% endif %}
+    </div>
+
+    <div class="citizen-card p-0 overflow-hidden">
+        {% for n in notifications %}
+        <div class="p-4 border-bottom {% if not n.read_at %}bg-primary bg-opacity-5{% endif %} position-relative">
+            <div class="d-flex align-items-center">
+                <div
+                    class="rounded-circle {% if n.type == 'TRANSACTION_UPDATE' %}bg-info{% else %}bg-primary{% endif %} bg-opacity-10 p-3 me-4">
+                    {% if n.type == 'TRANSACTION_UPDATE' %}🔔{% else %}📨{% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="fw-bold mb-1">{{ n.payload.title }}</h6>
+                        <small class="text-muted">{{ n.created_at|timesince }}</small>
+                    </div>
+                    <p class="text-muted small mb-0">{{ n.payload.message }}</p>
+                    {% if n.payload.folio_id %}
+                    <a href="{% url 'web_transaction_status' n.payload.folio_id %}" class="stretched-link"></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-5 text-center text-muted">
+            <p class="mb-0">Aucune notification pour le moment.</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -103,7 +140,9 @@
                 <a href="{% url 'web_property_detail' prop.id %}"
                     class="btn btn-outline-secondary rounded-3 fw-bold">Consulter le dossier complet</a>
                 {% if prop.status == 'DRAFT' %}
-                <button class="btn btn-citizen">Lancer la Validation Communautaire</button>
+                <button class="btn btn-citizen initiate-validation-btn" data-prop-id="{{ prop.id }}">
+                    Lancer la Validation Communautaire
+                </button>
                 {% endif %}
 
                 <a href="{% url 'web_create_listing' prop.id %}"
@@ -125,6 +164,46 @@
     </div>
     {% endfor %}
 </div>
+<script>
+    document.querySelectorAll('.initiate-validation-btn').forEach(btn => {
+        btn.onclick = async () => {
+            const propertyId = btn.getAttribute('data-prop-id');
+            if (!confirm("Voulez-vous lancer la validation communautaire ? Vos témoins recevront un email immédiatement.")) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi...';
+
+            try {
+                const res = await fetch('/api/validation/initiate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        property_id: propertyId,
+                        requester_wallet: "{{ user.wallet_address }}",
+                        gps_at_request: { lat: 6.36, lng: 2.42 } // Simulation GPS
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert(`Succès ! Validation lancée (${data.witness_count} témoins notifiés).`);
+                    location.reload();
+                } else {
+                    alert("Erreur : " + data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Lancer la Validation Communautaire';
+                }
+            } catch (err) {
+                alert("Une erreur est survenue : " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Lancer la Validation Communautaire';
+            }
+        };
+    });
+</script>
 {% endif %}
 
 {% endblock %}

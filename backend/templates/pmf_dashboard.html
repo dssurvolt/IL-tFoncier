@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header with Indicator -->
+    <div class="row align-items-center mb-5">
+        <div class="col">
+            <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">ANALYTICS RÉRETENTION
+            </h6>
+            <h1 class="display-5 fw-bold mb-0">Monthly Cohort Dashboard</h1>
+        </div>
+        <div class="col-auto">
+            {% if leading_indicator %}
+            <div class="card border-0 shadow-sm p-3 rounded-4 bg-success text-white">
+                {% else %}
+                <div class="card border-0 shadow-sm p-3 rounded-4 bg-warning text-white">
+                    {% endif %}
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-shield-check fs-1"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-uppercase small fw-bold">Customer Success Indicator</h6>
+                            <h3 class="mb-0 fw-bold">
+                                {% if leading_indicator %}
+                                TRUE
+                                {% else %}
+                                FALSE
+                                {% endif %}
+                                ({{ success_rate }}%)
+                            </h3>
+                            <small class="opacity-75">Target: 70% retention in first 2 months</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-3 border-0 shadow-sm rounded-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Filtrer par semaine d'acquisition</label>
+                            <input type="text" id="cohortFilter" class="form-control"
+                                placeholder="Ex: Semaine du 01/01/2026..." onkeyup="filterCohorts()">
+                        </div>
+                        <div class="col text-end">
+                            <span class="badge bg-light text-dark p-2">Légende :</span>
+                            <span class="badge bg-danger ms-2">0-25%</span>
+                            <span class="badge bg-warning text-dark ms-1">25-50%</span>
+                            <span class="badge bg-info text-dark ms-1">50-70%</span>
+                            <span class="badge bg-success ms-1">>70%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Cohort Heatmap -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-0">
+                        <h5 class="fw-bold mb-0">Heatmap de Rétention par Cohorte (Hebdomadaire)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0 align-middle text-center" id="cohortTable">
+                            <thead class="bg-light">
+                                <tr class="small text-muted uppercase">
+                                    <th class="text-start px-4">Cohorte (Semaine)</th>
+                                    <th>Taille</th>
+                                    <th>W0</th>
+                                    <th>W1</th>
+                                    <th>W2</th>
+                                    <th>W3</th>
+                                    <th>W4</th>
+                                    <th>W5</th>
+                                    <th>W6</th>
+                                    <th>W7</th>
+                                    <th>W8</th>
+                                    <th>W9</th>
+                                    <th>W10</th>
+                                    <th>W11</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in cohorts %}
+                                <tr class="cohort-row">
+                                    <td class="text-start fw-bold px-4 cohort-month">{{ c.label }}</td>
+                                    <td class="bg-light fw-bold">{{ c.size }}</td>
+                                    {% for rate in c.retention %}
+                                    <td {% if rate is not None %}
+                                        style="background-color: {% if rate < 25 %}#f8d7da{% elif rate < 50 %}#fff3cd{% elif rate < 70 %}#d1ecf1{% else %}#d4edda{% endif %}; color: {% if rate < 25 %}#721c24{% elif rate < 50 %}#856404{% elif rate < 70 %}#0c5460{% else %}#155724{% endif %};"
+                                        {% endif %}>
+                                        {% if rate is not None %}{{ rate }}%{% else %}-{% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traceability Tables -->
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-4">Traçabilité : Dernières Conversions</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead class="bg-light border-0">
+                                <tr class="small text-muted border-0">
+                                    <th>Citoyen</th>
+                                    <th>Objet</th>
+                                    <th>Heure</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                {% for i in recent_inquiries %}
+                                <tr class="border-light">
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-dark">{{ i.user.full_name }}</span>
+                                            <small class="text-muted">{{ i.user.email }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">#{{
+                                            i.listing.property.id|stringformat:"s"|slice:":8" }}</span>
+                                    </td>
+                                    <td><small class="text-muted">{{ i.created_at|date:"d/m H:i" }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-4 text-muted">Traçabilité : Consultations</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-borderless">
+                            <tbody class="small opacity-75">
+                                {% for v in recent_views %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="text-dark">
+                                                {% if v.user %}
+                                                {{ v.user.full_name }}
+                                                {% else %}
+                                                Anonyme
+                                                {% endif %}
+                                            </span>
+                                            <small class="text-muted">{{ v.view_type|slice:":20" }}</small>
+                                        </div>
+                                    </td>
+                                    <td class="text-end font-monospace"><small class="text-muted">{{
+                                            v.created_at|date:"H:i" }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterCohorts() {
+            let input = document.getElementById("cohortFilter");
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById("cohortTable");
+            let tr = table.getElementsByClassName("cohort-row");
+
+            for (let i = 0; i < tr.length; i++) {
+                let td = tr[i].getElementsByClassName("cohort-month")[0];
+                if (td) {
+                    let txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #eef2f7 !important;
+        }
+
+        .rounded-4 {
+            border-radius: 1rem !important;
+        }
+    </style>
+    {% endblock %}

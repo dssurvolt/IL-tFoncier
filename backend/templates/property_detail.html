@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="mb-5">
-    <a href="#" id="btnBackToDashboard" class="text-decoration-none text-muted small fw-bold">
+    <a href="{% if user.is_authenticated %}{% url 'user_dashboard' wallet=user.id %}{% else %}{% url 'web_login' %}{% endif %}"
+        id="btnBackToDashboard" class="text-decoration-none text-muted small fw-bold">
         ← Retour à mon patrimoine
     </a>
 </div>
@@ -168,7 +169,12 @@
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
                                 <h6 class="fw-bold mb-0">{{ w.first_name }} {{ w.last_name }}</h6>
-                                <small class="text-muted">{{ w.phone }}</small>
+                                <small class="text-muted d-block">{{ w.phone }}</small>
+                                {% if w.email %}
+                                <small class="text-primary d-block mt-1">
+                                    📧 {{ w.email }}
+                                </small>
+                                {% endif %}
                             </div>
                             <span class="badge bg-white text-muted border small">{{ w.get_gender_display }}</span>
                         </div>
@@ -252,7 +258,25 @@
             <h5 class="fw-bold mb-3">Actions Disponibles</h5>
             <div class="d-grid gap-2" id="actionButtons">
                 <!-- Les boutons d'action seront injectés par JS selon le rôle (Propriétaire / Acheteur) -->
+                {% if listing %}
+                {% if user.is_authenticated and user == property.owner_wallet %}
+                <div class="alert alert-info rounded-3 small">Vous êtes le propriétaire de cette annonce.</div>
+                {% else %}
+                <div
+                    class="p-3 bg-primary bg-opacity-5 rounded-4 mb-3 text-center border border-primary border-opacity-10">
+                    <h4 class="fw-bold text-primary mb-1">{{ listing.price_fiat|floatformat:0 }} FCFA</h4>
+                    <p class="small text-muted mb-0">Prix de vente direct</p>
+                </div>
+                <a href="{% url 'web_choose_notary' property_id=property.id %}"
+                    class="btn btn-primary d-block w-100 py-3 rounded-pill fw-bold shadow-sm mb-2">
+                    <i class="bi bi-shield-lock-fill me-2"></i> SÉCURISER L'ACHAT (NOTAIRE)
+                </a>
+                <button class="btn btn-outline-citizen py-2 w-100 small" onclick="contactSeller()">Demander plus
+                    d'infos</button>
+                {% endif %}
+                {% else %}
                 <button class="btn btn-citizen py-3" onclick="contactSeller()">CONTACTER LE VENDEUR</button>
+                {% endif %}
                 <button class="btn btn-outline-secondary py-2">Demander le Dossier Certifié (PDF)</button>
             </div>
         </div>
@@ -312,16 +336,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Bouton Retour
-        const backBtn = document.getElementById('btnBackToDashboard');
-        const ownerWallet = "{{ owner.wallet_address }}";
-        const savedWallet = localStorage.getItem('ilot_wallet') || ownerWallet;
-
-        if (savedWallet && savedWallet !== "None") {
-            backBtn.href = "/dashboard/" + savedWallet.toLowerCase().trim() + "/";
-        } else {
-            backBtn.href = "{% url 'web_login' %}";
-        }
+        // 1. Bouton Retour déjà géré par Django Template
 
         // 2. Initialisation de la Carte
         try {
@@ -377,11 +392,16 @@
     }
 
     function contactSeller() {
-        const isCertified = "{{ property.is_certified }}";
-        if (isCertified === 'True') {
-            alert("✅ Dossier Certifié !\n\nVotre demande de contact a été transmise au propriétaire. Il pourra vous donner accès aux documents complets (géomètre, témoins).");
+        const listingId = "{{ listing.id }}";
+        if (listingId && listingId !== "None") {
+            window.location.href = `/chat/start/${listingId}/`;
         } else {
-            alert("⚠️ Dossier en attente de certification.\n\nVous pouvez contacter le vendeur, mais le dossier n'est pas encore totalement sécurisé par iLôt.");
+            const isCertified = "{{ property.is_certified }}";
+            if (isCertified === 'True') {
+                alert("✅ Dossier Certifié !\n\nVotre demande de contact a été transmise au propriétaire. Il pourra vous donner accès aux documents complets.");
+            } else {
+                alert("⚠️ Dossier en attente de certification.");
+            }
         }
     }
 </script>

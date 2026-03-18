@@ -92,10 +92,21 @@
             const data = await response.json();
 
             if (response.ok) {
-                // Stocker l'ID utilisateur et rediriger
+                // Nettoyage et stockage frais
+                localStorage.removeItem('ilot_wallet');
                 localStorage.setItem('ilot_user_id', data.user_id);
                 localStorage.setItem('ilot_user_email', email);
-                window.location.href = `/dashboard/${data.user_id}/`;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const next = urlParams.get('next');
+
+                if (next) {
+                    window.location.href = next;
+                } else if (data.role === 'NOTARY') {
+                    window.location.href = '/notary/dashboard/';
+                } else {
+                    window.location.href = `/dashboard/${data.user_id}/`;
+                }
             } else {
                 errorDiv.textContent = data.error || 'Email ou mot de passe incorrect';
                 errorDiv.classList.remove('d-none');

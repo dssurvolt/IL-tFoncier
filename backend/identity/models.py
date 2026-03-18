@@ -32,6 +32,7 @@ class User(AbstractUser):
         WITNESS = 'WITNESS', _('Témoin Certifié')
         CHIEF = 'CHIEF', _('Chef de Localité')
         ADMIN = 'ADMIN', _('Administrateur')
+        NOTARY = 'NOTARY', _('Notaire Certifié')
 
     username = None  # On désactive le username par défaut
     

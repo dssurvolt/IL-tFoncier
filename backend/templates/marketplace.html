@@ -50,6 +50,7 @@
                                 <div class="text-center">
                                     <h6 class="fw-bold mb-1">${item.village || 'Parcelle'}</h6>
                                     <span class="badge bg-primary mb-2">${item.price_fiat} FCFA</span><br>
+                                    ${item.is_under_contract ? '<span class="badge bg-warning text-dark mb-2">⚠️ SOUS CONTRAT</span><br>' : ''}
                                     <a href="/property/${item.id}/" class="btn btn-sm btn-outline-primary py-1 mt-1">Détails techniques</a>
                                 </div>
                             `);
@@ -66,22 +67,54 @@
         </script>
     </div>
     <!-- Stats Marketplace -->
-    <div class="col-lg-4">
-        <div class="citizen-card h-100 bg-primary border-0 shadow-lg text-white">
-            <h5 class="fw-bold mb-4 text-white">Tendances du Marché</h5>
-            <div class="mb-4">
-                <small class="text-white text-opacity-75 d-block mb-1">Prix Moyen / m²</small>
-                <h3 class="fw-bold text-white">12.500 FCFA</h3>
+    <div class="col-lg-4 d-flex flex-column gap-3">
+        <!-- Tendances du Marché : Plus compact -->
+        <div class="citizen-card bg-primary border-0 shadow-lg text-white mb-0 py-3">
+            <h6 class="fw-bold mb-3 text-white text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                Tendances du Marché</h6>
+            <div class="row g-0">
+                <div class="col-6 border-end border-white border-opacity-10 ps-2">
+                    <small class="text-white text-opacity-75 d-block" style="font-size: 0.65rem;">Prix Moyen /
+                        m²</small>
+                    <div class="h5 fw-bold text-white mb-0">12.500 <small style="font-size: 0.6rem;">FCFA</small></div>
+                </div>
+                <div class="col-6 ps-3">
+                    <small class="text-white text-opacity-75 d-block" style="font-size: 0.65rem;">Volume (24h)</small>
+                    <div class="h5 fw-bold text-white mb-0">4.2M <small style="font-size: 0.6rem;">FCFA</small></div>
+                </div>
             </div>
-            <div class="mb-4">
-                <small class="text-white text-opacity-75 d-block mb-1">Volume de Transactions (24h)</small>
-                <h3 class="fw-bold text-white">4.2M FCFA</h3>
+        </div>
+
+        <!-- Portail Notaire Rapide -->
+        <div class="citizen-card h-auto border-2 border-dashed border-primary bg-primary bg-opacity-5 py-3 mb-0">
+            <h6 class="fw-bold text-primary mb-2" style="font-size: 0.8rem;">⚖️ PORTAIL NOTAIRE</h6>
+            <p class="x-small text-muted mb-2">Gestion des dossiers de mutation.</p>
+            <a href="{% url 'notary_dashboard' %}" class="btn btn-primary btn-sm w-100 fw-bold py-2"
+                style="font-size: 0.7rem;">ACCÉDER AU DASHBOARD</a>
+            {% if user.is_authenticated and not user.notary_profile %}
+            <div class="mt-2 x-small text-danger fw-bold text-center" style="font-size: 0.6rem;">
+                <i class="bi bi-exclamation-triangle"></i> Compte Citoyen actif.
             </div>
-            <hr class="border-white border-opacity-25">
-            <p class="small text-white text-opacity-75">
-                Toutes les transactions sur la marketplace iLôt sont sécurisées par des contrats séquestres intelligents
-                sur la blockchain Polygon.
-            </p>
+            {% endif %}
+        </div>
+
+        <!-- Notaires de Confiance -->
+        <div>
+            <h6 class="fw-bold mb-3" style="font-size: 0.8rem;">🛡️ NOTAIRES CERTIFIÉS</h6>
+            <div class="d-flex flex-column gap-2">
+                {% for n in featured_notaries %}
+                <div class="p-2 bg-white rounded-3 border shadow-sm d-flex align-items-center">
+                    <div class="rounded-circle bg-light p-1 me-2" style="font-size: 0.8rem;">💼</div>
+                    <div class="overflow-hidden">
+                        <small class="fw-bold d-block text-truncate" style="font-size: 0.75rem;">Me {{ n.name }}</small>
+                        <small class="text-muted d-block text-truncate" style="font-size: 0.65rem;">{{ n.office_name
+                            }}</small>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="x-small text-muted fst-italic">Référencement en cours...</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
@@ -93,12 +126,23 @@
         <div class="citizen-card h-100 d-flex flex-column hover-up">
             <div class="position-relative mb-4">
                 <div class="rounded-4 bg-light overflow-hidden" style="height: 200px;">
-                    <!-- Image placeholder ou générée -->
+                    {% if listing.property.thumbnail_url %}
+                    <img src="{{ listing.property.thumbnail_url }}" class="w-100 h-100 object-fit-cover"
+                        alt="{{ listing.property.village|default:'Parcelle iLôt' }}">
+                    {% else %}
                     <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-primary bg-opacity-10">
                         <span class="display-1">🏡</span>
                     </div>
+                    {% endif %}
                 </div>
+                {% if listing.is_under_contract %}
+                <span
+                    class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 shadow-sm border border-dark border-opacity-10">⚠️
+                    SOUS CONTRAT</span>
+                {% else %}
                 <span class="badge bg-success position-absolute top-0 end-0 m-3 shadow-sm">EN VENTE</span>
+                {% endif %}
+
                 {% if listing.property.is_certified %}
                 <span class="badge bg-primary position-absolute top-0 start-0 m-3 shadow-sm">🛡️ DOSSIER CERTIFIÉ</span>
                 {% else %}
@@ -127,10 +171,25 @@
                 </div>
 
                 <div class="d-grid gap-2">
+                    {% if user.is_authenticated and listing.property.owner_wallet == user %}
+                    <div class="alert alert-info small py-2 rounded-3 mb-0 text-center">
+                        <i class="bi bi-person-check me-1"></i> C'est votre annonce
+                    </div>
+                    {% elif is_notary %}
+                    <div class="alert alert-light small py-2 rounded-3 mb-0 text-center border">
+                        <i class="bi bi-shield-lock me-1"></i> Accès Professionnel
+                    </div>
+                    {% elif listing.is_under_contract %}
+                    <button class="btn btn-secondary disabled"
+                        title="Une transaction est déjà en cours sur ce terrain.">
+                        <i class="bi bi-lock-fill me-1"></i> NON DISPONIBLE
+                    </button>
+                    {% else %}
                     <button class="btn btn-citizen"
                         onclick="contactSeller('{{ listing.id }}', '{{ listing.property.is_certified }}')">
                         CONTACTER LE VENDEUR
                     </button>
+                    {% endif %}
                     <a href="{% url 'web_property_detail' listing.property.id %}"
                         class="btn btn-outline-secondary rounded-3 btn-sm">Détails techniques</a>
                 </div>
@@ -169,12 +228,34 @@
 </style>
 
 <script>
-    function contactSeller(listingId, isCertified) {
-        if (isCertified === 'True') {
-            alert("✅ Dossier Certifié détecté !\n\nVotre demande a été envoyée au vendeur. Vous recevrez une notification dès qu'il acceptera de vous partager les documents officiels (PV de géomètre, attestations des témoins).");
-        } else {
-            alert("⚠️ Dossier en cours de certification.\n\nVous pouvez contacter le vendeur, mais notez que les documents officiels ne sont pas encore tous validés par les experts iLôt.");
+    async function contactSeller(listingId, isCertified) {
+        const userId = "{{ user.id }}";
+
+        if (!userId || userId === "None") {
+            alert("Veuillez vous connecter pour contacter le vendeur.");
+            window.location.href = "{% url 'web_login' %}";
+            return;
         }
+
+        // Tracking PMF en temps réel
+        try {
+            await fetch("{% url 'api_marketplace_inquire' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    listing_id: listingId,
+                    user_id: userId
+                })
+            });
+        } catch (e) {
+            console.error("Erreur tracking PMF:", e);
+        }
+
+        // Redirection vers le chat privé (Phase 4.1)
+        window.location.href = `/chat/start/${listingId}/`;
     }
 </script>
 {% endblock %}

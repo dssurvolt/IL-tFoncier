@@ -10,6 +10,33 @@
             <p class="text-muted lead">Sécurisez une nouvelle parcelle sur la blockchain pour votre compte.</p>
         </div>
 
+        <!--
+        <div class="citizen-card animate-up mb-4 border-primary border-opacity-25 bg-primary bg-opacity-10">
+            <div class="d-flex align-items-center p-3">
+                <div class="rounded-circle bg-primary bg-opacity-20 p-3 me-3 text-center"
+                    style="width: 60px; height: 60px;">
+                    <div id="landTitleLoading" class="spinner-border spinner-border-sm text-primary d-none"
+                        role="status"></div>
+                    <span id="landTitleIcon" class="h4 mb-0">📄</span>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1">Analyse intelligente du Titre Foncier</h6>
+                    <p class="small text-muted mb-0">Uploadez votre document pour pré-remplir le formulaire.</p>
+                </div>
+                <div>
+                    <input type="file" class="form-control d-none" id="landTitleDoc" accept="image/*,application/pdf"
+                        onchange="performLandTitleOCR()">
+                    <label for="landTitleDoc" class="btn btn-primary btn-sm rounded-pill px-4">
+                        ANALYSER
+                    </label>
+                </div>
+            </div>
+            <div id="landTitleFeedback" class="px-3 pb-3 small text-success d-none">
+                ✨ Analyse terminée ! Les informations ont été extraites.
+            </div>
+        </div>
+        -->
+
         <div class="citizen-card animate-up mb-5">
             <form id="addPropertyForm">
                 <!-- Champs cachés pour l'utilisateur connecté -->
@@ -51,7 +78,7 @@
                         <div class="col-12">
                             <label class="form-label fw-bold text-muted small">PAYS</label>
                             <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country">
-                                <option value="Benin" selected>Bénin 🇧🇯</option>
+                                <option value="Benin">Bénin 🇧🇯</option>
                                 <option value="France">France 🇫🇷</option>
                                 <option value="Togo">Togo 🇹🇬</option>
                                 <option value="Cote d'Ivoire">Côte d'Ivoire 🇨🇮</option>
@@ -59,6 +86,21 @@
                                 <option value="USA">USA 🇺🇸</option>
                                 <option value="Other">Autre / International 🌐</option>
                             </select>
+                            <script>
+                                // Pré-sélection du pays depuis le profil utilisateur (Data passée via attribut data ou injectée proprement)
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const userCountry = "{{ user.country|default:'' }}";
+                                    if (userCountry) {
+                                        const select = document.getElementById('country');
+                                        for (let i = 0; i < select.options.length; i++) {
+                                            if (select.options[i].value === userCountry) {
+                                                select.selectedIndex = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                });
+                            </script>
                         </div>
                     </div>
 
@@ -67,14 +109,14 @@
                             <label class="form-label fw-bold text-muted small"
                                 id="label_district">ARRONDISSEMENT</label>
                             <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                                id="district" placeholder="..." required>
+                                id="district" placeholder="..." value="{{ user.district|default:'' }}" required>
                             <div id="districtStatus" class="small mt-1"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-muted small" id="label_village">QUARTIER /
                                 VILLAGE</label>
                             <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                                id="village" placeholder="..." required>
+                                id="village" placeholder="..." value="{{ user.village|default:'' }}" required>
                         </div>
                     </div>
                 </div>
@@ -272,18 +314,99 @@
                     <label class="form-label small text-muted">TÉLÉPHONE</label>
                     <input type="tel" class="form-control border-0 witness-phone" id="w_phone_${num}" required>
                 </div>
+                <div class="col-12">
+                    <label class="form-label small text-muted">ADRESSE EMAIL (Pour validation)</label>
+                    <input type="email" class="form-control border-0 witness-email" id="w_email_${num}" 
+                        placeholder="exemple@email.com" required>
+                    <div class="email-error text-danger x-small d-none" id="w_email_error_${num}">Format d'email invalide</div>
+                </div>
                 <div class="col-12 mt-3">
-                    <label class="form-label small fw-bold">PIÈCE D'IDENTITÉ (PHOTO/SCAN)</label>
-                    <input type="file" class="form-control border-0 witness-id-card" id="w_idcard_${num}" accept="image/*,application/pdf" required>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-bold mb-0">PIÈCE D'IDENTITÉ (PHOTO/SCAN)</label>
+                        <span id="ocr_status_${num}" class="badge bg-info d-none">Extraction IA en cours...</span>
+                    </div>
+                    <input type="file" class="form-control border-0 witness-id-card" id="w_idcard_${num}" 
+                        accept="image/*,application/pdf" onchange="analyzeWitnessID(${num})" required>
+                    <div class="form-text x-small">L'IA pré-remplira les champs à partir de votre document (PDF ou Image).</div>
                 </div>
             </div>
         `;
         witnessContainer.appendChild(div);
     }
 
+    async function analyzeWitnessID(num) {
+        const fileInput = document.getElementById(`w_idcard_${num}`);
+        const statusSpan = document.getElementById(`ocr_status_${num}`);
+
+        if (!fileInput.files || !fileInput.files[0]) return;
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        statusSpan.classList.remove('d-none');
+        statusSpan.innerText = "Extraction IA en cours...";
+        statusSpan.className = "badge bg-info";
+
+        try {
+            const response = await fetch('/api/identity/extract/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Pré-remplir si les données existent
+                if (data.last_name) document.getElementById(`w_name_${num}`).value = data.last_name;
+                if (data.first_name) document.getElementById(`w_firstname_${num}`).value = data.first_name;
+                if (data.birth_date) document.getElementById(`w_birth_${num}`).value = data.birth_date;
+                if (data.phone) document.getElementById(`w_phone_${num}`).value = data.phone;
+
+                // Effet visuel sur les champs remplis
+                [`w_name_${num}`, `w_firstname_${num}`, `w_birth_${num}`, `w_phone_${num}`].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.value) {
+                        el.classList.add('bg-success', 'bg-opacity-10');
+                        setTimeout(() => el.classList.remove('bg-success', 'bg-opacity-10'), 3000);
+                    }
+                });
+
+                statusSpan.innerText = "✨ Analyse terminée";
+                statusSpan.className = "badge bg-success";
+            } else {
+                statusSpan.innerText = "⚠️ Erreur analyse";
+                statusSpan.className = "badge bg-warning";
+            }
+        } catch (error) {
+            console.error("OCR Error:", error);
+            statusSpan.innerText = "❌ Échec réseau";
+            statusSpan.className = "badge bg-danger";
+        } finally {
+            setTimeout(() => {
+                statusSpan.classList.add('d-none');
+            }, 3000);
+        }
+    }
+
     document.getElementById('addWitnessBtn').onclick = () => {
         witnessCount++;
         createWitness(witnessCount);
+
+        // Validation email dynamique
+        const emailInput = document.getElementById(`w_email_${witnessCount}`);
+        const errorDiv = document.getElementById(`w_email_error_${witnessCount}`);
+
+        emailInput.onblur = () => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailInput.value && !emailRegex.test(emailInput.value)) {
+                errorDiv.classList.remove('d-none');
+                emailInput.classList.add('is-invalid');
+            } else {
+                errorDiv.classList.add('d-none');
+                emailInput.classList.remove('is-invalid');
+            }
+        };
     };
 
     document.getElementById('removeWitnessBtn').onclick = () => {
@@ -438,6 +561,21 @@
     for (let i = 1; i <= 3; i++) {
         witnessCount++;
         createWitness(witnessCount);
+
+        // Validation email pour les témoins initiaux
+        const num = witnessCount;
+        const emailInput = document.getElementById(`w_email_${num}`);
+        const errorDiv = document.getElementById(`w_email_error_${num}`);
+        emailInput.onblur = () => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailInput.value && !emailRegex.test(emailInput.value)) {
+                errorDiv.classList.remove('d-none');
+                emailInput.classList.add('is-invalid');
+            } else {
+                errorDiv.classList.add('d-none');
+                emailInput.classList.remove('is-invalid');
+            }
+        };
     }
 
     document.getElementById('addBoundaryPoint').onclick = () => {
@@ -515,13 +653,23 @@
         }
 
         const witnesses = [];
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         for (let i = 1; i <= witnessCount; i++) {
+            const email = document.getElementById(`w_email_${i}`).value.trim();
+            if (!emailRegex.test(email)) {
+                alert(`L'adresse email du témoin #${i} est invalide.`);
+                btn.disabled = false;
+                btn.innerText = originalText;
+                return;
+            }
+
             witnesses.push({
                 last_name: document.getElementById(`w_name_${i}`).value,
                 first_name: document.getElementById(`w_firstname_${i}`).value,
                 birth_date: document.getElementById(`w_birth_${i}`).value,
                 gender: document.getElementById(`w_gender_${i}`).value,
-                phone: document.getElementById(`w_phone_${i}`).value
+                phone: document.getElementById(`w_phone_${i}`).value,
+                email: email
             });
         }
 
@@ -572,5 +720,79 @@
             btn.innerText = originalText;
         }
     };
+
+    async function performLandTitleOCR() {
+        const fileInput = document.getElementById('landTitleDoc');
+        const loading = document.getElementById('landTitleLoading');
+        const icon = document.getElementById('landTitleIcon');
+        const feedback = document.getElementById('landTitleFeedback');
+
+        if (!fileInput.files || !fileInput.files[0]) return;
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        loading.classList.remove('d-none');
+        icon.classList.add('d-none');
+        feedback.classList.add('d-none');
+
+        try {
+            const response = await fetch('/api/land-title/extract/', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Extracted Land Title Data:", data);
+
+                if (data.is_land_title) {
+                    // Remplissage intelligent
+                    if (data.nup) {
+                        document.getElementById('cadastral_id').value = data.nup;
+                    } else if (data.title_number) {
+                        document.getElementById('cadastral_id').value = data.title_number;
+                    }
+
+                    if (data.area_sqm) document.getElementById('area_sqm').value = data.area_sqm;
+
+                    // Message de succès/alerte
+                    let feedbackMsg = `✨ Analyse : <strong>${data.document_type}</strong> identifié.`;
+
+                    if (data.is_copy) {
+                        feedbackMsg += `<br><span class="text-warning fw-bold">⚠️ ATTENTION : Ce document est identifié comme une COPIE.</span>`;
+                    }
+
+                    if (data.warnings && data.warnings.length > 0) {
+                        data.warnings.forEach(w => {
+                            feedbackMsg += `<br><span class="text-danger fw-bold">🚨 ${w}</span>`;
+                        });
+                    }
+
+                    feedback.innerHTML = feedbackMsg;
+                    feedback.classList.remove('d-none');
+                    feedback.className = `px-3 pb-3 small ${(data.warnings.length > 0 || data.is_copy) ? 'text-danger' : 'text-success'}`;
+
+                    ['cadastral_id', 'area_sqm'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.value) {
+                            el.classList.add('bg-success', 'bg-opacity-10', 'border-success');
+                            setTimeout(() => {
+                                el.classList.remove('bg-success', 'bg-opacity-10', 'border-success');
+                            }, 3000);
+                        }
+                    });
+                } else {
+                    alert("ALERTE SÉCURITÉ : Ce document n'a pas pu être validé comme un titre foncier officiel du Bénin. Risque de non-conformité.");
+                }
+            }
+        } catch (error) {
+            console.error("OCR Error:", error);
+        } finally {
+            loading.classList.add('d-none');
+            icon.classList.remove('d-none');
+        }
+    }
 </script>
 {% endblock %}

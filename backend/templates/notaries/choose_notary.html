@@ -1,0 +1,127 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h6 class="text-primary fw-bold text-uppercase mb-2">Étape 1 : Chaîne de Valeur Sécurisée</h6>
+            <h1 class="display-5 fw-bold mb-3">Choisissez votre Notaire Certifié</h1>
+            <p class="text-muted fs-5 mx-auto" style="max-width: 700px;">
+                iLôt Foncier travaille uniquement avec des notaires certifiés par l'État. Sélectionnez un partenaire
+                pour débuter votre acte de vente et la mutation du titre foncier.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar: Recap Property -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
+                <h5 class="fw-bold mb-4">Récapitulatif de l'Achat</h5>
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-3 bg-light p-3 me-3">
+                        <i class="bi bi-pin-map text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">{{ property.village|default:"Parcelle iLôt" }}</h6>
+                        <small class="text-muted">{{ property.district }} - {{ property.area_sqm }} m²</small>
+                    </div>
+                </div>
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Vendeur :</span>
+                        <span class="fw-bold text-dark">{{ property.owner_wallet.full_name|default:"Propriétaire
+                            Certifié" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger">
+                        <small>⚠️ Frais iLôt (Suivi) :</small>
+                        <small class="fw-bold">5 € (3,300 FCFA)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Notary List -->
+        <div class="col-lg-8">
+            {% if notaries %}
+            <div class="row g-4">
+                {% for n in notaries %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 hover-lift transition-all">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 text-center">
+                                <div class="avatar-lg bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto"
+                                    style="width: 80px; height: 80px;">
+                                    <i class="bi bi-person-badge fs-1"></i>
+                                </div>
+                                {% if n.is_verified %}
+                                <span class="badge bg-success mt-2 rounded-pill shadow-sm">
+                                    <i class="bi bi-patch-check"></i> VÉRIFIÉ
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 border-start-md ps-md-4">
+                                <h4 class="fw-bold mb-1">Me {{ n.name }}</h4>
+                                <h6 class="text-muted mb-3">{{ n.office_name }} — {{ n.city }}</h6>
+
+                                <div class="d-flex gap-3 mb-3 small">
+                                    <span class="badge bg-light text-dark py-2 px-3">
+                                        <i class="bi bi-clock me-1 text-primary"></i> {{ n.avg_processing_time_days }}
+                                        jours moy.
+                                    </span>
+                                    <span class="badge bg-light text-dark py-2 px-3">
+                                        <i class="bi bi-star-fill me-1 text-warning"></i> 4.9/5 (Avis)
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> {{ n.address|truncatechars:80 }}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                                <div class="mb-3">
+                                    <h5 class="fw-bold text-primary mb-0">Standard iLôt</h5>
+                                    <small class="text-muted">Tarifs pré-négociés</small>
+                                </div>
+                                <a href="{% url 'web_start_transaction' property_id=property.id notary_id=n.id %}"
+                                    class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                                    Choisir ce Notaire
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info rounded-4 p-5 text-center shadow-sm">
+                <i class="bi bi-info-circle fs-1 mb-3 d-block text-primary"></i>
+                <h5 class="fw-bold">Aucun notaire partenaire trouvé</h5>
+                <p class="mb-0">Nous activons de nouveaux partenariats. Veuillez réessayer plus tard.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-lg {
+        font-size: 2.5rem;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    @media (min-width: 768px) {
+        .border-start-md {
+            border-left: 1px solid #eee !important;
+        }
+    }
+</style>
+{% endblock %}

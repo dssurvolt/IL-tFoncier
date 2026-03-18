@@ -1,0 +1,404 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="row justify-content-center h-100">
+    <div class="col-lg-10 col-xl-9">
+        <div class="chat-container glass shadow-lg rounded-4 overflow-hidden d-flex flex-column position-relative">
+            <!-- Header WhatsApp Style -->
+            <div class="chat-header p-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'web_my_chats' %}" class="btn btn-link text-white p-0 me-3">
+                        <i class="bi bi-arrow-left fs-4"></i>
+                    </a>
+                    <div class="position-relative me-3">
+                        <div
+                            class="avatar-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center">
+                            {{ other_user.full_name|slice:":1" }}
+                        </div>
+                        <span class="status-indicator online"></span>
+                    </div>
+                    <div>
+                        <h6 class="text-white fw-bold mb-0">{{ other_user.full_name }}</h6>
+                        <small class="text-white-50">En ligne — {{ room.listing.property.village|default:"Parcelle iLôt"
+                            }}</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-none d-md-block text-end">
+                        <div class="small text-white-50 mb-0">Prix Affiché</div>
+                        <div class="fw-bold text-white small">{{ room.listing.price_fiat }} FCFA</div>
+                    </div>
+                    {% if user == room.buyer %}
+                    <a href="{% url 'web_choose_notary' room.listing.property.id %}"
+                        class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-primary shadow-sm">
+                        Sécuriser l'achat
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="chat-messages" class="chat-body p-4 flex-grow-1 overflow-y-auto">
+                {% for msg in chat_messages %}
+                <div class="message-wrapper {% if msg.sender == user %}sender{% else %}receiver{% endif %}">
+                    <div class="message-bubble shadow-sm animate-pop">
+                        {% if msg.attachment %}
+                        <div class="message-attachment mb-2">
+                            <a href="{{ msg.attachment.url }}" target="_blank">
+                                <img src="{{ msg.attachment.url }}" class="img-fluid rounded" style="max-height: 200px;"
+                                    onerror="this.outerHTML='<span class=\'btn btn-light btn-sm text-truncate w-100 border text-start\'><i class=\'bi bi-file-earmark-arrow-down me-2\'></i> Fichier</span>'">
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if msg.content %}<div class="message-text">{{ msg.content }}</div>{% endif %}
+                        <div class="message-info">
+                            <span class="time">{{ msg.created_at|date:"H:i" }}</span>
+                            {% if msg.sender == user %}
+                            <span class="status-ticks"><i class="bi bi-check2"></i></span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state text-center py-5">
+                    <div class="empty-icon mb-3">🌿</div>
+                    <h5 class="fw-bold text-muted">Démarrez la discussion sécurisée</h5>
+                    <p class="text-muted small">Toutes les discussions sont protégées par le iLôt Shield.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Emoji Picker -->
+            <div id="emoji-picker" class="emoji-picker shadow rounded-4 p-2 bg-white d-none">
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    <span class="emoji-item">😊</span><span class="emoji-item">🤝</span><span
+                        class="emoji-item">🏠</span>
+                    <span class="emoji-item">💰</span><span class="emoji-item">📍</span><span
+                        class="emoji-item">✅</span>
+                    <span class="emoji-item">🌳</span><span class="emoji-item">📄</span><span
+                        class="emoji-item">🏢</span>
+                    <span class="emoji-item">📐</span><span class="emoji-item">🔑</span><span
+                        class="emoji-item">👋</span>
+                    <span class="emoji-item">🌍</span><span class="emoji-item">🧱</span><span
+                        class="emoji-item">📝</span>
+                </div>
+            </div>
+
+            <!-- Attachment Preview Bar -->
+            <div id="file-preview" class="file-preview-bar d-none p-2 bg-light border-top">
+                <div class="d-flex align-items-center justify-content-between px-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded me-3 text-primary"><i
+                                class="bi bi-file-earmark-check fs-5"></i></div>
+                        <span id="file-name" class="small fw-bold text-truncate" style="max-width: 200px;"></span>
+                    </div>
+                    <button type="button" class="btn-close btn-sm" id="cancel-file"></button>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-footer p-3 bg-white border-top">
+                <form id="chat-form" class="d-flex align-items-center gap-2">
+                    <input type="file" id="attachment-input" style="display: none;"
+                        accept="image/*,application/pdf,.doc,.docx">
+                    <div class="input-group bg-light rounded-pill px-3 py-1 border-0">
+                        <button type="button" id="emoji-btn" class="btn btn-link text-muted p-0 me-2"><i
+                                class="bi bi-emoji-smile fs-5"></i></button>
+                        <input type="text" id="message-input"
+                            class="form-control border-0 bg-transparent py-2 shadow-none"
+                            placeholder="Tapez un message..." autocomplete="off">
+                        <button type="button" id="attachment-btn" class="btn btn-link text-muted p-0"><i
+                                class="bi bi-paperclip fs-5"></i></button>
+                    </div>
+                    <button type="submit"
+                        class="btn btn-primary rounded-circle shadow p-0 d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px; background: #075e54; border: none;">
+                        <i class="bi bi-send-fill text-white fs-5 ms-1"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-info border-0 rounded-4 mt-4 shadow-sm py-2">
+            <small class="d-flex align-items-center">
+                <i class="bi bi-shield-lock-fill text-primary me-2 fs-5"></i>
+                Discussions protégées par iLôt Shield. Les coordonnées sont automatiquement masquées.
+            </small>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chat-container {
+        height: 75vh;
+        border: none;
+        background: #e5ddd5;
+    }
+
+    .chat-header {
+        background: #075e54;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+    }
+
+    .status-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid #075e54;
+    }
+
+    .status-indicator.online {
+        background: #25d366;
+    }
+
+    .chat-body {
+        background: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+        display: flex;
+        flex-direction: column;
+    }
+
+    .message-wrapper {
+        display: flex;
+        margin-bottom: 12px;
+        width: 100%;
+    }
+
+    .message-wrapper.sender {
+        justify-content: flex-end;
+    }
+
+    .message-wrapper.receiver {
+        justify-content: flex-start;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        padding: 8px 12px 6px;
+        position: relative;
+        font-size: 0.95rem;
+        word-wrap: break-word;
+    }
+
+    .sender .message-bubble {
+        background: #dcf8c6;
+        color: #303030;
+        border-radius: 8px 0 8px 8px;
+    }
+
+    .receiver .message-bubble {
+        background: #ffffff;
+        color: #303030;
+        border-radius: 0 8px 8px 8px;
+    }
+
+    .sender .message-bubble::after {
+        content: "";
+        position: absolute;
+        right: -8px;
+        top: 0;
+        border: 8px solid transparent;
+        border-left-color: #dcf8c6;
+        border-top-color: #dcf8c6;
+    }
+
+    .receiver .message-bubble::after {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 0;
+        border: 8px solid transparent;
+        border-right-color: #ffffff;
+        border-top-color: #ffffff;
+    }
+
+    .message-info {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .time {
+        font-size: 0.65rem;
+        color: rgba(0, 0, 0, 0.45);
+    }
+
+    .status-ticks {
+        font-size: 0.8rem;
+        color: #34b7f1;
+    }
+
+    .emoji-picker {
+        position: absolute;
+        bottom: 80px;
+        left: 20px;
+        width: 240px;
+        z-index: 1000;
+        border: 1px solid #eee;
+    }
+
+    .emoji-item {
+        cursor: pointer;
+        font-size: 1.4rem;
+        transition: transform 0.1s;
+        padding: 5px;
+    }
+
+    .emoji-item:hover {
+        transform: scale(1.2);
+    }
+
+    .file-preview-bar {
+        background: #f8f9fa;
+        z-index: 5;
+    }
+
+    .animate-pop {
+        animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    #chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+    // Fonction pour récupérer le CSRF token depuis les cookies (méthode Django recommandée)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const attachmentInput = document.getElementById('attachment-input');
+    const attachmentBtn = document.getElementById('attachment-btn');
+    const emojiBtn = document.getElementById('emoji-btn');
+    const emojiPicker = document.getElementById('emoji-picker');
+    const filePreview = document.getElementById('file-preview');
+    const fileNameSpan = document.getElementById('file-name');
+    const cancelFileBtn = document.getElementById('cancel-file');
+    const roomId = "{{ room.id }}";
+
+    // Emoji
+    emojiBtn.addEventListener('click', (e) => { e.stopPropagation(); emojiPicker.classList.toggle('d-none'); });
+    document.addEventListener('click', () => emojiPicker.classList.add('d-none'));
+    emojiPicker.addEventListener('click', (e) => e.stopPropagation());
+    document.querySelectorAll('.emoji-item').forEach(item => {
+        item.addEventListener('click', () => { messageInput.value += item.innerText; emojiPicker.classList.add('d-none'); messageInput.focus(); });
+    });
+
+    // Attachment
+    attachmentBtn.addEventListener('click', () => attachmentInput.click());
+    attachmentInput.addEventListener('change', () => {
+        if (attachmentInput.files.length > 0) { fileNameSpan.innerText = attachmentInput.files[0].name; filePreview.classList.remove('d-none'); }
+    });
+    cancelFileBtn.addEventListener('click', () => { attachmentInput.value = ''; filePreview.classList.add('d-none'); });
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    chatForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const content = messageInput.value.trim();
+        const file = attachmentInput.files[0];
+        if (!content && !file) return;
+
+        const formData = new FormData();
+        formData.append('room_id', roomId);
+        formData.append('content', content);
+        if (file) formData.append('attachment', file);
+
+        messageInput.value = '';
+        attachmentInput.value = '';
+        filePreview.classList.add('d-none');
+
+        try {
+            const response = await fetch("{% url 'api_chat_send' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('ilot_csrftoken') },
+                body: formData
+            });
+            const data = await response.json();
+            if (response.ok) {
+                appendMessage(data);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } else {
+                alert("Erreur : " + data.error);
+            }
+        } catch (error) { console.error("Erreur Chat:", error); }
+    });
+
+    function appendMessage(data) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message-wrapper sender';
+        let attachHtml = '';
+        if (data.attachment_url) {
+            const isImg = /\.(jpg|jpeg|png|gif)$/i.test(data.attachment_url);
+            attachHtml = isImg
+                ? `<div class="message-attachment mb-2"><img src="${data.attachment_url}" class="img-fluid rounded" style="max-height: 200px;"></div>`
+                : `<div class="message-attachment mb-2"><a href="${data.attachment_url}" target="_blank" class="btn btn-light btn-sm w-100 border text-start">📎 Document</a></div>`;
+        }
+        wrapper.innerHTML = `
+            <div class="message-bubble shadow-sm animate-pop">
+                ${attachHtml}
+                ${data.content ? '<div class="message-text">' + data.content + '</div>' : ''}
+                <div class="message-info">
+                    <span class="time">${data.created_at}</span>
+                    <span class="status-ticks"><i class="bi bi-check2"></i></span>
+                </div>
+            </div>`;
+        chatMessages.appendChild(wrapper);
+    }
+
+    setInterval(() => {
+        fetch(window.location.href).then(r => r.text()).then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const el = doc.getElementById('chat-messages');
+            if (el && el.innerHTML.trim() !== chatMessages.innerHTML.trim()) {
+                chatMessages.innerHTML = el.innerHTML;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    }, 5000);
+</script>
+{% endblock %}

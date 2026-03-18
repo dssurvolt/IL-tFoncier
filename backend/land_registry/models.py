@@ -65,6 +65,15 @@ class Property(models.Model):
         """Un dossier est certifié si le géomètre a validé ET au moins 2 témoins ont confirmé."""
         witness_count = self.witnesses.filter(is_confirmed=True).count()
         return self.is_surveyor_validated and witness_count >= 2
+
+    @property
+    def thumbnail_url(self):
+        """Retourne l'URL de la première photo du terrain pour la marketplace."""
+        first_photo = self.media.filter(media_type='PHOTO_LAND').first()
+        if first_photo and first_photo.file:
+            return first_photo.file.url
+        return None
+
     last_sync_block = models.BigIntegerField(null=True, blank=True, help_text="Dernier bloc synchronisé")
 
     class Meta:
@@ -77,7 +86,7 @@ class Property(models.Model):
         ]
 
     def __str__(self):
-        return f"Prop {self.id} ({self.status})"
+        return f"{self.village or 'Parcelle'} - {self.district or 'Zone'} ({self.status})"
 
 class PropertyMedia(models.Model):
     """

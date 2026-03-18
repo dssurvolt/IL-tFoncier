@@ -26,6 +26,18 @@ SECRET_KEY = 'django-insecure-v8t(hpvhzy0p1oc^phlu##1r@+oj+a7f*1s8y7yn2)(6#=d8rl
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000', 
+    'http://127.0.0.1:8000',
+    'https://localhost:8000',
+    'https://127.0.0.1:8000'
+]
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_NAME = 'ilot_csrftoken'
+SESSION_COOKIE_NAME = 'ilot_sessionid'
+# Important pour les environnements proxysés (cloud IDE, tunnels)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 
@@ -46,6 +58,7 @@ INSTALLED_APPS = [
     'land_registry',
     'consensus',
     'marketplace',
+    'notaries',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +83,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'marketplace.context_processors.notification_count',
+                'notaries.context_processors.notary_context',
             ],
         },
     },
@@ -136,21 +151,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'identity.User'
+LOGIN_URL = 'web_login'
+LOGIN_REDIRECT_URL = 'login_home'
 
 # Media Storage
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Email Configuration (Development)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@ilotfoncier.bj'
-EMAIL_HOST_USER = 'noreply@ilotfoncier.bj'
-
-# Pour production, utiliser:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your-app-password'
+# Email Configuration (Gmail Production)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'sobaberakib4@gmail.com'
+EMAIL_HOST_PASSWORD = 'msfxtjbvpyunzwti'
+DEFAULT_FROM_EMAIL = 'iLôt Foncier <sobaberakib4@gmail.com>'

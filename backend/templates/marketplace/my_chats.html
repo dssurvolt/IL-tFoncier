@@ -1,0 +1,64 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-5">
+    <div>
+        <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Communications Privées</h6>
+        <h1 class="display-5 fw-bold mb-0">Mes Discussions</h1>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="citizen-card p-0 overflow-hidden">
+            {% for room in rooms %}
+            <a href="{% url 'web_chat_room' room.id %}" class="text-decoration-none text-dark">
+                <div class="p-4 border-bottom d-flex align-items-center hover-bg-light transition-all">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-4 d-flex align-items-center justify-content-center"
+                        style="width: 60px; height: 60px;">
+                        <span class="fs-3">👤</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold mb-0">
+                                {% if user == room.buyer %}
+                                Vendeur : {{ room.seller.full_name }}
+                                {% else %}
+                                Acheteur : {{ room.buyer.full_name }}
+                                {% endif %}
+                            </h6>
+                            <small class="text-muted">{{ room.updated_at|timesince }}</small>
+                        </div>
+                        <p class="mb-1 text-primary small fw-bold">Terrain: {{
+                            room.listing.property.village|default:"Parcelle" }} ({{ room.listing.price_fiat }} FCFA)</p>
+                        <p class="text-muted small mb-0 text-truncate" style="max-width: 500px;">
+                            {{ room.messages.last.content|default:"Démarrez la conversation..." }}
+                        </p>
+                    </div>
+                    <div class="ms-3">
+                        <span class="fs-4 text-muted">➡️</span>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="p-5 text-center text-muted">
+                <div class="display-1 mb-3">💬</div>
+                <h4 class="fw-bold">Aucune discussion active</h4>
+                <p>Parcourez la marketplace pour trouver des terrains et contacter les vendeurs.</p>
+                <a href="{% url 'web_marketplace' %}" class="btn btn-citizen mt-3">Aller à la Marketplace</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-bg-light:hover {
+        background-color: #f8fafc;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease;
+    }
+</style>
+{% endblock %}

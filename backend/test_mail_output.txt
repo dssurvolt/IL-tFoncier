@@ -1,0 +1,85 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: 
+ =?utf-8?q?iL=C3=B4t_Foncier_-_T=C3=A9moignage_requis_pour_Abd_Rakib_SOBABE_A?=
+ =?utf-8?q?=2E_T=2E?=
+From: noreply@ilotfoncier.bj
+To: rakib.sobabe@epitech.eu
+Date: Sat, 07 Mar 2026 18:11:08 -0000
+Message-ID: <177290706865.7467.2366574321346412723@VICTUS.localdomain>
+
+
+Bonjour laure,
+
+L'utilisateur Abd Rakib SOBABE A. T. vous a cité comme témoin pour sa déclaration de parcelle (ID: 7295134e) sur iLôt Foncier.
+
+Votre confirmation est essentielle pour sécuriser ce patrimoine au sein de la communauté.
+
+Veuillez cliquer sur le lien ci-dessous pour confirmer votre témoignage :
+http://testserver/validation/witness/?req=716f75fb-3be8-4da0-ba14-5c44b69c0473&witness=e23b012d-edac-42dc-819e-34c0177d9023
+
+Si vous ne connaissez pas cette personne ou si cette demande vous semble erronée, vous pouvez ignorer cet email ou signaler une fraude via le lien.
+
+Cordialement,
+L'équipe iLôt Foncier
+        
+-------------------------------------------------------------------------------
+📧 [CHASQUID API] Email envoyé avec succès à rakib.sobabe@epitech.eu
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: 
+ =?utf-8?q?iL=C3=B4t_Foncier_-_T=C3=A9moignage_requis_pour_Abd_Rakib_SOBABE_A?=
+ =?utf-8?q?=2E_T=2E?=
+From: noreply@ilotfoncier.bj
+To: haidarath.seidou@epitech.eu
+Date: Sat, 07 Mar 2026 18:11:08 -0000
+Message-ID: <177290706865.7467.13094730578170958670@VICTUS.localdomain>
+
+
+Bonjour drgdrdrdgr,
+
+L'utilisateur Abd Rakib SOBABE A. T. vous a cité comme témoin pour sa déclaration de parcelle (ID: 7295134e) sur iLôt Foncier.
+
+Votre confirmation est essentielle pour sécuriser ce patrimoine au sein de la communauté.
+
+Veuillez cliquer sur le lien ci-dessous pour confirmer votre témoignage :
+http://testserver/validation/witness/?req=716f75fb-3be8-4da0-ba14-5c44b69c0473&witness=ea41e07c-dab8-4e2f-bc46-292b044a276c
+
+Si vous ne connaissez pas cette personne ou si cette demande vous semble erronée, vous pouvez ignorer cet email ou signaler une fraude via le lien.
+
+Cordialement,
+L'équipe iLôt Foncier
+        
+-------------------------------------------------------------------------------
+📧 [CHASQUID API] Email envoyé avec succès à haidarath.seidou@epitech.eu
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Subject: 
+ =?utf-8?q?iL=C3=B4t_Foncier_-_T=C3=A9moignage_requis_pour_Abd_Rakib_SOBABE_A?=
+ =?utf-8?q?=2E_T=2E?=
+From: noreply@ilotfoncier.bj
+To: sobaberakib2@gmail.com
+Date: Sat, 07 Mar 2026 18:11:08 -0000
+Message-ID: <177290706865.7467.7044386787594040031@VICTUS.localdomain>
+
+
+Bonjour kyfyktf,
+
+L'utilisateur Abd Rakib SOBABE A. T. vous a cité comme témoin pour sa déclaration de parcelle (ID: 7295134e) sur iLôt Foncier.
+
+Votre confirmation est essentielle pour sécuriser ce patrimoine au sein de la communauté.
+
+Veuillez cliquer sur le lien ci-dessous pour confirmer votre témoignage :
+http://testserver/validation/witness/?req=716f75fb-3be8-4da0-ba14-5c44b69c0473&witness=719a8932-1006-4c45-8a74-50b4ef928637
+
+Si vous ne connaissez pas cette personne ou si cette demande vous semble erronée, vous pouvez ignorer cet email ou signaler une fraude via le lien.
+
+Cordialement,
+L'équipe iLôt Foncier
+        
+-------------------------------------------------------------------------------
+📧 [CHASQUID API] Email envoyé avec succès à sobaberakib2@gmail.com
+API Response Status: 201

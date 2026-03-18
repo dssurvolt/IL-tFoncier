@@ -8,10 +8,105 @@ from django.utils import timezone
 from .models import ValidationRequest, WitnessVote
 from land_registry.models import Property
 from identity.models import User
+from utils.chasquid_api import EmailNotifier
+from django.conf import settings
 
+from django.shortcuts import render, get_object_or_404
+from django.db import transaction
+from land_registry.models import Property, PropertyWitness
+
+from identity.decorators import admin_required
+
+@admin_required
 def web_validation(request):
     """Vue HTML pour le simulateur de consensus."""
     return render(request, 'validation.html')
+
+def web_witness_confirmation(request):
+    """Vue pour qu'un témoin confirme son témoignage via le lien reçu par email."""
+    req_id = request.GET.get('req')
+    witness_id = request.GET.get('witness')
+
+    if not req_id or not witness_id:
+        return render(request, 'witness_confirmation.html', {'error': 'Lien invalide (IDs manquants).'})
+
+    val_req = get_object_or_404(ValidationRequest, id=req_id)
+    witness = get_object_or_404(PropertyWitness, id=witness_id, property=val_req.property)
+
+    # Vérifier si ce témoin a déjà voté pour cette demande
+    already_voted = WitnessVote.objects.filter(request=val_req, witness_phone=witness.phone).exists()
+
+    if request.method == 'POST':
+        if already_voted:
+            return render(request, 'witness_confirmation.html', {
+                'val_req': val_req,
+                'witness': witness,
+                'error': 'Vous avez déjà validé ce témoignage.'
+            })
+
+        vote_result = request.POST.get('vote') == 'yes'
+        # On pourrait demander le numéro de pièce d'identité ici
+        id_number = request.POST.get('id_number', 'N/A') 
+
+        try:
+            with transaction.atomic():
+                # 1. Enregistrer le vote
+                WitnessVote.objects.create(
+                    request=val_req,
+                    witness_full_name=f"{witness.first_name} {witness.last_name}",
+                    witness_phone=witness.phone,
+                    witness_id_number=id_number,
+                    witness_birth_date=witness.birth_date,
+                    witness_gps={'lat': 6.36, 'lng': 2.42}, # Simulation GPS
+                    vote_result=vote_result,
+                    signature='EMAIL_LINK_CONFIRMATION'
+                )
+
+                # 2. Marquer le témoin comme confirmé dans le dossier de parcelle
+                witness.is_confirmed = True
+                witness.save()
+
+                # 3. Vérifier si le consensus est atteint
+                positive_votes = val_req.votes.filter(vote_result=True).count()
+                total_witnesses = val_req.property.witnesses.count()
+                
+                # On considère le consensus atteint si tous les témoins ont validé (ou au moins min_witnesses)
+                if positive_votes >= val_req.min_witnesses or positive_votes >= total_witnesses:
+                    val_req.status = ValidationRequest.Status.COMPLETED
+                    val_req.save()
+                    
+                    prop = val_req.property
+                    prop.status = Property.Status.ON_CHAIN
+                    prop.save()
+                    
+                    context = {
+                        'success': True,
+                        'message': 'Merci ! Votre témoignage a été enregistré. Le consensus est maintenant atteint pour cette parcelle.',
+                        'val_req': val_req,
+                        'witness': witness
+                    }
+                else:
+                    context = {
+                        'success': True,
+                        'message': 'Merci ! Votre témoignage a été enregistré. En attente des autres témoins.',
+                        'val_req': val_req,
+                        'witness': witness
+                    }
+                return render(request, 'witness_confirmation.html', context)
+
+        except Exception as e:
+            return render(request, 'witness_confirmation.html', {
+                'val_req': val_req,
+                'witness': witness,
+                'error': f"Une erreur est survenue lors de l'enregistrement : {str(e)}"
+            })
+
+    return render(request, 'witness_confirmation.html', {
+        'val_req': val_req,
+        'witness': witness,
+        'property': val_req.property,
+        'already_voted': already_voted
+    })
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ValidationRequestAPI(View):
@@ -54,7 +149,30 @@ class ValidationRequestAPI(View):
             prop.status = Property.Status.VALIDATING
             prop.save()
 
-            return JsonResponse({'id': str(val_req.id), 'status': 'OPEN'}, status=201)
+            # 4. Envoi des Emails via Chasquid
+            witnesses = prop.witnesses.all()
+            owner_name = prop.owner_wallet.full_name or "Un citoyen iLôt"
+            
+            for witness in witnesses:
+                if witness.email:
+                    # Lien de validation simulé (pourrait pointer vers une page dédiée)
+                    validation_link = f"{request.scheme}://{request.get_host()}/validation/witness/?req={val_req.id}&witness={witness.id}"
+                    
+                    EmailNotifier.send_witness_invitation(
+                        witness_name=witness.first_name,
+                        witness_email=witness.email,
+                        owner_name=owner_name,
+                        property_id=str(prop.id),
+                        validation_link=validation_link
+                    )
+
+            return JsonResponse({
+                'id': str(val_req.id), 
+                'status': 'OPEN',
+                'witness_count': witnesses.count()
+            }, status=201)
+        except Property.DoesNotExist:
+            return JsonResponse({'error': 'Parcelle non trouvée.'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 

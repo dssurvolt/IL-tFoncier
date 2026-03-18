@@ -17,7 +17,6 @@ class AuthAPI(View):
             return self.login(request)
         elif action == 'logout':
             return self.logout(request)
-            return self.login(request)
         else:
             return JsonResponse({'error': 'Invalid action'}, status=400)
     
@@ -30,6 +29,8 @@ class AuthAPI(View):
             full_name = body.get('full_name', '').strip()
             country = body.get('country', 'Benin')
             district = body.get('district')
+            village = body.get('village')
+            birth_date = body.get('birth_date')
             
             # Validation
             if not email or not password or not full_name:
@@ -74,15 +75,20 @@ class AuthAPI(View):
             # Créer l'utilisateur
             import secrets
             wallet_address = f'0x{secrets.token_hex(20)}'
-            user = User.objects.create_user(
-                email=email,
-                password=password,
-                full_name=full_name,
-                country=country,
-                district=district,
-                role=User.Role.USER,
-                wallet_address=wallet_address
-            )
+            
+            user_data = {
+                'email': email,
+                'password': password,
+                'full_name': full_name,
+                'country': country,
+                'district': district,
+                'role': User.Role.USER,
+                'wallet_address': wallet_address
+            }
+            if village: user_data['village'] = village
+            if birth_date: user_data['birth_date'] = birth_date
+            
+            user = User.objects.create_user(**user_data)
             
             # Auto-login
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
@@ -121,14 +127,13 @@ class AuthAPI(View):
             user = authenticate(request, username=email, password=password)
             
             if user is not None:
-                # Create Django Session
-                login(request, user)
                 # Auto-fix wallet address for Legacy Users
                 if not user.wallet_address:
                     import secrets
                     user.wallet_address = f'0x{secrets.token_hex(20)}'
                     user.save()
-                # Auto-login
+                
+                # Create Django Session and Login
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 return JsonResponse({
                     'success': True,

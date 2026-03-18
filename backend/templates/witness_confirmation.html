@@ -1,0 +1,116 @@
+{% extends 'base_citizen.html' %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-8">
+        <div class="citizen-card animate-fade">
+            {% if error %}
+            <div class="text-center">
+                <div class="display-1 mb-4">⚠️</div>
+                <h2 class="fw-bold text-danger mb-3">Erreur</h2>
+                <p class="text-muted fs-5">{{ error }}</p>
+                <a href="{% url 'web_login' %}" class="btn btn-citizen mt-4">Retour à l'accueil</a>
+            </div>
+            {% elif success %}
+            <div class="text-center">
+                <div class="display-1 mb-4">✅</div>
+                <h2 class="fw-bold text-primary mb-3">Témoignage Enregistré</h2>
+                <p class="text-muted fs-5">{{ message }}</p>
+                <div class="mt-5 p-4 bg-light rounded-4">
+                    <h6 class="fw-bold text-uppercase small text-muted mb-3">Détails de la Parcelle</h6>
+                    <p class="mb-1"><strong>ID :</strong> {{ val_req.property.id|stringformat:"s"|slice:":8" }}</p>
+                    <p class="mb-0"><strong>Village :</strong> {{ val_req.property.village }}</p>
+                </div>
+                <a href="{% url 'web_login' %}" class="btn btn-citizen mt-5">Terminer</a>
+            </div>
+            {% else %}
+            <div class="mb-4 text-center">
+                <h2 class="fw-bold">Validation de Témoignage</h2>
+                <p class="text-muted">Vous avez été cité comme témoin pour la déclaration foncière suivante.</p>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-4 h-100 bg-light bg-opacity-50">
+                        <h6 class="fw-bold text-primary small text-uppercase mb-3">Informations de la Parcelle</h6>
+                        <p class="mb-2"><strong>Propriétaire :</strong> {{ property.owner_wallet.full_name }}</p>
+                        <p class="mb-2"><strong>Localisation :</strong> {{ property.village }}, {{ property.district }}
+                        </p>
+                        <p class="mb-0"><strong>Superficie :</strong> {{ property.area_sqm|floatformat:0 }} m²</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 border rounded-4 h-100 bg-light bg-opacity-50">
+                        <h6 class="fw-bold text-primary small text-uppercase mb-3">Votre Identité (Témoin)</h6>
+                        <p class="mb-2"><strong>Nom :</strong> {{ witness.first_name }} {{ witness.last_name }}</p>
+                        <p class="mb-2"><strong>Téléphone :</strong> {{ witness.phone }}</p>
+                        <p class="mb-0"><strong>E-mail :</strong> {{ witness.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" id="witnessForm">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Numéro de pièce d'identité (CNI / Passeport / Récépissé
+                        RAVIP)</label>
+                    <input type="text" name="id_number" class="form-control form-control-lg border-2"
+                        placeholder="Ex: 0123456789" required>
+                    <div class="form-text">Ces informations sont nécessaires pour la validité juridique de votre
+                        témoignage.</div>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-4 p-4 mb-5">
+                    <div class="d-flex">
+                        <i class="bi bi-shield-check fs-2 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold">Engagement sur l'honneur</h6>
+                            <p class="small mb-0 text-muted">En validant ce formulaire, vous confirmez sur l'honneur
+                                connaître le propriétaire et la parcelle décrite, et que les limites mentionnées sont
+                                exactes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" name="vote" value="yes" class="btn btn-citizen btn-lg py-3">
+                        ✅ Je confirme le témoignage
+                    </button>
+                    <button type="submit" name="vote" value="no" class="btn btn-outline-danger btn-lg py-3 border-2">
+                        ❌ Signaler une erreur ou fraude
+                    </button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-lg {
+        border-radius: 16px;
+        font-weight: 700;
+    }
+
+    .form-control-lg {
+        border-radius: 12px;
+    }
+
+    .animate-fade {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

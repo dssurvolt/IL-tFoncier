@@ -7,6 +7,9 @@ from .models import USSDSession, User
 from land_registry.models import Property
 from consensus.models import ValidationRequest, WitnessVote
 
+from identity.decorators import admin_required
+
+@admin_required
 def web_ussd(request):
     """Vue HTML pour le simulateur USSD."""
     return render(request, 'ussd_simulator.html')
