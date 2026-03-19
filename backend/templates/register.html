@@ -11,131 +11,134 @@
         </div>
 
         <div class="citizen-card animate-up">
-            <!-- Section OCR: Document d'Identité (Nouveau) -->
-            <div class="mb-5 p-4 border-2 border-dashed rounded-4 bg-light text-center position-relative">
-                <div id="ocrLoading" class="position-absolute top-50 start-50 translate-middle d-none"
-                    style="z-index: 10;">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <div class="small fw-bold mt-2">ANALYSE DU DOCUMENT...</div>
-                </div>
-                <div id="ocrContent">
-                    <span class="display-6 d-block mb-3">📄</span>
-                    <h6 class="fw-bold mb-1">Pré-remplir avec votre CIP / CNI</h6>
-                    <p class="small text-muted mb-3">Gagnez du temps en analysant votre pièce d'identité</p>
-                    <input type="file" class="form-control d-none" id="idDocument" accept="image/*,application/pdf"
-                        onchange="performOCR()">
-                    <label for="idDocument" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-                        SÉLECTIONNER UN DOCUMENT
-                    </label>
-                </div>
-            </div>
-
-            <!-- Informations personnelles -->
-            <div class="mb-4">
-                <label class="form-label fw-bold text-muted small">NOM COMPLET</label>
-                <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light" id="fullName"
-                    placeholder="Nom et Prénoms" required>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold text-muted small">PAYS</label>
-                    <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country" required>
-                        <option value="Benin" selected>Bénin</option>
-                        <option value="Togo">Togo</option>
-                        <option value="Niger">Niger</option>
-                        <option value="Burkina Faso">Burkina Faso</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold text-muted small">DISTRICT / COMMUNE</label>
-                    <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                        id="district" placeholder="Ex: Cotonou">
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold text-muted small">VILLAGE / QUARTIER</label>
-                    <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light" id="village"
-                        placeholder="Ex: Akpakpa">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold text-muted small">DATE DE NAISSANCE</label>
-                    <input type="date" class="form-control form-control-lg rounded-4 border-light bg-light"
-                        id="birthDate">
-                </div>
-            </div>
-
-            <!-- Email et mot de passe -->
-            <div class="mb-4">
-                <label class="form-label fw-bold text-muted small">ADRESSE EMAIL</label>
-                <input type="email" class="form-control form-control-lg rounded-4 border-light bg-light" id="email"
-                    placeholder="votre@email.com" required>
-                <div class="form-text small">Utilisé pour la connexion et les notifications</div>
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label fw-bold text-muted small">MOT DE PASSE</label>
-                <div class="position-relative">
-                    <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
-                        id="password" placeholder="••••••••" required>
-                    <button type="button"
-                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
-                        onclick="togglePassword('password')" style="text-decoration: none;">
-                        <span id="eyeIcon1">👁️</span>
-                    </button>
-                </div>
-
-                <!-- Indicateur de force du mot de passe -->
-                <div class="mt-2">
-                    <div class="progress" style="height: 6px;">
-                        <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%">
-                        </div>
+            <form id="registerForm">
+                <!-- Section OCR: Document d'Identité (Nouveau) -->
+                <div class="mb-5 p-4 border-2 border-dashed rounded-4 bg-light text-center position-relative">
+                    <div id="ocrLoading" class="position-absolute top-50 start-50 translate-middle d-none"
+                        style="z-index: 10;">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="small fw-bold mt-2">ANALYSE DU DOCUMENT...</div>
                     </div>
-                    <small id="passwordStrengthText" class="text-muted"></small>
+                    <div id="ocrContent">
+                        <span class="display-6 d-block mb-3">📄</span>
+                        <h6 class="fw-bold mb-1">Pré-remplir avec votre CIP / CNI</h6>
+                        <p class="small text-muted mb-3">Gagnez du temps en analysant votre pièce d'identité</p>
+                        <input type="file" class="form-control d-none" id="idDocument" accept="image/*,application/pdf"
+                            onchange="performOCR()">
+                        <label for="idDocument" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+                            SÉLECTIONNER UN DOCUMENT
+                        </label>
+                    </div>
                 </div>
 
-                <div class="form-text small mt-2">
-                    <strong>Critères :</strong>
-                    <ul class="mb-0 mt-1" style="font-size: 0.85rem;">
-                        <li id="criteria-length" class="text-muted">Au moins 8 caractères</li>
-                        <li id="criteria-uppercase" class="text-muted">Une lettre majuscule</li>
-                        <li id="criteria-lowercase" class="text-muted">Une lettre minuscule</li>
-                        <li id="criteria-number" class="text-muted">Un chiffre</li>
-                        <li id="criteria-special" class="text-muted">Un caractère spécial (!@#$%^&*)</li>
-                    </ul>
+                <!-- Informations personnelles -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">NOM COMPLET</label>
+                    <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                        id="fullName" placeholder="Nom et Prénoms" required>
                 </div>
-            </div>
 
-            <div class="mb-4">
-                <label class="form-label fw-bold text-muted small">CONFIRMER LE MOT DE PASSE</label>
-                <div class="position-relative">
-                    <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
-                        id="confirmPassword" placeholder="••••••••" required>
-                    <button type="button"
-                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
-                        onclick="togglePassword('confirmPassword')" style="text-decoration: none;">
-                        <span id="eyeIcon2">👁️</span>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">PAYS</label>
+                        <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country"
+                            required>
+                            <option value="Benin" selected>Bénin</option>
+                            <option value="Togo">Togo</option>
+                            <option value="Niger">Niger</option>
+                            <option value="Burkina Faso">Burkina Faso</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">DISTRICT / COMMUNE</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="district" placeholder="Ex: Cotonou">
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">VILLAGE / QUARTIER</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="village" placeholder="Ex: Akpakpa">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">DATE DE NAISSANCE</label>
+                        <input type="date" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="birthDate">
+                    </div>
+                </div>
+
+                <!-- Email et mot de passe -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">ADRESSE EMAIL</label>
+                    <input type="email" class="form-control form-control-lg rounded-4 border-light bg-light" id="email"
+                        placeholder="votre@email.com" required>
+                    <div class="form-text small">Utilisé pour la connexion et les notifications</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">MOT DE PASSE</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="password" placeholder="••••••••" required>
+                        <button type="button"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            onclick="togglePassword('password')" style="text-decoration: none;">
+                            <span id="eyeIcon1">👁️</span>
+                        </button>
+                    </div>
+
+                    <!-- Indicateur de force du mot de passe -->
+                    <div class="mt-2">
+                        <div class="progress" style="height: 6px;">
+                            <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%">
+                            </div>
+                        </div>
+                        <small id="passwordStrengthText" class="text-muted"></small>
+                    </div>
+
+                    <div class="form-text small mt-2">
+                        <strong>Critères :</strong>
+                        <ul class="mb-0 mt-1" style="font-size: 0.85rem;">
+                            <li id="criteria-length" class="text-muted">Au moins 8 caractères</li>
+                            <li id="criteria-uppercase" class="text-muted">Une lettre majuscule</li>
+                            <li id="criteria-lowercase" class="text-muted">Une lettre minuscule</li>
+                            <li id="criteria-number" class="text-muted">Un chiffre</li>
+                            <li id="criteria-special" class="text-muted">Un caractère spécial (!@#$%^&*)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-muted small">CONFIRMER LE MOT DE PASSE</label>
+                    <div class="position-relative">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
+                            id="confirmPassword" placeholder="••••••••" required>
+                        <button type="button"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            onclick="togglePassword('confirmPassword')" style="text-decoration: none;">
+                            <span id="eyeIcon2">👁️</span>
+                        </button>
+                    </div>
+                    <div id="passwordMatchMessage" class="form-text small"></div>
+                </div>
+
+                <div id="errorMessage" class="alert alert-danger d-none mb-3"></div>
+                <div id="successMessage" class="alert alert-success d-none mb-3"></div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-citizen py-3 fs-5" id="registerBtn" disabled>
+                        CRÉER MON COMPTE
                     </button>
+                    <a href="{% url 'web_login' %}" class="btn btn-outline-secondary py-2 rounded-3">
+                        Déjà un compte ? Se connecter
+                    </a>
                 </div>
-                <div id="passwordMatchMessage" class="form-text small"></div>
-            </div>
-
-            <div id="errorMessage" class="alert alert-danger d-none mb-3"></div>
-            <div id="successMessage" class="alert alert-success d-none mb-3"></div>
-
-            <div class="d-grid gap-3">
-                <button type="submit" class="btn btn-citizen py-3 fs-5" id="registerBtn" disabled>
-                    CRÉER MON COMPTE
-                </button>
-                <a href="{% url 'web_login' %}" class="btn btn-outline-secondary py-2 rounded-3">
-                    Déjà un compte ? Se connecter
-                </a>
-            </div>
             </form>
         </div>
     </div>
+</div>
 </div>
 
 <script>
