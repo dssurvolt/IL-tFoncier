@@ -2,7 +2,7 @@ services:
   - type: web
     name: ilot-foncier
     env: docker
-    plan: starter
+    plan: free # Plan gratuit (le site s'endort après 15min d'inactivité)
     region: frankfurt
     dockerContext: .
     dockerfilePath: ./Dockerfile
@@ -27,4 +27,4 @@ services:
 
 databases:
   - name: ilot-db
-    plan: starter
+    plan: free # Plan gratuit (ATTENTION : La DB expire après 90 jours sur Render Free)
