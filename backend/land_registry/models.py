@@ -50,6 +50,8 @@ class Property(models.Model):
     # Information Foncière
     area_sqm = models.FloatField(null=True, blank=True, help_text="Superficie en m²")
     area_cadastral = models.CharField(max_length=50, null=True, blank=True, help_text="Superficie format cadastral (ex: 01ha 20a 15ca)")
+    departement = models.CharField(max_length=100, null=True, blank=True, help_text="Nom du département")
+    commune = models.CharField(max_length=100, null=True, blank=True, help_text="Nom de la commune")
     district = models.CharField(max_length=100, null=True, blank=True, help_text="Nom de l'arrondissement")
     village = models.CharField(max_length=100, null=True, blank=True, help_text="Quartier / Village")
     

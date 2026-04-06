@@ -4,157 +4,146 @@
 
 {% block content %}
 <div class="row justify-content-center py-5">
-    <div class="col-md-6">
-        <div class="text-center mb-5">
-            <h1 class="display-6 fw-bold mb-2">Créer un Compte</h1>
-            <p class="text-muted">Rejoignez la révolution foncière numérique</p>
+    <div class="col-md-7 col-lg-6 col-xl-5">
+        <div class="text-center mb-5 animate-up">
+            <h6 class="text-secondary fw-bold text-uppercase mb-2" style="letter-spacing: 0.2em; font-size: 0.7rem;">
+                INSCRIPTION SÉCURISÉE</h6>
+            <h1 class="display-5 fw-bold mb-2" style="letter-spacing: -0.04em;">Créer un Compte</h1>
+            <p class="text-muted lead" style="font-size: 1rem;">Rejoignez la plateforme foncière certifiée du Bénin.</p>
         </div>
 
-        <div class="citizen-card animate-up">
-            <form id="registerForm">
-                <!-- Section OCR: Document d'Identité (Nouveau) -->
-                <div class="mb-5 p-4 border-2 border-dashed rounded-4 bg-light text-center position-relative">
-                    <div id="ocrLoading" class="position-absolute top-50 start-50 translate-middle d-none"
-                        style="z-index: 10;">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <div class="small fw-bold mt-2">ANALYSE DU DOCUMENT...</div>
-                    </div>
-                    <div id="ocrContent">
-                        <span class="display-6 d-block mb-3">📄</span>
-                        <h6 class="fw-bold mb-1">Pré-remplir avec votre CIP / CNI</h6>
-                        <p class="small text-muted mb-3">Gagnez du temps en analysant votre pièce d'identité</p>
-                        <input type="file" class="form-control d-none" id="idDocument" accept="image/*,application/pdf"
-                            onchange="performOCR()">
-                        <label for="idDocument" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-                            SÉLECTIONNER UN DOCUMENT
-                        </label>
-                    </div>
+        <div class="citizen-card p-4 p-lg-5 shadow-lg border-0 animate-up" style="animation-delay: 0.1s;">
+            <!-- Section OCR -->
+            <div class="mb-5 p-4 border-2 border-dashed rounded-4 bg-light text-center position-relative hover-up"
+                style="transition: all 0.3s ease;">
+                <div id="ocrLoading" class="position-absolute top-50 start-50 translate-middle d-none"
+                    style="z-index: 10;">
+                    <div class="spinner-border text-primary" role="status"></div>
                 </div>
+                <div id="ocrContent">
+                    <div class="mb-3 fs-3">📄</div>
+                    <h6 class="fw-bold mb-1">Analyse intelligente CIP / CNI</h6>
+                    <p class="x-small text-muted mb-3">Pré-remplissez vos informations avec votre pièce d'identité</p>
+                    <input type="file" class="form-control d-none" id="idDocument" accept="image/*,application/pdf"
+                        onchange="performOCR()">
+                    <label for="idDocument" class="btn btn-outline-primary btn-sm rounded-pill px-4 fw-bold">
+                        SÉLECTIONNER UN DOCUMENT
+                    </label>
+                </div>
+            </div>
 
-                <!-- Informations personnelles -->
+            <form id="registerForm">
                 <div class="mb-4">
-                    <label class="form-label fw-bold text-muted small">NOM COMPLET</label>
-                    <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                        id="fullName" placeholder="Nom et Prénoms" required>
+                    <label class="x-small fw-bold text-muted text-uppercase mb-2"
+                        style="letter-spacing: 0.1em;">Identité Complète</label>
+                    <input type="text" class="form-control form-control-lg rounded-4 border-white bg-light"
+                        id="fullName" placeholder="Nom et Prénoms" required style="font-size: 1rem;">
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">PAYS</label>
-                        <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country"
-                            required>
+                        <label class="x-small fw-bold text-muted text-uppercase mb-2">Pays</label>
+                        <select class="form-select form-select-lg rounded-4 border-white bg-light" id="country" required
+                            style="font-size: 1rem;">
                             <option value="Benin" selected>Bénin</option>
                             <option value="Togo">Togo</option>
                             <option value="Niger">Niger</option>
-                            <option value="Burkina Faso">Burkina Faso</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">DISTRICT / COMMUNE</label>
-                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                            id="district" placeholder="Ex: Cotonou">
+                        <label class="x-small fw-bold text-muted text-uppercase mb-2">District / Commune</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-white bg-light"
+                            id="district" placeholder="Ex: Cotonou" style="font-size: 1rem;">
                     </div>
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">VILLAGE / QUARTIER</label>
-                        <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                            id="village" placeholder="Ex: Akpakpa">
+                        <label class="x-small fw-bold text-muted text-uppercase mb-2">Quartier</label>
+                        <input type="text" class="form-control form-control-lg rounded-4 border-white bg-light"
+                            id="village" placeholder="Ex: Akpakpa" style="font-size: 1rem;">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">DATE DE NAISSANCE</label>
-                        <input type="date" class="form-control form-control-lg rounded-4 border-light bg-light"
-                            id="birthDate">
+                        <label class="x-small fw-bold text-muted text-uppercase mb-2">Date de naissance</label>
+                        <input type="date" class="form-control form-control-lg rounded-4 border-white bg-light"
+                            id="birthDate" style="font-size: 1rem;">
                     </div>
                 </div>
 
-                <!-- Email et mot de passe -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-muted small">ADRESSE EMAIL</label>
-                    <input type="email" class="form-control form-control-lg rounded-4 border-light bg-light" id="email"
-                        placeholder="votre@email.com" required>
-                    <div class="form-text small">Utilisé pour la connexion et les notifications</div>
-                </div>
+                <div class="mb-4 pt-3 border-top border-light">
+                    <label class="x-small fw-bold text-muted text-uppercase mb-2">Accès Sécurisé</label>
+                    <input type="email" class="form-control form-control-lg rounded-4 border-white bg-light mb-3"
+                        id="email" placeholder="votre@email.com" required style="font-size: 1rem;">
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-muted small">MOT DE PASSE</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
-                            id="password" placeholder="••••••••" required>
+                    <div class="position-relative mb-2">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-white bg-light"
+                            id="password" placeholder="Mot de passe" required style="font-size: 1rem;">
                         <button type="button"
-                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted px-3"
                             onclick="togglePassword('password')" style="text-decoration: none;">
                             <span id="eyeIcon1">👁️</span>
                         </button>
                     </div>
 
-                    <!-- Indicateur de force du mot de passe -->
-                    <div class="mt-2">
-                        <div class="progress" style="height: 6px;">
-                            <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%">
-                            </div>
-                        </div>
-                        <small id="passwordStrengthText" class="text-muted"></small>
+                    <!-- Strength meter -->
+                    <div class="progress mb-2" style="height: 4px; background: #eef2f3;">
+                        <div id="passwordStrengthBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small id="passwordStrengthText" class="x-small text-muted"></small>
+                        <div class="x-small fw-bold" id="scoreIndicator">0/5</div>
                     </div>
 
-                    <div class="form-text small mt-2">
-                        <strong>Critères :</strong>
-                        <ul class="mb-0 mt-1" style="font-size: 0.85rem;">
-                            <li id="criteria-length" class="text-muted">Au moins 8 caractères</li>
-                            <li id="criteria-uppercase" class="text-muted">Une lettre majuscule</li>
-                            <li id="criteria-lowercase" class="text-muted">Une lettre minuscule</li>
-                            <li id="criteria-number" class="text-muted">Un chiffre</li>
-                            <li id="criteria-special" class="text-muted">Un caractère spécial (!@#$%^&*)</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-muted small">CONFIRMER LE MOT DE PASSE</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control form-control-lg rounded-4 border-light bg-light"
-                            id="confirmPassword" placeholder="••••••••" required>
+                    <div class="position-relative mb-4">
+                        <input type="password" class="form-control form-control-lg rounded-4 border-white bg-light"
+                            id="confirmPassword" placeholder="Confirmer le mot de passe" required
+                            style="font-size: 1rem;">
                         <button type="button"
-                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                            class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted px-3"
                             onclick="togglePassword('confirmPassword')" style="text-decoration: none;">
                             <span id="eyeIcon2">👁️</span>
                         </button>
                     </div>
-                    <div id="passwordMatchMessage" class="form-text small"></div>
+                    <div id="passwordMatchMessage" class="x-small mb-4 text-center"></div>
                 </div>
 
-                <div id="errorMessage" class="alert alert-danger d-none mb-3"></div>
-                <div id="successMessage" class="alert alert-success d-none mb-3"></div>
+                <div id="errorMessage" class="alert alert-danger border-0 rounded-4 x-small d-none mb-4"></div>
+                <div id="successMessage" class="alert alert-success border-0 rounded-4 x-small d-none mb-4"></div>
 
                 <div class="d-grid gap-3">
-                    <button type="submit" class="btn btn-citizen py-3 fs-5" id="registerBtn" disabled>
-                        CRÉER MON COMPTE
+                    <button type="submit" class="btn btn-citizen py-3 fw-bold" id="registerBtn" disabled>
+                        CRÉER MON COMPTE SÉCURISÉ
                     </button>
-                    <a href="{% url 'web_login' %}" class="btn btn-outline-secondary py-2 rounded-3">
-                        Déjà un compte ? Se connecter
-                    </a>
+                    <a href="{% url 'web_login' %}"
+                        class="btn btn-link text-muted x-small fw-bold text-decoration-none text-center">VOUS AVEZ DÉJÀ
+                        UN COMPTE ? SE CONNECTER</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
-</div>
+
+<style>
+    .x-small {
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+    }
+
+    #scoreIndicator {
+        color: var(--citizen-text-muted);
+        opacity: 0.5;
+    }
+</style>
 
 <script>
     let passwordValid = false;
     let passwordsMatch = false;
 
     function togglePassword(fieldId) {
-        const passwordInput = document.getElementById(fieldId);
-        const eyeIcon = document.getElementById(fieldId === 'password' ? 'eyeIcon1' : 'eyeIcon2');
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeIcon.textContent = '🙈';
-        } else {
-            passwordInput.type = 'password';
-            eyeIcon.textContent = '👁️';
-        }
+        const inp = document.getElementById(fieldId);
+        const icon = document.getElementById(fieldId === 'password' ? 'eyeIcon1' : 'eyeIcon2');
+        if (inp.type === 'password') { inp.type = 'text'; icon.textContent = '🙈'; }
+        else { inp.type = 'password'; icon.textContent = '👁️'; }
     }
 
     function checkPasswordStrength(password) {
@@ -165,167 +154,75 @@
             number: /[0-9]/.test(password),
             special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
         };
-
-        // Mettre à jour les critères visuels
-        document.getElementById('criteria-length').className = criteria.length ? 'text-success' : 'text-muted';
-        document.getElementById('criteria-uppercase').className = criteria.uppercase ? 'text-success' : 'text-muted';
-        document.getElementById('criteria-lowercase').className = criteria.lowercase ? 'text-success' : 'text-muted';
-        document.getElementById('criteria-number').className = criteria.number ? 'text-success' : 'text-muted';
-        document.getElementById('criteria-special').className = criteria.special ? 'text-success' : 'text-muted';
-
-        // Calculer le score
         const score = Object.values(criteria).filter(Boolean).length;
-        const strengthBar = document.getElementById('passwordStrengthBar');
-        const strengthText = document.getElementById('passwordStrengthText');
+        const bar = document.getElementById('passwordStrengthBar');
+        const txt = document.getElementById('passwordStrengthText');
+        const ind = document.getElementById('scoreIndicator');
 
-        let strength = '';
-        let color = '';
-        let width = 0;
+        let color = 'bg-danger'; let width = score * 20;
+        if (score >= 4) color = 'bg-success'; else if (score >= 3) color = 'bg-warning';
 
-        if (score === 0) {
-            strength = '';
-            color = '';
-            width = 0;
-        } else if (score <= 2) {
-            strength = 'Faible';
-            color = 'bg-danger';
-            width = 33;
-        } else if (score === 3) {
-            strength = 'Moyen';
-            color = 'bg-warning';
-            width = 66;
-        } else if (score === 4) {
-            strength = 'Bon';
-            color = 'bg-info';
-            width = 85;
-        } else {
-            strength = 'Excellent';
-            color = 'bg-success';
-            width = 100;
-        }
+        bar.className = `progress-bar ${color}`;
+        bar.style.width = width + '%';
+        txt.textContent = ['Invalide', 'Très Faible', 'Faible', 'Moyen', 'Bon', 'SÉCURISÉ'][score];
+        ind.textContent = score + '/5';
 
-        strengthBar.className = `progress-bar ${color}`;
-        strengthBar.style.width = `${width}%`;
-        strengthText.textContent = strength ? `Force : ${strength}` : '';
-
-        passwordValid = score >= 4; // Au moins 4 critères sur 5
+        passwordValid = (score >= 4);
         updateSubmitButton();
-        return passwordValid;
     }
 
     function checkPasswordMatch() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const matchMessage = document.getElementById('passwordMatchMessage');
-
-        if (confirmPassword === '') {
-            matchMessage.textContent = '';
-            passwordsMatch = false;
-        } else if (password === confirmPassword) {
-            matchMessage.textContent = '✓ Les mots de passe correspondent';
-            matchMessage.className = 'form-text small text-success';
-            passwordsMatch = true;
-        } else {
-            matchMessage.textContent = '✗ Les mots de passe ne correspondent pas';
-            matchMessage.className = 'form-text small text-danger';
-            passwordsMatch = false;
-        }
+        const p1 = document.getElementById('password').value;
+        const p2 = document.getElementById('confirmPassword').value;
+        const msg = document.getElementById('passwordMatchMessage');
+        if (!p2) { msg.textContent = ''; passwordsMatch = false; }
+        else if (p1 === p2) { msg.textContent = '✓ MOTS DE PASSE IDENTIQUES'; msg.className = 'x-small text-success fw-bold'; passwordsMatch = true; }
+        else { msg.textContent = '✗ LES MOTS DE PASSE NE CORRESPONDENT PAS'; msg.className = 'x-small text-danger fw-bold'; passwordsMatch = false; }
         updateSubmitButton();
     }
 
     function updateSubmitButton() {
-        const registerBtn = document.getElementById('registerBtn');
+        const btn = document.getElementById('registerBtn');
         const email = document.getElementById('email').value;
-        const fullName = document.getElementById('fullName').value;
-
-        registerBtn.disabled = !(passwordValid && passwordsMatch && email && fullName);
+        const name = document.getElementById('fullName').value;
+        btn.disabled = !(passwordValid && passwordsMatch && email && name);
     }
 
     async function performOCR() {
         const fileInput = document.getElementById('idDocument');
-        const ocrContent = document.getElementById('ocrContent');
-        const ocrLoading = document.getElementById('ocrLoading');
-
-        if (!fileInput.files || !fileInput.files[0]) return;
-
-        const file = fileInput.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-
-        ocrContent.classList.add('opacity-0');
-        ocrLoading.classList.remove('d-none');
-
+        if (!fileInput.files[0]) return;
+        document.getElementById('ocrLoading').classList.remove('d-none');
+        document.getElementById('ocrContent').classList.add('opacity-25');
+        const formData = new FormData(); formData.append('file', fileInput.files[0]);
         try {
-            const response = await fetch('/api/identity/extract/', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-
-                // Pré-remplir les champs si possible
-                if (data.first_name || data.last_name) {
-                    const fullName = `${data.first_name || ''} ${data.last_name || ''}`.trim();
-                    document.getElementById('fullName').value = fullName;
-                }
-
-                if (data.birth_date) document.getElementById('birthDate').value = data.birth_date;
-
-                if (data.address) {
-                    // Essayer de séparer l'adresse pour district/village
-                    const parts = data.address.split(',');
-                    if (parts.length >= 1) document.getElementById('district').value = parts[0].trim();
-                    if (parts.length >= 2) document.getElementById('village').value = parts[1].trim();
-                }
-
-                // Si on a le lieu de naissance mais pas de district, on l'utilise comme district probable
-                if (data.birth_place && !document.getElementById('district').value) {
-                    document.getElementById('district').value = data.birth_place;
-                }
-
-                // Animer les champs remplis
-                ['fullName', 'birthDate', 'district', 'village'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el && el.value) {
-                        el.classList.add('bg-success', 'bg-opacity-10');
-                        setTimeout(() => el.classList.remove('bg-success', 'bg-opacity-10'), 3000);
-                    }
-                });
-
-                updateSubmitButton();
+            const res = await fetch('/api/identity/extract/', { method: 'POST', body: formData });
+            if (res.ok) {
+                const d = await res.json();
+                if (d.first_name || d.last_name) document.getElementById('fullName').value = (d.first_name + ' ' + d.last_name).trim();
+                if (d.birth_date) document.getElementById('birthDate').value = d.birth_date;
+                if (d.birth_place) document.getElementById('district').value = d.birth_place;
             }
-        } catch (error) {
-            console.error("OCR Inference Error:", error);
-        } finally {
-            ocrContent.classList.remove('opacity-0');
-            ocrLoading.classList.add('d-none');
+        } catch (e) { } finally {
+            document.getElementById('ocrLoading').classList.add('d-none');
+            document.getElementById('ocrContent').classList.remove('opacity-25');
+            updateSubmitButton();
         }
     }
 
-    // Event listeners
-    document.getElementById('password').addEventListener('input', (e) => {
-        checkPasswordStrength(e.target.value);
-        checkPasswordMatch();
-    });
-
+    document.getElementById('password').addEventListener('input', e => { checkPasswordStrength(e.target.value); checkPasswordMatch(); });
     document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
     document.getElementById('email').addEventListener('input', updateSubmitButton);
     document.getElementById('fullName').addEventListener('input', updateSubmitButton);
 
-    document.getElementById('registerForm').onsubmit = async (e) => {
+    document.getElementById('registerForm').onsubmit = async e => {
         e.preventDefault();
+        const err = document.getElementById('errorMessage');
+        const ok = document.getElementById('successMessage');
+        const btn = document.getElementById('registerBtn');
+        err.classList.add('d-none'); ok.classList.add('d-none');
+        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>SÉCURISATION DU COMPTE...';
 
-        const errorDiv = document.getElementById('errorMessage');
-        const successDiv = document.getElementById('successMessage');
-        const registerBtn = document.getElementById('registerBtn');
-
-        errorDiv.classList.add('d-none');
-        successDiv.classList.add('d-none');
-        registerBtn.disabled = true;
-        registerBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Création du compte...';
-
-        const formData = {
+        const payload = {
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
             full_name: document.getElementById('fullName').value,
@@ -336,37 +233,27 @@
         };
 
         try {
-            const response = await fetch('/api/auth/register/', {
+            const res = await fetch('/api/auth/register/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                successDiv.textContent = 'Compte créé avec succès ! Redirection...';
-                successDiv.classList.remove('d-none');
-
-                // Stocker l'ID utilisateur et rediriger
-                localStorage.removeItem('ilot_wallet');
+            const data = await res.json();
+            if (res.ok) {
+                ok.textContent = 'COMPTE CRÉÉ AVEC SUCCÈS ! REDIRECTION...';
+                ok.classList.remove('d-none');
                 localStorage.setItem('ilot_user_id', data.user_id);
-                localStorage.setItem('ilot_user_email', formData.email);
-
-                setTimeout(() => {
-                    window.location.href = `/dashboard/${data.user_id}/`;
-                }, 1500);
+                localStorage.setItem('ilot_user_email', payload.email);
+                setTimeout(() => { window.location.href = `/dashboard/${data.user_id}/`; }, 1500);
             } else {
-                errorDiv.textContent = data.error || 'Erreur lors de la création du compte';
-                errorDiv.classList.remove('d-none');
-                registerBtn.disabled = false;
-                registerBtn.textContent = 'CRÉER MON COMPTE';
+                err.textContent = data.error || 'ERREUR DURANT L\'INSCRIPTION';
+                err.classList.remove('d-none');
+                btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
             }
-        } catch (error) {
-            errorDiv.textContent = 'Erreur de connexion. Veuillez réessayer.';
-            errorDiv.classList.remove('d-none');
-            registerBtn.disabled = false;
-            registerBtn.textContent = 'CRÉER MON COMPTE';
+        } catch (e) {
+            err.textContent = 'ERREUR RÉSEAU. VEUILLEZ RÉESSAYER.';
+            err.classList.remove('d-none');
+            btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
         }
     };
 </script>

@@ -38,24 +38,47 @@ def run_full_validation():
     print("\n--- PHASE 1 : MARKETPLACE & CHAT ---")
     
     # Login Buyer
-    c_buyer.login(username=buyer_email, password="Rakib2026Password")
+    success = c_buyer.login(username=buyer_email, password="Rakib2026Password")
+    print(f"🔑 Tentative de connexion (Rakib) : {'SUCCÈS' if success else 'ÉCHEC'}")
+    assert success, "Login Rakib a échoué. Vérifiez le mot de passe dans setup_rakib_scenario.py."
     
     # Voir la Marketplace
     resp = c_buyer.get(reverse('web_marketplace'))
     assert resp.status_code == 200
     print("✅ Marketplace accessible.")
 
+    # Nettoyage préventif
+    ChatRoom.objects.filter(buyer=buyer).delete()
+
     # Démarrer une discussion
-    listing = Listing.objects.filter(status=Listing.Status.ACTIVE).first()
+    listing = Listing.objects.filter(property__village="Lot 405 - Cadjèhoun", status=Listing.Status.ACTIVE).first()
     if not listing:
-        print("❌ Aucune annonce active pour le test !")
-        return
+        print("❌ L'annonce 'Lot 405 - Cadjèhoun' n'est pas disponible pour le test !")
+        # Essayons n'importe quelle annonce dont Rakib n'est pas le proprio
+        listing = Listing.objects.exclude(property__owner_wallet=buyer).filter(status=Listing.Status.ACTIVE).first()
+
+    if not listing:
+         print("❌ Aucune annonce valide (non-proprio) trouvée !")
+         return
     
-    print(f"💬 Rakib démarre une discussion pour : {listing.property.village}")
-    resp = c_buyer.get(reverse('web_start_chat', kwargs={'listing_id': listing.id}), follow=True)
+    print(f"💬 Rakib démarre une discussion pour : {listing.property.village} (ID: {listing.id})")
+    url_start = reverse('web_start_chat', kwargs={'listing_id': listing.id})
+    print(f"🔗 GET {url_start}")
+    resp = c_buyer.get(url_start, follow=True)
+    
+    print(f"📑 Redirection finale : {resp.request['PATH_INFO']}")
     assert resp.status_code == 200
-    room = ChatRoom.objects.get(buyer=buyer, listing=listing)
-    print(f"✅ Salon de discussion créé (ID: {room.id})")
+    
+    try:
+        room = ChatRoom.objects.get(buyer=buyer, listing=listing)
+        print(f"✅ Salon de discussion créé (ID: {room.id})")
+    except ChatRoom.DoesNotExist:
+        print(f"❌ ÉCHEC : Le salon n'a pas été créé par la vue web_start_chat.")
+        print(f"CONTEXTE : Buyer ID={buyer.id}, Listing ID={listing.id}")
+        # On regarde si un salon existe avec n'importe qui
+        count = ChatRoom.objects.all().count()
+        print(f"Nombre total de salons en DB : {count}")
+        raise
 
     # Envoyer un message (via API)
     from django.test import RequestFactory

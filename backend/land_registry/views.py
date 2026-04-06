@@ -15,6 +15,10 @@ from consensus.models import ValidationRequest
 from marketplace.models import MarketplaceView
 from utils.id_document_extractor import extract_from_upload
 
+def health_check(request):
+    """Simple view for Render health checks."""
+    return JsonResponse({'status': 'ok'})
+
 # --- DASHBOARD VIEW (HTML) ---
 
 @admin_required
@@ -73,53 +77,14 @@ def dashboard(request):
 
 @login_required
 def user_dashboard(request, wallet):
-    """
-    Tableau de bord personnel pour un utilisateur.
-    ROBUSTE : Priorise la session active si l'URL échoue.
-    """
+    """Tableau de bord personnel pour un utilisateur."""
     try:
-        identifier = wallet.lower().strip()
-        user = None
+        user = request.user
         
-        # 1. Essayer par UUID
-        try:
-            import uuid
-            user_id = uuid.UUID(identifier)
-            user = User.objects.get(id=user_id)
-        except (ValueError, User.DoesNotExist):
-            pass
-            
-        # 2. Essayer par wallet
-        if not user:
-            try:
-                user = User.objects.get(wallet_address=identifier)
-            except User.DoesNotExist:
-                pass
-                
-        # 3. Essayer par email
-        if not user:
-            try:
-                user = User.objects.get(email=identifier)
-            except User.DoesNotExist:
-                pass
-        
-        # SÉCURITÉ : Un utilisateur authentifié ne peut voir que SON PROPRE dashboard.
-        # Si un utilisateur tente d'accéder à un autre ID via l'URL, on le redirige vers le sien.
-        if request.user.is_authenticated:
-            # RÈGLE MÉTIER : Un notaire ne doit pas voir le dashboard citoyen
-            if request.user.role == User.Role.NOTARY:
-                return redirect('notary_dashboard')
+        # Sécurité : Un notaire ne doit pas voir le dashboard citoyen
+        if user.role == User.Role.NOTARY:
+            return redirect('notary_dashboard')
 
-            if user and user != request.user:
-                 messages.warning(request, "Redirection vers votre propre tableau de bord.")
-                 return redirect('user_dashboard', wallet=str(request.user.id))
-            user = request.user
-        
-        if not user:
-            # Cas où l'utilisateur n'est pas connecté et tente d'accéder via URL (ex: via lien public partagé)
-            messages.error(request, "Veuillez vous connecter pour accéder à cet espace.")
-            return redirect('web_login')
-        
         user_properties = Property.objects.filter(owner_wallet=user).annotate(media_count=Count('media'))
         
         # Récupérer les notifications récentes (In-App)
@@ -134,10 +99,9 @@ def user_dashboard(request, wallet):
         }
         return render(request, 'user_dashboard.html', context)
     except Exception as e:
-        # Dernier recours : session active
-        if request.user.is_authenticated:
-             return redirect('user_dashboard', wallet=str(request.user.id))
-        return render(request, 'user_dashboard.html', {'error': f'Erreur: {str(e)}'})
+        import traceback
+        traceback.print_exc()
+        return render(request, 'user_dashboard.html', {'error': f'Erreur de rendu: {str(e)}'})
 @login_required
 def web_add_property(request, wallet):
     """Vue pour ajouter une parcelle à un utilisateur existant."""
@@ -325,6 +289,8 @@ class PropertyListAPI(View):
                     owner_name = data.get('owner_name')
                     birth_date = data.get('birth_date')
                     user_country = data.get('user_country', 'Benin')
+                    departement = data.get('departement')
+                    commune = data.get('commune')
                     district = data.get('district')
                     village = data.get('village')
                     surveyor_id = data.get('surveyor_id')
@@ -339,6 +305,8 @@ class PropertyListAPI(View):
                     owner_name = body.get('owner_name')
                     birth_date = body.get('birth_date')
                     user_country = body.get('user_country', 'Benin')
+                    departement = body.get('departement')
+                    commune = body.get('commune')
                     district = body.get('district')
                     village = body.get('village')
                     surveyor_id = body.get('surveyor_id')
@@ -437,6 +405,8 @@ class PropertyListAPI(View):
                 
                 # Nouvelles informations d'identité
                 owner.country = user_country
+                owner.departement = departement
+                owner.commune = commune
                 owner.district = district
                 owner.village = village
                 
@@ -451,6 +421,8 @@ class PropertyListAPI(View):
                     gps_centroid=gps_centroid,
                     gps_boundaries=gps_boundaries,
                     country=country,
+                    departement=departement,
+                    commune=commune,
                     district=district,
                     village=village,
                     surveyor_id=surveyor_id if surveyor_id else None,

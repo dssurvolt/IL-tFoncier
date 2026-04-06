@@ -77,11 +77,15 @@ def setup_rakib_test():
         property=prop,
         first_name="Témoin",
         last_name="Certifié",
-        defaults={'phone': "+229 01 00 00 00"}
+        defaults={
+            'phone': "+229 01 00 00 00",
+            'birth_date': "1985-05-15",
+            'gender': 'M'
+        }
     )
 
     # 5. ANNONCE
-    listing, _ = Listing.objects.get_or_create(
+    listing, created = Listing.objects.get_or_create(
         property=prop,
         defaults={
             'price_fiat': 15000000,
@@ -89,6 +93,10 @@ def setup_rakib_test():
             'status': Listing.Status.ACTIVE
         }
     )
+    if not created:
+        listing.status = Listing.Status.ACTIVE
+        listing.price_fiat = 15000000
+        listing.save()
 
     # 6. FOLIO UNIQUE
     TransactionFolio.objects.filter(property=prop).delete()

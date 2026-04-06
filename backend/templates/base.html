@@ -17,6 +17,18 @@
             --text: #1e293b;
             --text-muted: #64748b;
             --sidebar-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --nav-hover: rgba(16, 185, 129, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --sidebar-bg: #0f172a;
+            --border-color: #334155;
+            --nav-hover: rgba(16, 185, 129, 0.15);
         }
 
         body {
@@ -24,11 +36,12 @@
             color: var(--text);
             font-family: 'Outfit', sans-serif;
             overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .glass {
             background: var(--card-bg);
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
@@ -40,10 +53,11 @@
         .sidebar {
             min-height: 100vh;
             background: var(--sidebar-bg);
-            border-right: 1px solid #e2e8f0;
+            border-right: 1px solid var(--border-color);
             padding-top: 2rem;
             position: sticky;
             top: 0;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .sidebar h3 {
@@ -85,10 +99,10 @@
 
         .card {
             background: var(--card-bg);
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 1.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
@@ -129,7 +143,7 @@
         }
 
         .table thead th {
-            border-bottom: 2px solid #f1f5f9;
+            border-bottom: 2px solid var(--border-color);
             color: var(--text-muted);
             text-transform: uppercase;
             font-size: 0.75rem;
@@ -137,8 +151,20 @@
         }
 
         .table td {
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: var(--bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text) !important;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.1);
         }
 
         /* Animations */
@@ -160,7 +186,13 @@
     </style>
 </head>
 
-<body>
+<body data-theme="light">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('ilot_theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <div class="d-flex">
         <div class="sidebar col-md-2">
             <h3>iLôt Foncier</h3>
@@ -196,7 +228,15 @@
             </a>
         </div>
         <div class="content col-md-10">
-            <div class="d-flex justify-content-end align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex justify-content-end align-items-center mb-4 pb-3 border-bottom"
+                style="border-color: var(--border-color) !important;">
+                <button id="themeToggle"
+                    class="btn btn-link me-3 p-2 text-muted rounded-circle border-0 d-flex align-items-center justify-content-center"
+                    style="width: 42px; height: 42px; background: var(--bg);">
+                    <i class="bi bi-moon-stars fs-5" id="themeIcon"></i>
+                </button>
+                <link rel="stylesheet"
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
                 {% if user.is_authenticated %}
                 <div class="text-end me-4">
                     <small class="text-muted d-block" style="font-size: 0.7rem;">Session Administration</small>
@@ -216,6 +256,27 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const body = document.body;
+
+            function updateTheme(theme) {
+                body.setAttribute('data-theme', theme);
+                localStorage.setItem('ilot_theme', theme);
+                themeIcon.className = theme === 'dark' ? 'bi bi-sun fs-5' : 'bi bi-moon-stars fs-5';
+            }
+
+            const currentTheme = localStorage.getItem('ilot_theme') || 'light';
+            updateTheme(currentTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const newTheme = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                updateTheme(newTheme);
+            });
+        });
+    </script>
 </body>
 
 </html>

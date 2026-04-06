@@ -7,7 +7,7 @@ from land_registry.views import (
     dashboard, web_properties, PropertyListAPI, PropertyDetailAPI, 
     user_dashboard, web_register_user, web_login, web_logout, web_property_detail, 
     web_profile, web_password_reset, web_add_property, IdentityExtractionAPI,
-    LandTitleExtractionAPI
+    LandTitleExtractionAPI, health_check
 )
 from consensus.views import web_validation, ValidationRequestAPI, web_witness_confirmation
 from identity.ussd_views import web_ussd, USSDGateway
@@ -27,6 +27,7 @@ from config.swagger_views import swagger_ui
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', health_check, name='health_check'),
     path('', lambda r: redirect('web_login'), name='login_home'),
     # Espace Citoyen (Public & Personnel)
     path('login/', web_login, name='web_login'),

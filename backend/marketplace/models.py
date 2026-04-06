@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from land_registry.models import Property
 from identity.models import User
 
+from django.utils import timezone
+
 class Listing(models.Model):
     """
     Offre de vente (Layer 2).
@@ -14,14 +16,23 @@ class Listing(models.Model):
         SOLD = 'SOLD', _('Vendu')
         CANCELLED = 'CANCELLED', _('Annulé')
 
+    class ListingType(models.TextChoices):
+        SALE = 'SALE', _('À vendre')
+        RENT = 'RENT', _('À louer')
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='listings')
     
+    listing_type = models.CharField(max_length=10, choices=ListingType.choices, default=ListingType.SALE)
     price_fiat = models.DecimalField(max_digits=15, decimal_places=2, help_text="Prix affiché en FCFA")
     price_crypto = models.DecimalField(max_digits=18, decimal_places=6, help_text="Équivalent stablecoin (cUSD)")
+    is_negotiable = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
     
     escrow_contract = models.CharField(max_length=42, blank=True, help_text="Adresse du contrat séquestre déployé")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True)
+    views_count = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
     
     class Meta:
         db_table = 'listings'

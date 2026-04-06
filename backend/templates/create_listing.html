@@ -42,13 +42,27 @@
                         <input type="hidden" name="property_id" value="{{ property.id }}">
 
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Prix de vente souhaité (FCFA)</label>
+                            <label class="form-label fw-bold">Type d'annonce</label>
+                            <select class="form-select rounded-4 p-3" id="listing_type">
+                                <option value="SALE" selected>À vendre</option>
+                                <option value="RENT">À louer</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Prix souhaité (FCFA)</label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-white border-end-0 rounded-start-4">💰</span>
                                 <input type="number" class="form-control border-start-0 rounded-end-4" id="price_fiat"
                                     placeholder="Ex: 5000000" required min="1000">
                             </div>
-                            <div class="form-text mt-2">Ce prix sera affiché sur la marketplace publique.</div>
+                            <div class="mt-2 text-end">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="is_negotiable">
+                                    <label class="form-check-label small fw-bold text-muted" for="is_negotiable">Prix
+                                        négociable</label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-4">
@@ -60,6 +74,12 @@
                                 </div>
                                 <input type="hidden" id="price_crypto" value="0.00">
                             </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Description de l'annonce</label>
+                            <textarea class="form-control rounded-4 p-3" id="description" rows="4"
+                                placeholder="Décrivez les atouts de votre parcelle (ex: Proche campus, terrain plat, etc.)"></textarea>
                         </div>
 
                         <div class="p-3 bg-warning bg-opacity-10 rounded-4 mb-4 small text-warning-emphasis">
@@ -99,8 +119,11 @@
         const data = {
             property_id: "{{ property.id }}",
             seller_wallet: "{{ user.wallet_address|default:'' }}",
+            listing_type: document.getElementById('listing_type').value,
             price_fiat: priceFiatInput.value,
-            price_crypto: priceCryptoInput.value
+            price_crypto: priceCryptoInput.value,
+            is_negotiable: document.getElementById('is_negotiable').checked,
+            description: document.getElementById('description').value
         };
 
         try {

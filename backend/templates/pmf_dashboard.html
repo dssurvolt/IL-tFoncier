@@ -130,8 +130,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary">#{{
-                                            i.listing.property.id|stringformat:"s"|slice:":8" }}</span>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary">#{{ i.listing.property.id|stringformat:"s"|slice:":8" }}</span>
                                     </td>
                                     <td><small class="text-muted">{{ i.created_at|date:"d/m H:i" }}</small></td>
                                 </tr>
@@ -161,8 +160,7 @@
                                             <small class="text-muted">{{ v.view_type|slice:":20" }}</small>
                                         </div>
                                     </td>
-                                    <td class="text-end font-monospace"><small class="text-muted">{{
-                                            v.created_at|date:"H:i" }}</small></td>
+                                    <td class="text-end font-monospace"><small class="text-muted">{{ v.created_at|date:"H:i" }}</small></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

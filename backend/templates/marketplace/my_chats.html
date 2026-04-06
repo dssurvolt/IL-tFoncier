@@ -29,8 +29,7 @@
                             </h6>
                             <small class="text-muted">{{ room.updated_at|timesince }}</small>
                         </div>
-                        <p class="mb-1 text-primary small fw-bold">Terrain: {{
-                            room.listing.property.village|default:"Parcelle" }} ({{ room.listing.price_fiat }} FCFA)</p>
+                        <p class="mb-1 text-primary small fw-bold">Terrain: {{ room.listing.property.village|default:"Parcelle" }} ({{ room.listing.price_fiat }} FCFA)</p>
                         <p class="text-muted small mb-0 text-truncate" style="max-width: 500px;">
                             {{ room.messages.last.content|default:"Démarrez la conversation..." }}
                         </p>

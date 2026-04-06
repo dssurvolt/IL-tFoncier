@@ -69,54 +69,59 @@
                 <div class="mb-5">
                     <div class="d-flex align-items-center mb-4">
                         <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
-                            <span class="h4 mb-0">🌍</span>
+                            <span class="h4 mb-0">🇧🇯</span>
                         </div>
-                        <h4 class="fw-bold mb-0">Localisation Administrative</h4>
+                        <h4 class="fw-bold mb-0">Localisation Administrative (B&#233;nin)</h4>
                     </div>
 
                     <div class="row g-4 mb-4">
-                        <div class="col-12">
-                            <label class="form-label fw-bold text-muted small">PAYS</label>
-                            <select class="form-select form-select-lg rounded-4 border-light bg-light" id="country">
-                                <option value="Benin">Bénin 🇧🇯</option>
-                                <option value="France">France 🇫🇷</option>
-                                <option value="Togo">Togo 🇹🇬</option>
-                                <option value="Cote d'Ivoire">Côte d'Ivoire 🇨🇮</option>
-                                <option value="Nigeria">Nigeria 🇳🇬</option>
-                                <option value="USA">USA 🇺🇸</option>
-                                <option value="Other">Autre / International 🌐</option>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">D&#201;PARTEMENT</label>
+                            <select class="form-select form-select-lg rounded-4 border-light bg-light" id="departement"
+                                required>
+                                <option value="" disabled selected>Choisir un d&#233;partement...</option>
+                                <option value="Alibori">Alibori</option>
+                                <option value="Atacora">Atacora</option>
+                                <option value="Atlantique">Atlantique</option>
+                                <option value="Borgou">Borgou</option>
+                                <option value="Collines">Collines</option>
+                                <option value="Couffo">Couffo</option>
+                                <option value="Donga">Donga</option>
+                                <option value="Littoral">Littoral</option>
+                                <option value="Mono">Mono</option>
+                                <option value="Ou&#233;m&#233;">Ou&#233;m&#233;</option>
+                                <option value="Plateau">Plateau</option>
+                                <option value="Zou">Zou</option>
                             </select>
+                            <div id="departementStatus" class="small mt-1"></div>
                             <script>
-                                // Pré-sélection du pays depuis le profil utilisateur (Data passée via attribut data ou injectée proprement)
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    const userCountry = "{{ user.country|default:'' }}";
-                                    if (userCountry) {
-                                        const select = document.getElementById('country');
-                                        for (let i = 0; i < select.options.length; i++) {
-                                            if (select.options[i].value === userCountry) {
-                                                select.selectedIndex = i;
-                                                break;
-                                            }
-                                        }
-                                    }
+                                document.addEventListener('DOMContentLoaded', () => {
+                                    const savedDept = "{{ user.departement|default:'' }}";
+                                    if (savedDept) document.getElementById('departement').value = savedDept;
                                 });
                             </script>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">COMMUNE</label>
+                            <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
+                                id="commune" placeholder="Ex: Cotonou" value="{{ user.commune|default:'' }}" required>
+                            <div id="communeStatus" class="small mt-1"></div>
                         </div>
                     </div>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-muted small"
-                                id="label_district">ARRONDISSEMENT</label>
+                            <label class="form-label fw-bold text-muted small">ARRONDISSEMENT</label>
                             <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                                id="district" placeholder="..." value="{{ user.district|default:'' }}" required>
+                                id="district" placeholder="Ex: 6&#232;me Arrondissement"
+                                value="{{ user.district|default:'' }}" required>
                             <div id="districtStatus" class="small mt-1"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-bold text-muted small" id="label_village">QUARTIER /
-                                VILLAGE</label>
+                            <label class="form-label fw-bold text-muted small">VILLAGE / QUARTIER DE VILLE</label>
                             <input type="text" class="form-control form-control-lg rounded-4 border-light bg-light"
-                                id="village" placeholder="..." value="{{ user.village|default:'' }}" required>
+                                id="village" placeholder="Ex: Akpakpa" value="{{ user.village|default:'' }}" required>
+                            <div id="villageStatus" class="small mt-1"></div>
                         </div>
                     </div>
                 </div>
@@ -499,57 +504,116 @@
         if (totalSqm > 0) areaMetric.value = totalSqm;
     };
 
-    // Country & Dynamic Labels Logic
-    const countrySelect = document.getElementById('country');
-    const labelDistrict = document.getElementById('label_district');
-    const labelVillage = document.getElementById('label_village');
+    // Verification Logic for Localization with Hierarchical Validation
+    async function verifyLocation(inputId, statusId, parentIds = []) {
+        const input = document.getElementById(inputId);
+        const status = document.getElementById(statusId);
+        const val = input.value.trim();
 
-    const countryConfig = {
-        'Benin': { district: 'ARRONDISSEMENT', village: 'QUARTIER / VILLAGE', search: 'Benin' },
-        'France': { district: 'COMMUNE / VILLE', village: 'RUE / QUARTIER', search: 'France' },
-        'Togo': { district: 'PRÉFECTURE', village: 'CANTON / VILLAGE', search: 'Togo' },
-        'Cote d\'Ivoire': { district: 'COMMUNE / SOUS-PRÉFECTURE', village: 'QUARTIER / VILLAGE', search: 'Ivory Coast' },
-        'Nigeria': { district: 'LOCAL GOVERNMENT AREA (LGA)', village: 'WARD / STREET', search: 'Nigeria' },
-        'USA': { district: 'CITY / COUNTY', village: 'NEIGHBORHOOD / ADDRESS', search: 'USA' },
-        'Other': { district: 'REGION / CITY', village: 'LOCALITY / ADDRESS', search: '' }
-    };
+        if (!val || val.length < 3) {
+            status.innerHTML = '';
+            input.classList.remove('is-valid', 'is-invalid');
+            return;
+        }
 
-    countrySelect.onchange = () => {
-        const config = countryConfig[countrySelect.value] || countryConfig['Other'];
-        labelDistrict.innerText = config.district;
-        labelVillage.innerText = config.village;
-        // Trigger re-validation if district has value
-        if (districtInput.value) districtInput.onblur();
-    };
+        // Check if parents are filled
+        for (const pid of parentIds) {
+            const pVal = document.getElementById(pid).value;
+            if (!pVal) {
+                status.innerHTML = '<span class="text-warning small italic">⚡ Remplissez d\'abord le d&#233;partement/commune.</span>';
+                return;
+            }
+        }
 
-    // District Verification (Dynamic based on country)
-    const districtInput = document.getElementById('district');
-    districtInput.onblur = async () => {
-        const val = districtInput.value.trim();
-        if (val.length < 3) return;
+        status.innerHTML = '<span class="text-citizen-muted"><span class="spinner-border spinner-border-sm"></span> V&#233;rification hi&#233;rarchique...</span>';
 
-        const statusDiv = document.getElementById('districtStatus');
-        statusDiv.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> Vérification...</span>';
+        let searchQuery = val;
+        let parentValues = [];
+        parentIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const pVal = el.value.trim();
+                if (pVal) {
+                    searchQuery += `, ${pVal}`;
+                    parentValues.push(pVal);
+                }
+            }
+        });
 
-        const country = countrySelect.value;
-        const config = countryConfig[country] || countryConfig['Other'];
-        const searchQuery = `${val} ${config.search}`.trim();
+        const apiUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&countrycodes=bj&format=json&addressdetails=1&limit=1`;
 
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${searchQuery}&format=json&limit=1`);
+            const res = await fetch(apiUrl);
             const data = await res.json();
+
             if (data && data.length > 0) {
-                statusDiv.innerHTML = `<span class="text-success small">✔️ Localisé: ${data[0].display_name.split(',')[0]}</span>`;
+                const result = data[0];
+                const address = result.address || {};
+                const displayName = result.display_name.toLowerCase();
+
+                // 1. Safety check: Benin
+                if (address.country_code !== 'bj') {
+                    status.innerHTML = '<span class="text-danger small fw-bold">❌ Lieu hors du B&#233;nin.</span>';
+                    input.classList.add('is-invalid');
+                    return;
+                }
+
+                // 2. Hierarchical check: display_name must contain all parent values
+                let incoherence = false;
+                for (const p of parentValues) {
+                    if (!displayName.includes(p.toLowerCase())) {
+                        incoherence = true;
+                        status.innerHTML = `<span class="text-danger small fw-bold">❌ Incoh&#233;rence : ${val} introuvable dans ${p}.</span>`;
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                        break;
+                    }
+                }
+
+                if (!incoherence) {
+                    status.innerHTML = `<span class="text-success small fw-bold">✔️ Confirm&#233;: ${result.display_name.split(',')[0]}</span>`;
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                }
             } else {
-                statusDiv.innerHTML = '<span class="text-warning small">⚠️ Lieu non identifié sur la carte.</span>';
+                status.innerHTML = '<span class="text-warning small fw-bold">⚠️ Localisation introuvable ou incorrecte.</span>';
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
             }
-        } catch (e) {
-            statusDiv.innerHTML = '';
+        } catch (err) {
+            status.innerHTML = '';
         }
+    }
+
+    // Attach listeners with cascading logic
+    const deptEl = document.getElementById('departement');
+    const commEl = document.getElementById('commune');
+    const distEl = document.getElementById('district');
+    const villEl = document.getElementById('village');
+
+    deptEl.onchange = () => {
+        document.getElementById('departementStatus').innerHTML = '<span class="text-success small fw-bold">✔️ D&#233;partement s&#233;lectionn&#233;.</span>';
+        if (commEl.value) commEl.onblur();
     };
 
-    // Initialisation
-    countrySelect.onchange();
+    commEl.onblur = async () => {
+        await verifyLocation('commune', 'communeStatus', ['departement']);
+        if (distEl.value) distEl.onblur();
+    };
+
+    distEl.onblur = async () => {
+        await verifyLocation('district', 'districtStatus', ['commune', 'departement']);
+        if (villEl.value) villEl.onblur();
+    };
+
+    villEl.onblur = () => {
+        verifyLocation('village', 'villageStatus', ['district', 'commune', 'departement']);
+    };
+
+    // Initial triggers
+    window.addEventListener('DOMContentLoaded', () => {
+        if (deptEl.value) deptEl.onchange();
+    });
 
     // Initialisation avec 4 points par défaut
     for (let i = 1; i <= 4; i++) {
@@ -633,7 +697,9 @@
 
         const name = document.getElementById('ownerName').value.trim();
         const wallet = document.getElementById('ownerWallet').value.trim();
-        const country = document.getElementById('country').value;
+        const country = "Benin";
+        const departement = document.getElementById('departement').value.trim();
+        const commune = document.getElementById('commune').value.trim();
         const district = document.getElementById('district').value.trim();
         const village = document.getElementById('village').value.trim();
         const surveyor_name = document.getElementById('surveyor_name').value.trim();
@@ -677,6 +743,8 @@
         formData.append('owner_name', name);
         formData.append('owner_wallet', wallet);
         formData.append('country', country);
+        formData.append('departement', departement);
+        formData.append('commune', commune);
         formData.append('district', district);
         formData.append('village', village);
         formData.append('surveyor_name', surveyor_name);

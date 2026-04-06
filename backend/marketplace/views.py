@@ -91,9 +91,14 @@ class ListingListAPI(View):
             data.append({
                 'id': str(l.id),
                 'property_id': str(l.property.id),
+                'listing_type': l.listing_type,
                 'price_fiat': str(l.price_fiat),
                 'price_crypto': str(l.price_crypto),
-                'seller': l.property.owner_wallet.wallet_address
+                'is_negotiable': l.is_negotiable,
+                'description': l.description,
+                'views_count': l.views_count,
+                'seller': l.property.owner_wallet.wallet_address,
+                'created_at': l.created_at.isoformat()
             })
         return JsonResponse({'count': len(data), 'results': data})
 
@@ -130,8 +135,11 @@ class ListingListAPI(View):
             # 5. Création de l'offre
             listing = Listing.objects.create(
                 property=prop,
+                listing_type=body.get('listing_type', 'SALE'),
                 price_fiat=price_fiat,
                 price_crypto=price_crypto,
+                is_negotiable=body.get('is_negotiable', False),
+                description=body.get('description', ''),
                 status=Listing.Status.ACTIVE
             )
             return JsonResponse({'id': str(listing.id), 'status': 'ACTIVE'}, status=201)

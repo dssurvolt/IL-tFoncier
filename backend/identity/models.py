@@ -48,9 +48,12 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=255, null=True, blank=True, help_text="Nom et Prénom (pas de chiffres)")
     birth_date = models.DateField(null=True, blank=True)
     country = models.CharField(max_length=100, default='Benin', help_text="Pays de résidence")
-    district = models.CharField(max_length=100, null=True, blank=True, help_text="Arrondissement / Commune")
+    departement = models.CharField(max_length=100, null=True, blank=True, help_text="Département")
+    commune = models.CharField(max_length=100, null=True, blank=True, help_text="Commune")
+    district = models.CharField(max_length=100, null=True, blank=True, help_text="Arrondissement")
     village = models.CharField(max_length=100, null=True, blank=True, help_text="Quartier / Village")
     reputation_score = models.IntegerField(default=50, help_text="Score 0-100 basé sur la fiabilité")
+    is_verified = models.BooleanField(default=False, help_text="Compte vérifié par l'administration iLôt")
     created_at = models.DateTimeField(auto_now_add=True)
     
     USERNAME_FIELD = 'email'

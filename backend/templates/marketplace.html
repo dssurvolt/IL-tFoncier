@@ -1,261 +1,408 @@
 {% extends 'base_citizen.html' %}
+{% load static %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-end mb-5">
-    <div>
-        <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">Place de Marché Digitale
-        </h6>
-        <h1 class="display-5 fw-bold mb-0">Terrains Disponibles</h1>
-    </div>
-    <div class="d-none d-md-block">
-        <div class="p-3 bg-white rounded-4 border shadow-sm">
-            <small class="text-muted d-block">Total des Offres</small>
-            <span class="h4 fw-bold text-primary mb-0">{{ listings|length }}</span>
-        </div>
-    </div>
-</div>
+<!-- Hero Section (Espace Foncier Style) -->
+<div class="row g-0 mb-5 overflow-hidden animate-up"
+    style="border-radius: 40px; background: linear-gradient(135deg, var(--citizen-primary) 0%, #032d12 100%); min-height: 520px; position: relative;">
 
-<div class="row g-4 mb-5">
-    <!-- Vue Carte Simulée -->
-    <div class="col-lg-8">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-        <div class="citizen-card p-0 overflow-hidden" style="height: 450px; border: 2px solid #e2e8f0;">
-            <div id="map" style="height: 100%; width: 100%; z-index: 1;"></div>
-        </div>
-
-        {{ listings_json|json_script:"listings-data" }}
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Init Map (Centré sur Cotonou par défaut)
-                var map = L.map('map').setView([6.3703, 2.3912], 13);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-
-                // Récupération des données sécurisées via le script tag
-                const listingsData = JSON.parse(document.getElementById('listings-data').textContent);
-
-                const markers = [];
-                listingsData.forEach(item => {
-                    if (item.lat && item.lng) {
-                        const marker = L.marker([item.lat, item.lng]).addTo(map)
-                            .bindPopup(`
-                                <div class="text-center">
-                                    <h6 class="fw-bold mb-1">${item.village || 'Parcelle'}</h6>
-                                    <span class="badge bg-primary mb-2">${item.price_fiat} FCFA</span><br>
-                                    ${item.is_under_contract ? '<span class="badge bg-warning text-dark mb-2">⚠️ SOUS CONTRAT</span><br>' : ''}
-                                    <a href="/property/${item.id}/" class="btn btn-sm btn-outline-primary py-1 mt-1">Détails techniques</a>
-                                </div>
-                            `);
-                        markers.push(marker);
-                    }
-                });
-
-                // Auto-fit bounds if markers exist
-                if (markers.length > 0) {
-                    const group = new L.featureGroup(markers);
-                    map.fitBounds(group.getBounds().pad(0.1));
-                }
-            });
-        </script>
-    </div>
-    <!-- Stats Marketplace -->
-    <div class="col-lg-4 d-flex flex-column gap-3">
-        <!-- Tendances du Marché : Plus compact -->
-        <div class="citizen-card bg-primary border-0 shadow-lg text-white mb-0 py-3">
-            <h6 class="fw-bold mb-3 text-white text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                Tendances du Marché</h6>
-            <div class="row g-0">
-                <div class="col-6 border-end border-white border-opacity-10 ps-2">
-                    <small class="text-white text-opacity-75 d-block" style="font-size: 0.65rem;">Prix Moyen /
-                        m²</small>
-                    <div class="h5 fw-bold text-white mb-0">12.500 <small style="font-size: 0.6rem;">FCFA</small></div>
-                </div>
-                <div class="col-6 ps-3">
-                    <small class="text-white text-opacity-75 d-block" style="font-size: 0.65rem;">Volume (24h)</small>
-                    <div class="h5 fw-bold text-white mb-0">4.2M <small style="font-size: 0.6rem;">FCFA</small></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Portail Notaire Rapide -->
-        <div class="citizen-card h-auto border-2 border-dashed border-primary bg-primary bg-opacity-5 py-3 mb-0">
-            <h6 class="fw-bold text-primary mb-2" style="font-size: 0.8rem;">⚖️ PORTAIL NOTAIRE</h6>
-            <p class="x-small text-muted mb-2">Gestion des dossiers de mutation.</p>
-            <a href="{% url 'notary_dashboard' %}" class="btn btn-primary btn-sm w-100 fw-bold py-2"
-                style="font-size: 0.7rem;">ACCÉDER AU DASHBOARD</a>
-            {% if user.is_authenticated and not user.notary_profile %}
-            <div class="mt-2 x-small text-danger fw-bold text-center" style="font-size: 0.6rem;">
-                <i class="bi bi-exclamation-triangle"></i> Compte Citoyen actif.
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Notaires de Confiance -->
-        <div>
-            <h6 class="fw-bold mb-3" style="font-size: 0.8rem;">🛡️ NOTAIRES CERTIFIÉS</h6>
-            <div class="d-flex flex-column gap-2">
-                {% for n in featured_notaries %}
-                <div class="p-2 bg-white rounded-3 border shadow-sm d-flex align-items-center">
-                    <div class="rounded-circle bg-light p-1 me-2" style="font-size: 0.8rem;">💼</div>
-                    <div class="overflow-hidden">
-                        <small class="fw-bold d-block text-truncate" style="font-size: 0.75rem;">Me {{ n.name }}</small>
-                        <small class="text-muted d-block text-truncate" style="font-size: 0.65rem;">{{ n.office_name
-                            }}</small>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="x-small text-muted fst-italic">Référencement en cours...</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<h4 class="fw-bold mb-4">Annonces Récentes</h4>
-<div class="row g-4">
-    {% for listing in listings %}
-    <div class="col-md-4">
-        <div class="citizen-card h-100 d-flex flex-column hover-up">
-            <div class="position-relative mb-4">
-                <div class="rounded-4 bg-light overflow-hidden" style="height: 200px;">
-                    {% if listing.property.thumbnail_url %}
-                    <img src="{{ listing.property.thumbnail_url }}" class="w-100 h-100 object-fit-cover"
-                        alt="{{ listing.property.village|default:'Parcelle iLôt' }}">
-                    {% else %}
-                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-primary bg-opacity-10">
-                        <span class="display-1">🏡</span>
-                    </div>
-                    {% endif %}
-                </div>
-                {% if listing.is_under_contract %}
-                <span
-                    class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 shadow-sm border border-dark border-opacity-10">⚠️
-                    SOUS CONTRAT</span>
-                {% else %}
-                <span class="badge bg-success position-absolute top-0 end-0 m-3 shadow-sm">EN VENTE</span>
-                {% endif %}
-
-                {% if listing.property.is_certified %}
-                <span class="badge bg-primary position-absolute top-0 start-0 m-3 shadow-sm">🛡️ DOSSIER CERTIFIÉ</span>
-                {% else %}
-                <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 shadow-sm">⚠️ EN ATTENTE
-                    CERTIF.</span>
-                {% endif %}
-            </div>
-
-            <h5 class="fw-bold mb-1">{{ listing.property.village|default:"Parcelle iLôt" }}</h5>
-            <p class="text-muted small mb-4">
-                <span class="me-2">📍</span> {{ listing.property.district }}, {{ listing.property.country }}
+    <div class="col-lg-8 p-5 d-flex flex-column justify-content-center position-relative" style="z-index: 2;">
+        <div class="ps-md-4">
+            <span
+                class="badge rounded-pill bg-secondary bg-opacity-20 text-secondary fw-bold px-3 py-2 mb-4 border border-secondary border-opacity-25"
+                style="letter-spacing: 0.1em; font-size: 0.75rem;">
+                <i class="bi bi-patch-check-fill me-2"></i>PLATEFORME FONCIÈRE N°1 AU BÉNIN
+            </span>
+            <h1 class="display-3 fw-bold text-white mb-4" style="letter-spacing: -0.04em; line-height: 1.1;">
+                Trouvez votre terrain <br><span class="text-secondary">en toute sécurité.</span>
+            </h1>
+            <p class="lead text-white text-opacity-75 mb-5 col-lg-10">
+                iLôt Foncier connecte acheteurs, vendeurs et notaires sur une infrastructure décentralisée pour éliminer
+                la fraude et simplifier vos transactions immobilières.
             </p>
 
-            <div class="mt-auto">
-                <div class="p-3 bg-light rounded-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <small class="text-muted d-block">Prix en FCFA</small>
-                            <span class="h5 fw-bold mb-0">{{ listing.price_fiat }} FCFA</span>
+            <!-- Floating Search Bar -->
+            <div class="bg-citizen-card p-3 rounded-4 shadow-lg d-flex flex-wrap gap-2 align-items-center me-lg-5">
+                <div class="flex-grow-1 border-end-md pe-3 ps-2">
+                    <label class="d-block x-small fw-bold text-citizen-muted text-uppercase mb-1"
+                        style="font-size: 0.6rem;">Type de bien</label>
+                    <select class="form-select border-0 p-0 fw-bold text-citizen bg-citizen-card shadow-none"
+                        style="font-size: 0.95rem; cursor: pointer;">
+                        <option>Tous les types</option>
+                        <option>Terrain Vierge</option>
+                        <option>Parcelle Bâtie</option>
+                        <option>Location / Bail</option>
+                    </select>
+                </div>
+                <div class="flex-grow-1 border-end-md pe-3 ps-2">
+                    <label class="d-block x-small fw-bold text-citizen-muted text-uppercase mb-1"
+                        style="font-size: 0.6rem;">Ville / Localité</label>
+                    <select class="form-select border-0 p-0 fw-bold text-citizen bg-citizen-card shadow-none"
+                        style="font-size: 0.95rem; cursor: pointer;">
+                        <option>Tout le Bénin</option>
+                        <option>Cotonou</option>
+                        <option>Abomey-Calavi</option>
+                        <option>Ouidah</option>
+                    </select>
+                </div>
+                <div class="flex-grow-1 pe-3 ps-2">
+                    <label class="d-block x-small fw-bold text-citizen-muted text-uppercase mb-1"
+                        style="font-size: 0.6rem;">Budget Max</label>
+                    <input type="text"
+                        class="form-control border-0 p-0 fw-bold text-citizen bg-citizen-card shadow-none"
+                        placeholder="Ex: 5,000,000" style="font-size: 0.95rem;">
+                </div>
+                <button class="btn btn-secondary rounded-4 px-4 py-3 d-flex align-items-center gap-2 shadow-sm">
+                    <i class="bi bi-search"></i> <span class="fw-bold">Rechercher</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overlay for Hero -->
+    <div class="col-lg-4 d-none d-lg-flex align-items-center justify-content-center p-5 position-relative">
+        <div class="citizen-card border-white border-opacity-10 backdrop-blur p-4 text-white w-100"
+            style="border-radius: 30px; background: rgba(255,255,255, 0.1);">
+            <div class="mb-4">
+                <div class="h1 fw-bold mb-0">1,284</div>
+                <div class="text-white-50 x-small fw-bold text-uppercase">Parcelles Certifiées</div>
+            </div>
+            <div class="mb-4">
+                <div class="h1 fw-bold mb-0">34</div>
+                <div class="text-white-50 x-small fw-bold text-uppercase">Notaires Partenaires</div>
+            </div>
+            <div>
+                <div class="h1 fw-bold mb-0">100%</div>
+                <div class="text-white-50 x-small fw-bold text-uppercase">Zéro Fraude Garantie</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container container-lg">
+    <!-- Map Integration Section -->
+    <div class="d-flex justify-content-between align-items-end mb-4 animate-up">
+        <div>
+            <h3 class="fw-bold mb-1 text-citizen">Exploration G&#233;ographique</h3>
+            <p class="text-citizen-muted small">Visualisez les opportunit&#233;s sur la carte interactive du B&#233;nin.
+            </p>
+        </div>
+        <button class="btn btn-outline-primary rounded-pill px-4 fw-bold small mb-2" onclick="toggleMap()">
+            <i class="bi bi-map-fill me-2"></i>Agrandir la carte
+        </button>
+    </div>
+
+    <div class="citizen-card p-0 mb-5 overflow-hidden border-0 shadow-sm animate-up" id="mapContainer"
+        style="height: 400px; border-radius: 30px; transition: height 0.4s ease;">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <div id="map" style="height: 100%; width: 100%;"></div>
+    </div>
+
+    <!-- Active Listings Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 animate-up">
+        <h4 class="fw-bold mb-0 text-citizen"><span class="text-primary">{{ listings|length }}</span> Opportunit&#233;s
+            R&#233;centes</h4>
+        <div class="d-flex gap-3 align-items-center">
+            <div class="btn-group p-1 rounded-pill shadow-sm border border-citizen bg-citizen-card">
+                <button class="btn btn-sm rounded-pill px-3 active">Plus récents</button>
+                <button class="btn btn-sm rounded-pill px-3">Prix bas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings Grid -->
+    <div class="row g-4 mb-5">
+        {% for listing in listings %}
+        <div class="col-md-4">
+            <div class="citizen-card h-100 p-0 overflow-hidden listing-card border-0 shadow-sm position-relative"
+                style="border-radius: 20px; cursor: pointer;">
+                <!-- Redirection Invisible (Stretched Link) -->
+                <a href="{% url 'web_property_detail' listing.property.id %}" class="stretched-link"
+                    style="z-index: 1;"></a>
+
+                <!-- Card Image -->
+                <div class="position-relative">
+                    <div class="listing-img-container bg-citizen-light" style="height: 220px;">
+                        {% if listing.property.thumbnail_url %}
+                        <img src="{{ listing.property.thumbnail_url }}" class="w-100 h-100 object-fit-cover"
+                            alt="Property">
+                        {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-citizen-light">
+                            <i class="bi bi-image text-citizen-muted opacity-25" style="font-size: 4rem;"></i>
                         </div>
-                        <div class="text-end">
-                            <small class="text-muted d-block">Crypto (cUSD)</small>
-                            <span class="fw-bold text-primary">{{ listing.price_crypto }}</span>
-                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="position-absolute top-0 start-0 m-3" style="z-index: 10;">
+                        <span
+                            class="badge rounded-pill bg-success bg-opacity-10 text-success fw-bold px-3 py-2 border border-success border-opacity-10 shadow-sm"
+                            style="font-size: 0.75rem;">
+                            {{ listing.get_listing_type_display }}
+                        </span>
+                    </div>
+
+                    <div class="position-absolute top-0 end-0 m-3 d-flex gap-2" style="z-index: 10;">
+                        <button class="btn bg-citizen-card border-citizen rounded-circle shadow-sm p-2"
+                            style="width: 38px; height: 38px;">
+                            <i class="bi bi-heart text-citizen-muted"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2">
-                    {% if user.is_authenticated and listing.property.owner_wallet == user %}
-                    <div class="alert alert-info small py-2 rounded-3 mb-0 text-center">
-                        <i class="bi bi-person-check me-1"></i> C'est votre annonce
+                <div class="p-4 pt-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="position-relative" style="z-index: 10;">
+                            <h4 class="fw-bold mb-0 text-primary">{{ listing.price_fiat|floatformat:0 }} XOF
+                            </h4>
+                            <div class="mt-1">
+                                <span
+                                    class="badge {% if listing.is_negotiable %}bg-success{% else %}bg-primary{% endif %} bg-opacity-10 text-{% if listing.is_negotiable %}success{% else %}primary{% endif %} small fw-bold px-2 py-1"
+                                    style="font-size: 0.65rem;">
+                                    <i class="bi bi-tag-fill me-1"></i>{% if listing.is_negotiable %}Prix négociable{%                   else %}Prix fixe{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-end position-relative" style="z-index: 10;">
+                            <div class="fw-bold text-citizen-muted small" style="font-size: 0.8rem;">{{                 listing.property.owner_wallet.full_name|default:listing.property.owner_wallet.wallet_address|truncatechars:12                 }}</div>
+                            {% if listing.property.owner_wallet.is_verified %}
+                            <div class="text-success small fw-bold" style="font-size: 0.7rem;">
+                                <i class="bi bi-patch-check-fill me-1"></i>Vérifié
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% elif is_notary %}
-                    <div class="alert alert-light small py-2 rounded-3 mb-0 text-center border">
-                        <i class="bi bi-shield-lock me-1"></i> Accès Professionnel
+
+                    <h5 class="fw-bold text-citizen mb-2 mt-3">{{ listing.property.village|default:"Parcelle iLôt" }}
+                    </h5>
+                    <div class="text-citizen-muted small mb-3">
+                        <i class="bi bi-geo-alt me-1"></i>{{ listing.property.district }}, {{ listing.property.country             }}
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="text-muted small">
+                                <i class="bi bi-house-door me-1"></i>{{ listing.property.area_sqm|default:"-" }} m²
+                            </div>
+                            <div class="text-muted x-small">
+                                <i class="bi bi-eye me-1"></i>{{ listing.views_count }} vues
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 position-relative" style="z-index: 10;">
+                            <a href="https://wa.me/22900000000"
+                                class="btn btn-success rounded-pill px-3 py-2 fw-bold small d-flex align-items-center gap-1 flex-grow-1"
+                                style="background-color: #25D366; border-color: #25D366;">
+                                <i class="bi bi-whatsapp"></i> WhatsApp
+                            </a>
+                            <button
+                                class="btn btn-primary rounded-pill px-3 py-2 fw-bold small d-flex align-items-center gap-1 flex-grow-1"
+                                style="background-color: #003057;" onclick="contactSeller('{{ listing.id }}')">
+                                Chatter iLôt
+                            </button>
+                        </div>
                     </div>
-                    {% elif listing.is_under_contract %}
-                    <button class="btn btn-secondary disabled"
-                        title="Une transaction est déjà en cours sur ce terrain.">
-                        <i class="bi bi-lock-fill me-1"></i> NON DISPONIBLE
-                    </button>
-                    {% else %}
-                    <button class="btn btn-citizen"
-                        onclick="contactSeller('{{ listing.id }}', '{{ listing.property.is_certified }}')">
-                        CONTACTER LE VENDEUR
-                    </button>
-                    {% endif %}
-                    <a href="{% url 'web_property_detail' listing.property.id %}"
-                        class="btn btn-outline-secondary rounded-3 btn-sm">Détails techniques</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Assurance / Trust Section (Espace Foncier Style) -->
+        <div class="citizen-card border-0 shadow-sm p-5 mb-5 bg-citizen-card overflow-hidden position-relative"
+            style="border-radius: 40px;">
+            <div class="row align-items-center position-relative" style="z-index: 2;">
+                <div class="col-lg-12">
+                    <h2 class="fw-bold mb-4 text-citizen">Pourquoi choisir la Marketplace iL&#244;t ?</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6 col-lg-3">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-4" style="width: fit-content;">
+                                    <i class="bi bi-search text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-citizen mb-1">V&#233;rification ANDF</h6>
+                                    <p class="text-citizen-muted small mb-0">Chaque certificat sur la plateforme est
+                                        authentifi&#233;
+                                        aupr&#232;s des registres fonciers.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-4" style="width: fit-content;">
+                                    <i class="bi bi-cpu text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-citizen mb-1">S&#233;questre Blockchain</h6>
+                                    <p class="text-citizen-muted small mb-0">Vos fonds sont prot&#233;g&#233;s par un
+                                        contrat intelligent
+                                        jusqu'&#224; la signature finale.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-4" style="width: fit-content;">
+                                    <i class="bi bi-people text-warning fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-citizen mb-1">T&#233;moins Locaux</h6>
+                                    <p class="text-citizen-muted small mb-0">Les notables de la r&#233;gion valident
+                                        physiquement les
+                                        limites de la parcelle.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="bg-info bg-opacity-10 p-3 rounded-4" style="width: fit-content;">
+                                    <i class="bi bi-file-earmark-check text-info fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold text-citizen mb-1">Notaires Int&#233;gr&#233;s</h6>
+                                    <p class="text-citizen-muted small mb-0">Signez l'acte de vente directement avec un
+                                        notaire
+                                        certifi&#233; sur la plateforme.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12 text-center py-5">
-        <div class="citizen-card border-dashed">
-            <span class="display-1 d-block mb-4">📭</span>
-            <h4 class="fw-bold">Aucune offre active</h4>
-            <p class="text-muted">Revenez plus tard ou mettez votre propre terrain en vente depuis votre dashboard.</p>
-        </div>
-    </div>
-    {% endfor %}
-</div>
 
-<style>
-    .hover-scale {
-        transition: transform 0.3s ease;
-    }
-
-    .hover-scale:hover {
-        transform: translate(-50%, -50%) scale(1.2);
-        z-index: 100;
-    }
-
-    .hover-up {
-        transition: all 0.3s ease;
-    }
-
-    .hover-up:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
-</style>
-
-<script>
-    async function contactSeller(listingId, isCertified) {
-        const userId = "{{ user.id }}";
-
-        if (!userId || userId === "None") {
-            alert("Veuillez vous connecter pour contacter le vendeur.");
-            window.location.href = "{% url 'web_login' %}";
-            return;
+    <style>
+        .marketplace-hero {
+            background-size: cover;
+            background-position: center;
         }
 
-        // Tracking PMF en temps réel
-        try {
-            await fetch("{% url 'api_marketplace_inquire' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: JSON.stringify({
-                    listing_id: listingId,
-                    user_id: userId
-                })
+        .backdrop-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .border-end-md {
+            border-right: 1px solid var(--input-border);
+        }
+
+        @media (max-width: 768px) {
+            .border-end-md {
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+                padding-bottom: 1rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .listing-card {
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-white {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .hover-up:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+
+    {{ listings_json|json_script:"listings-data" }}
+    <script>
+        let mapVisible = true;
+
+        function toggleMap() {
+            const container = document.getElementById('mapContainer');
+            if (container.style.height === '400px') {
+                container.style.height = '600px';
+            } else {
+                container.style.height = '400px';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            window.mapInstance = L.map('map', { scrollWheelZoom: false }).setView([6.3703, 2.3912], 13);
+
+            function updateMapTheme(theme) {
+                if (!window.mapInstance) return;
+                window.mapInstance.eachLayer(function (layer) {
+                    if (layer instanceof L.TileLayer) {
+                        window.mapInstance.removeLayer(layer);
+                    }
+                });
+                const url = theme === 'dark'
+                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://{s}.tile.osm.org/{z}/{x}/{y}.png';
+                L.tileLayer(url, {
+                    attribution: '© OpenStreetMap'
+                }).addTo(window.mapInstance);
+            }
+
+            // Init map theme
+            const currentTheme = localStorage.getItem('ilot_theme') || 'light';
+            updateMapTheme(currentTheme);
+
+            // Listen for theme changes (global custom event or polling? Let's use an event)
+            window.addEventListener('themeChanged', (e) => {
+                updateMapTheme(e.detail.theme);
             });
-        } catch (e) {
-            console.error("Erreur tracking PMF:", e);
+
+            const listingsData = JSON.parse(document.getElementById('listings-data').textContent);
+            const markers = [];
+
+            listingsData.forEach(item => {
+                if (item.lat && item.lng) {
+                    const marker = L.marker([item.lat, item.lng]).addTo(map)
+                        .bindPopup(`
+                        <div class="text-center p-2" style="min-width: 150px;">
+                            <h6 class="fw-bold mb-1">${item.village || 'Parcelle'}</h6>
+                            <p class="text-primary fw-bold mb-2">${item.price_fiat} FCFA</p>
+                            <a href="/property/${item.id}/" class="btn btn-sm btn-citizen px-3 w-100" style="font-size: 0.7rem;">VOIR DOSSIER</a>
+                        </div>
+                    `);
+                    markers.push(marker);
+                }
+            });
+
+            if (markers.length > 0) {
+                map.fitBounds(new L.featureGroup(markers).getBounds().pad(0.2));
+            }
+        });
+
+        async function contactSeller(listingId) {
+            if (typeof userIsAuthenticated === 'undefined' || !userIsAuthenticated) {
+                window.location.href = "{% url 'web_login' %}?next=" + window.location.pathname;
+                return;
+            }
+            window.location.href = `/marketplace/start-chat/${listingId}/`;
         }
 
-        // Redirection vers le chat privé (Phase 4.1)
-        window.location.href = `/chat/start/${listingId}/`;
-    }
-</script>
-{% endblock %}
+        // Recherche / Filtres (Simulation UX)
+        document.querySelector('.btn-secondary.px-4.py-3').addEventListener('click', function () {
+            const btn = this;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+                alert("Recherche en cours sur iLôt Node... Les résultats seront mis à jour en temps réel.");
+            }, 800);
+        });
+    </script>
+    {% endblock %}

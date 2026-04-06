@@ -1,99 +1,117 @@
 {% extends 'base_citizen.html' %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid py-4">
     <!-- Notary Header -->
-    <div class="row mb-5 align-items-center">
+    <div class="row mb-5 align-items-center animate-up">
         <div class="col-md-8">
-            <h6 class="text-primary fw-bold text-uppercase mb-2">Espace Professionnel</h6>
-            <h1 class="fw-bold mb-1">Étude de Me {{ notary.name }}</h1>
-            <p class="text-muted">{{ notary.office_name }} — {{ notary.city }}</p>
+            <h6 class="text-secondary fw-bold text-uppercase mb-2" style="letter-spacing: 0.2em; font-size: 0.7rem;">
+                ESPACE NOTARIAL PROFESSIONNEL</h6>
+            <h1 class="display-5 fw-bold mb-1" style="letter-spacing: -0.04em;">Étude de Me {{ notary.name }}</h1>
+            <p class="text-muted lead">{{ notary.office_name }} — {{ notary.city }}</p>
         </div>
         <div class="col-md-4 text-md-end">
-            <div
-                class="badge bg-success bg-opacity-10 text-success p-3 rounded-4 border border-success border-opacity-25 w-100 text-start">
+            <div class="p-4 bg-white rounded-4 border shadow-sm border-start border-success border-4">
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-patch-check-fill fs-2 me-3"></i>
-                    <div>
-                        <div class="fw-bold">NOTAIRE CERTIFIÉ iLÔT</div>
-                        <small class="opacity-75">Statut : Partenaire Actif</small>
+                    <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+                        <span class="fs-4">⚖️</span>
+                    </div>
+                    <div class="text-start">
+                        <div class="fw-bold text-success" style="font-size: 0.8rem;">NOTAIRE CERTIFIÉ iLÔT</div>
+                        <small class="text-muted">Statut : Partenaire Actif</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Stats Boxes for Notary -->
+    <div class="row g-4 mb-5 animate-up" style="animation-delay: 0.1s;">
+        <div class="col-md-3">
+            <div class="citizen-card p-4 text-center">
+                <h6 class="text-muted fw-bold x-small mb-2 text-uppercase">Folios Actifs</h6>
+                <h2 class="fw-bold mb-0">{{ transactions.count }}</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="citizen-card p-4 text-center">
+                <h6 class="text-muted fw-bold x-small mb-2 text-uppercase">Délai Moyen</h6>
+                <h2 class="fw-bold mb-0">{{ notary.avg_processing_time_days }}j</h2>
+            </div>
+        </div>
+    </div>
+
     <!-- Active Folios Table -->
-    <div class="row">
+    <div class="row animate-up" style="animation-delay: 0.2s;">
         <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-white py-4 px-4 border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0">Dossiers en cours de traitement</h5>
-                        <span class="badge bg-light text-dark rounded-pill px-3 py-2 border">
-                            {{ transactions.count }} Folio(s) actif(s)
-                        </span>
-                    </div>
+            <div class="citizen-card p-0 overflow-hidden">
+                <div
+                    class="bg-light bg-opacity-50 py-4 px-4 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-folder2-open me-2 text-primary"></i>Dossiers en cours de
+                        traitement</h5>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">Exporter la
+                        liste</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light bg-opacity-50">
-                            <tr class="small text-muted text-uppercase fw-bold">
-                                <th class="ps-4">Réf Folio / Propriété</th>
-                                <th>Acheteur & Vendeur</th>
-                                <th>Statut Actuel</th>
-                                <th>Modifier l'Etape</th>
+                        <thead>
+                            <tr class="x-small text-muted text-uppercase fw-bold bg-white">
+                                <th class="ps-4 py-3">Réf Folio / Propriété</th>
+                                <th class="py-3">Acheteur & Vendeur</th>
+                                <th class="py-3">Statut Actuel</th>
+                                <th class="py-3 pe-4 text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for t in transactions %}
-                            <tr>
-                                <td class="ps-4">
-                                    <h6 class="mb-0 fw-bold">{{ t.property.village|default:"Parcelle sans nom" }}</h6>
-                                    <div class="small text-primary fw-bold mb-1">Folio #{{
-                                        t.id|stringformat:"s"|slice:":8" }}</div>
-                                    {% if t.property.district %}
-                                    <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{
-                                        t.property.district }}</div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="mb-2">
-                                        <div class="small text-muted mb-1 text-uppercase fw-bold"
-                                            style="font-size: 0.6rem;">Acheteur</div>
-                                        <div class="fw-bold text-dark">
-                                            <i class="bi bi-person-circle text-primary me-1"></i>
-                                            {{ t.buyer.full_name|default:t.buyer.email }}
+                            <tr class="border-top">
+                                <td class="ps-4 py-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-3 bg-primary bg-opacity-5 p-2 me-3">
+                                            <span class="fs-5">📄</span>
                                         </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">{{ t.property.village|default:"Parcelle
+                                                iLôt" }}</h6>
+                                            <div class="x-small text-primary fw-bold">FOLIO #{{ t.id|stringformat:"s"|slice:":8"|upper }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4">
+                                    <div class="mb-2">
+                                        <small
+                                            class="text-muted x-small d-block fw-bold text-uppercase">Acheteur</small>
+                                        <span class="fw-bold text-dark"><i
+                                                class="bi bi-person-fill text-primary me-1"></i>{{ t.buyer.full_name|default:t.buyer.email }}</span>
                                     </div>
                                     <div class="mb-0">
-                                        <div class="small text-muted mb-1 text-uppercase fw-bold"
-                                            style="font-size: 0.6rem;">Vendeur</div>
-                                        <div class="fw-bold text-secondary">
-                                            <i class="bi bi-person text-muted me-1"></i>
-                                            {{ t.seller.full_name|default:t.seller.email }}
-                                        </div>
+                                        <small class="text-muted x-small d-block fw-bold text-uppercase">Vendeur</small>
+                                        <span class="fw-bold text-secondary text-opacity-75"><i
+                                                class="bi bi-person me-1"></i>{{ t.seller.full_name|default:t.seller.email }}</span>
                                     </div>
                                 </td>
-                                <td>
-                                    <span
-                                        class="badge {% if t.status == 'STEP6_COMPLETED' %} bg-success {% else %} bg-warning bg-opacity-10 text-warning {% endif %} rounded-pill px-3 py-2">
+                                <td class="py-4">
+                                    <span class="status-badge 
+                                        {% if t.status == 'STEP6_COMPLETED' %}bg-success text-white
+                                        {% elif t.status == 'CANCELLED' %}bg-danger text-white
+                                        {% else %}bg-warning bg-opacity-10 text-warning{% endif %}">
                                         {{ t.get_status_display }}
                                     </span>
                                     {% if t.andf_dossier_number %}
-                                    <div class="mt-1 x-small text-info fw-bold">ANDF: {{ t.andf_dossier_number }}</div>
+                                    <div class="mt-2 text-info fw-bold x-small"><i class="bi bi-link-45deg"></i> ANDF:
+                                        {{ t.andf_dossier_number }}</div>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="py-4 pe-4 text-end">
                                     {% if t.status != 'STEP6_COMPLETED' and t.status != 'CANCELLED' %}
                                     <form action="{% url 'update_transaction_step' folio_id=t.id %}" method="POST"
-                                        class="d-flex gap-2"
+                                        class="d-inline-flex gap-2 align-items-center"
                                         onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='...';">
                                         {% csrf_token %}
                                         <select name="next_step" required
-                                            class="form-select form-select-sm rounded-3 border-light shadow-none"
-                                            style="width: 250px;">
-                                            <option value="" disabled selected>Passer à l'étape suivante...</option>
+                                            class="form-select form-select-sm rounded-pill border-light shadow-none bg-light"
+                                            style="width: 220px; font-size: 0.8rem;">
+                                            <option value="" disabled selected>Changer l'étape...</option>
                                             <option value="STEP2_ID_VERIFIED">2. Identités Vérifiées</option>
                                             <option value="STEP3_DEED_SIGNED">3. Acte de Vente Signé</option>
                                             <option value="STEP4_ANDF_DEPOSITED">4. Déposé à l'ANDF</option>
@@ -102,24 +120,24 @@
                                             <option value="CANCELLED" class="text-danger">Annuler le dossier</option>
                                         </select>
 
-                                        <!-- Champ conditionnel JS pour le n° ANDF -->
-                                        <input type="text" name="andf_number" placeholder="N° Dossier ANDF"
-                                            class="form-control form-control-sm rounded-3 border-light d-none"
-                                            style="width: 150px;" id="andf_input_{{ t.id }}">
+                                        <input type="text" name="andf_number" placeholder="N° ANDF"
+                                            class="form-control form-control-sm rounded-pill border-light d-none"
+                                            style="width: 120px; font-size: 0.8rem;" id="andf_input_{{ t.id }}">
 
                                         <button type="submit"
-                                            class="btn btn-sm btn-primary rounded-3 px-3">Valider</button>
+                                            class="btn btn-sm btn-citizen rounded-pill px-3">Valider</button>
                                     </form>
                                     {% else %}
-                                    <span class="text-muted small"><i class="bi bi-check2-all me-1"></i> Dossier
-                                        Clôturé</span>
+                                    <span class="text-muted small fw-bold"><i
+                                            class="bi bi-check-all fs-4 text-success align-middle me-1"></i>Archivé</span>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="4" class="py-5 text-center">
-                                    <div class="text-muted">Aucune transaction en cours pour votre étude.</div>
+                                    <div class="display-3 opacity-25 mb-3">📂</div>
+                                    <h6 class="text-muted">Aucune transaction active pour votre étude foncière.</h6>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -139,6 +157,7 @@
             if (e.target.value === 'STEP4_ANDF_DEPOSITED') {
                 andfInput.classList.remove('d-none');
                 andfInput.required = true;
+                andfInput.focus();
             } else {
                 andfInput.classList.add('d-none');
                 andfInput.required = false;
@@ -148,12 +167,12 @@
 </script>
 
 <style>
-    .table thead th {
-        border-top: none;
+    .x-small {
+        font-size: 0.7rem;
     }
 
-    .x-small {
-        font-size: 0.75rem;
+    .table-hover tbody tr:hover {
+        background-color: rgba(6, 78, 27, 0.02) !important;
     }
 </style>
 {% endblock %}

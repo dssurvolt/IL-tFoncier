@@ -1,152 +1,164 @@
 {% extends 'base_citizen.html' %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container-fluid py-5">
     <div class="row g-5">
-        <!-- Sidebar: Recap -->
-        <div class="col-lg-4">
+        <!-- Sidebar: Transaction Details -->
+        <div class="col-lg-4 animate-up">
             <div class="mb-4">
                 {% if is_notary %}
-                <a href="{% url 'notary_dashboard' %}" class="btn btn-link text-decoration-none text-muted p-0">
-                    <i class="bi bi-arrow-left me-2"></i> Retour au Tableau de Bord
+                <a href="{% url 'notary_dashboard' %}"
+                    class="btn btn-link text-decoration-none text-muted p-0 fw-bold x-small">
+                    <i class="bi bi-arrow-left me-2"></i> RETOUR AU TABLEAU DE BORD
                 </a>
                 {% else %}
-                <a href="{% url 'user_transactions' %}" class="btn btn-link text-decoration-none text-muted p-0">
-                    <i class="bi bi-arrow-left me-2"></i> Retour à Mes Transactions
+                <a href="{% url 'user_transactions' %}"
+                    class="btn btn-link text-decoration-none text-muted p-0 fw-bold x-small">
+                    <i class="bi bi-arrow-left me-2"></i> MES TRANSACTIONS
                 </a>
                 {% endif %}
             </div>
 
-            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
-                <h5 class="fw-bold mb-4">Dossier de Transaction</h5>
-                <div class="d-flex align-items-center mb-4">
-                    <div class="rounded-3 bg-primary bg-opacity-10 p-3 me-3 text-primary">
-                        <i class="bi bi-file-earmark-lock fs-3"></i>
+            <div class="citizen-card p-4 sticky-top" style="top: 100px; border-top: 6px solid var(--citizen-primary);">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary">
+                        <i class="bi bi-file-earmark-check fs-3"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 fw-bold">N° Folio : {{ folio.id|stringformat:"s"|slice:":8" }}</h6>
-                        <small class="text-muted">Ouvert le {{ folio.created_at|date:"d/m/Y" }}</small>
+                        <h6 class="mb-0 fw-bold text-dark">Folio #{{ folio.id|stringformat:"s"|slice:":8"|upper }}</h6>
+                        <small class="text-muted">Ouvert le {{ folio.created_at|date:"d M Y" }}</small>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="small text-muted mb-1 text-uppercase fw-bold">Parties au Dossier</label>
-                    <div class="d-flex flex-column gap-2 mt-2">
+                    <label class="x-small text-muted mb-2 text-uppercase fw-bold"
+                        style="letter-spacing: 0.1em;">Parties</label>
+                    <div class="d-flex flex-column gap-3">
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-person-circle text-primary me-2"></i>
+                            <div class="rounded-circle bg-light p-2 me-3 fs-6">👤</div>
                             <div>
-                                <small class="text-muted d-block" style="font-size: 0.6rem;">ACHETEUR</small>
-                                <span class="fw-bold small">{{ folio.buyer.full_name|default:folio.buyer.email }}</span>
+                                <small class="text-muted d-block x-small">ACHETEUR</small>
+                                <span class="fw-bold text-dark">{{ folio.buyer.full_name|default:folio.buyer.email }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-person text-muted me-2"></i>
+                            <div class="rounded-circle bg-light p-2 me-3 fs-6">🤝</div>
                             <div>
-                                <small class="text-muted d-block" style="font-size: 0.6rem;">VENDEUR</small>
-                                <span class="fw-bold small">{{ folio.seller.full_name|default:folio.seller.email
-                                    }}</span>
+                                <small class="text-muted d-block x-small">VENDEUR</small>
+                                <span class="fw-bold text-secondary">{{ folio.seller.full_name|default:folio.seller.email }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="small text-muted mb-1">PROPRIÉTÉ</label>
-                    <h6 class="fw-bold mb-0 text-dark">{{ folio.property.village|default:"Parcelle iLôt" }}</h6>
-                    <small class="text-muted">{{ folio.property.district }}</small>
+                <div class="mb-4 p-3 bg-light rounded-4 border border-white">
+                    <label class="x-small text-muted mb-1 text-uppercase fw-bold">Propriété</label>
+                    <h6 class="fw-bold mb-1 text-dark">{{ folio.property.village|default:"Parcelle iLôt" }}</h6>
+                    <small class="text-muted d-block"><i class="bi bi-geo-alt me-1"></i>{{ folio.property.district }}</small>
                 </div>
 
                 <div class="mb-4">
-                    <label class="small text-muted mb-1">⚖️ NOTAIRE EN CHARGE DU DOSSIER</label>
-                    <h6 class="fw-bold mb-1 text-primary">Me {{ folio.notary.name }}</h6>
-                    <small class="text-muted"><i class="bi bi-telephone-fill me-1"></i> {{ folio.notary.phone }}</small>
+                    <label class="x-small text-muted mb-1 text-uppercase fw-bold">Notaire Responsable</label>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-5 p-2 me-3 fs-5">⚖️</div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-primary">Me {{ folio.notary.name }}</h6>
+                            <small class="text-muted">{{ folio.notary.phone }}</small>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="small text-muted mb-1">PRIX SÉCURISÉ</label>
-                    <h5 class="fw-bold mb-1 text-primary">{{ listing.price_fiat }} FCFA</h5>
+                <div class="pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="x-small text-muted fw-bold">PRIX SÉCURISÉ</span>
+                        <span class="h5 fw-bold mb-0 text-primary">{{ listing.price_fiat }} <span
+                                class="x-small">FCFA</span></span>
+                    </div>
                     {% if listing.escrow_contract %}
-                    <div class="p-2 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 mt-2">
-                        <small class="text-success fw-bold d-block"><i class="bi bi-link-45deg"></i> ESCROW
-                            DÉPLOYÉ</small>
-                        <code class="x-small text-dark">{{ listing.escrow_contract }}</code>
+                    <div class="p-2 bg-success bg-opacity-5 border border-success border-opacity-10 rounded-3 mt-1">
+                        <small class="text-success fw-bold d-block x-small"><i class="bi bi-shield-lock-fill"></i> SMART
+                            CONTRACT ACTIF</small>
+                        <code class="x-small text-dark opacity-75">{{ listing.escrow_contract|truncatechars:30 }}</code>
                     </div>
                     {% endif %}
-                </div>
-
-                <div class="border-top pt-4">
-                    <div class="alert alert-warning rounded-3 p-3 border-0 small mb-0">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Veuillez vous rendre à l'étude du notaire avec vos pièces d'identité originales pour l'étape 2.
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Main Content: Value Chain -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 p-5 mb-4">
-                <h2 class="fw-bold mb-4">Étapes de votre acquisition sécurisée</h2>
-
-                <!-- Progress Bar -->
-                <div class="progress rounded-pill mb-5" style="height: 10px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
-                        style="width: {{ folio.progress_percentage }}%;"></div>
+        <!-- Main Content: Timeline -->
+        <div class="col-lg-8 animate-up" style="animation-delay: 0.1s;">
+            <div class="citizen-card p-5 mb-4 shadow-lg border-0">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h2 class="fw-bold mb-0" style="letter-spacing: -0.04em;">Chaîne de Valeur Foncière</h2>
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-4 py-2 fw-bold">
+                        {{ folio.progress_percentage }}% Complété
+                    </span>
                 </div>
 
-                <div class="transaction-timeline position-relative ps-5">
+                <!-- Progress Visual -->
+                <div class="progress rounded-pill mb-5" style="height: 12px; background-color: #f1f5f9;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
+                        style="width: {{ folio.progress_percentage }}%; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                    </div>
+                </div>
 
-                    <!-- Line -->
-                    <div class="line position-absolute start-0 top-0 h-100 border-start border-3 border-light ms-4"
+                <div class="position-relative ps-5">
+                    <!-- Vertical Line -->
+                    <div class="position-absolute start-0 top-0 h-100 border-start border-4 border-light ms-4"
                         style="z-index: 1;"></div>
 
-                    <!-- Steps Loop -->
                     {% for step_code, step_label in steps %}
                     {% if step_code != 'CANCELLED' %}
                     <div class="step-item mb-5 position-relative">
-                        <!-- Icon/Circle -->
-                        <div class="step-marker position-absolute rounded-circle shadow-sm d-flex align-items-center justify-content-center
-                                {% if folio.status_order == forloop.counter %} bg-primary text-white border border-4 border-white {% elif folio.status_order > forloop.counter %} bg-success text-white {% else %} bg-light text-muted border border-1 border-gray-300 {% endif %}"
-                            style="width: 50px; height: 50px; left: -68px; top: -10px; z-index: 2; transition: all 0.3s ease;">
+                        <!-- Step Circle -->
+                        <div class="position-absolute rounded-circle shadow-sm d-flex align-items-center justify-content-center
+                                {% if folio.status_order == forloop.counter %} bg-primary text-white scale-up {% elif folio.status_order > forloop.counter %} bg-success text-white {% else %} bg-white text-muted border border-2 border-light {% endif %}"
+                            style="width: 54px; height: 54px; left: -72px; top: -5px; z-index: 2; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                             {% if folio.status_order > forloop.counter %}
-                            <i class="bi bi-check-lg fs-4"></i>
+                            <i class="bi bi-check-all fs-3"></i>
                             {% else %}
-                            <span class="fw-bold h5 mb-0">{{ forloop.counter }}</span>
+                            <span class="fw-bold fs-5 mb-0">{{ forloop.counter }}</span>
                             {% endif %}
                         </div>
 
-                        <div class="step-content">
+                        <div class="ps-3">
                             <h4
                                 class="fw-bold mb-2 {% if folio.status_order == forloop.counter %} text-primary {% elif folio.status_order > forloop.counter %} text-success {% else %} text-muted opacity-50 {% endif %}">
                                 {{ step_label }}
                             </h4>
-
-                            <p class="text-muted mb-0">
+                            <p class="text-muted mb-3" style="max-width: 600px; line-height: 1.6;">
                                 {% if step_code == 'STEP1_NOTARY_SELECTED' %}
-                                Le notaire a été sélectionné et a reçu l'ouverture du dossier.
+                                Le protocole de mutation a été initié. Me {{ folio.notary.name }} supervise l'ouverture
+                                du dossier numérique.
                                 {% elif step_code == 'STEP2_ID_VERIFIED' %}
-                                Vérification physique des pièces d'identité effectuée en présence du notaire.
+                                Confrontation physique et numérique des identités effectuée. Les parties sont
+                                authentifiées.
                                 {% elif step_code == 'STEP3_DEED_SIGNED' %}
-                                L'acte de vente authentique a été signé par toutes les parties.
+                                Signature de l'acte authentique sous scellement notarial. Accord irrévocable.
                                 {% elif step_code == 'STEP4_ANDF_DEPOSITED' %}
-                                Le dossier a été transmis à l'ANDF pour mutation.
+                                Transmission officielle à l'Agence Nationale du Domaine et du Foncier (ANDF).
+                                Transformation en titre foncier définitif.
                                 {% if folio.andf_dossier_number %}
                                 <span
-                                    class="badge bg-info bg-opacity-10 text-info py-2 px-3 fw-bold mt-2 d-block">Dossier
-                                    N° : {{ folio.andf_dossier_number }}</span>
+                                    class="badge bg-info bg-opacity-10 text-info py-2 px-3 fw-bold mt-2 d-inline-block border border-info border-opacity-10">
+                                    <i class="bi bi-layers-half me-2"></i>Dossier ANDF : {{ folio.andf_dossier_number }}
+                                </span>
                                 {% endif %}
                                 {% elif step_code == 'STEP5_TITLE_MODIFIED' %}
-                                L'ANDF a transféré la pleine propriété à votre nom dans le cadastre.
+                                Mutation cadastrale effectuée. La propriété est enregistrée à votre nom dans le registre
+                                d'État.
                                 {% elif step_code == 'STEP6_COMPLETED' %}
-                                Titre foncier récupéré physiquement. Félicitations, vous êtes officiellement
-                                propriétaire !
+                                Remise du titre foncier physique et numérique. Le processus iLôt est clôturé avec
+                                succès.
                                 {% endif %}
                             </p>
 
                             {% if folio.status == step_code %}
-                            <div class="mt-4">
-                                <div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
-                                <span class="text-primary fw-bold ms-2">Étape en cours...</span>
+                            <div
+                                class="d-flex align-items-center p-3 bg-primary bg-opacity-5 rounded-4 border border-primary border-opacity-10 animate-pulse">
+                                <div class="spinner-grow spinner-grow-sm text-primary me-3" role="status"></div>
+                                <span class="text-primary fw-bold small">ACTION REQUISE : EN ATTENTE DE VALIDATION
+                                    NOTARIALE</span>
                             </div>
                             {% endif %}
                         </div>
@@ -156,12 +168,10 @@
                 </div>
             </div>
 
-            <!-- Global Footer Info -->
-            <div class="text-center p-4 bg-white rounded-4 shadow-sm border-0 border-top border-5 border-primary">
-                <p class="text-muted mb-0">
-                    <i class="bi bi-shield-fill-check text-success me-1"></i>
-                    Cette chaîne de valeur est garantie sécurisée par iLôt Foncier en partenariat avec la Chambre
-                    Nationale des Notaires.
+            <div class="citizen-card p-4 bg-primary text-white border-0 shadow-lg text-center">
+                <p class="mb-0 fw-bold">
+                    <i class="bi bi-shield-fill-check fs-4 me-2"></i>
+                    Chaîne de valeur certifiée conforme par la Chambre Nationale des Notaires du Bénin.
                 </p>
             </div>
         </div>
@@ -169,25 +179,38 @@
 </div>
 
 <style>
-    .step-marker {
-        font-family: 'Inter', sans-serif;
+    .x-small {
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
     }
 
-    .step-content {
-        transition: all 0.3s ease;
+    .scale-up {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(6, 78, 27, 0.3) !important;
     }
 
-    .step-item:last-child .line {
-        display: none;
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.7;
+        }
+
+        100% {
+            opacity: 1;
+        }
     }
 </style>
 
 <script>
-    // Auto-refresh intelligent : actualise la page toutes les 30 secondes si le dossier n'est pas terminé
     {% if folio.status_order < 6 and folio.status != 'CANCELLED' %}
-    setTimeout(function () {
-        location.reload();
-    }, 30000); // 30 secondes
+    setTimeout(() => { location.reload(); }, 30000);
     {% endif %}
 </script>
 {% endblock %}

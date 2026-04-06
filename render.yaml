@@ -6,7 +6,7 @@ services:
     region: frankfurt
     dockerContext: .
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /login/
+    healthCheckPath: /health/
     preDeployCommand: python manage.py migrate # <--- Migration automatique avant chaque déploiement
     envVars:
       - key: DEBUG
