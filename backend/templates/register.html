@@ -201,8 +201,14 @@
                 if (d.first_name || d.last_name) document.getElementById('fullName').value = (d.first_name + ' ' + d.last_name).trim();
                 if (d.birth_date) document.getElementById('birthDate').value = d.birth_date;
                 if (d.birth_place) document.getElementById('district').value = d.birth_place;
+            } else {
+                const errorData = await res.json();
+                alert("Erreur d'analyse : " + (errorData.error || "Le document est illisible."));
             }
-        } catch (e) { } finally {
+        } catch (e) {
+            console.error("OCR Inference Error:", e);
+            alert("Erreur de connexion au serveur d'analyse.");
+        } finally {
             document.getElementById('ocrLoading').classList.add('d-none');
             document.getElementById('ocrContent').classList.remove('opacity-25');
             updateSubmitButton();

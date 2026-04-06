@@ -527,18 +527,38 @@ from utils.land_title_extractor import extract_land_title_data
 class IdentityExtractionAPI(View):
     """
     API pour extraire les données d'identité à partir d'un fichier uploadé (PDF/Image).
+    Optimisée pour Render avec remontée d'erreurs précise.
     """
     def post(self, request):
         if 'file' not in request.FILES:
-            return JsonResponse({'error': 'Aucun fichier fourni.'}, status=400)
+            return JsonResponse({'error': 'Aucun fichier fourni dans la requête (clé "file" manquante).'}, status=400)
             
         uploaded_file = request.FILES['file']
-        data = extract_from_upload(uploaded_file)
         
-        if 'raw_text' in data:
-            del data['raw_text']
+        try:
+            data = extract_from_upload(uploaded_file)
             
-        return JsonResponse(data)
+            # Si le moteur d'extraction renvoie une erreur interne
+            if 'error' in data:
+                return JsonResponse(data, status=500)
+            
+            # Vérifier si on a trouvé au moins un champ important (Nom ou Prénom)
+            if not data.get('last_name') and not data.get('first_name'):
+                return JsonResponse({
+                    'error': "Aucune information lisible n'a été détectée. Essayez une photo plus claire ou plus lumineuse du document."
+                }, status=422)
+                
+            # Nettoyage des données pour le front-end
+            if 'raw_text' in data:
+                del data['raw_text']
+                
+            return JsonResponse(data)
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"CRASH API Extraction: {str(e)}")
+            return JsonResponse({'error': f"Erreur système lors de l'analyse : {str(e)}"}, status=500)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LandTitleExtractionAPI(View):
