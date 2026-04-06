@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 try:
     import dj_database_url
 except ImportError:
@@ -34,7 +34,7 @@ if load_dotenv:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v8t(hpvhzy0p1oc^phlu##1r@+oj+a7f*1s8y7yn2)(6#=d8rl'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-v8t(hpvhzy0p1oc^phlu##1r@+oj+a7f*1s8y7yn2)(6#=d8rl')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
