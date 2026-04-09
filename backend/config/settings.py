@@ -34,27 +34,18 @@ if load_dotenv:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-v8t(hpvhzy0p1oc^phlu##1r@+oj+a7f*1s8y7yn2)(6#=d8rl')
+SECRET_KEY = 'django-insecure-v8t(hpvhzy0p1oc^phlu##1r@+oj+a7f*1s8y7yn2)(6#=d8rl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['ilotfoncier.com', 'www.ilotfoncier.com', 'ilotfoncier.onrender.com', 'localhost', '127.0.0.1']
-if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
-    ALLOWED_HOSTS.append(os.environ.get('RENDER_EXTERNAL_HOSTNAME'))
-
+ALLOWED_HOSTS = ['*'] # Autorisé pour Render
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000', 
     'http://127.0.0.1:8000',
     'https://localhost:8000',
-    'https://127.0.0.1:8000',
-    'https://ilotfoncier.com',
-    'https://www.ilotfoncier.com',
-    'https://ilot-foncier.onrender.com'
+    'https://127.0.0.1:8000'
 ]
-if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}")
-
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_NAME = 'ilot_csrftoken'
@@ -86,7 +77,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Pour servir les statiques sur Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -174,9 +165,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles' # Requis pour collectstatic
-
-# WhiteNoise configuration pour compression et cache long-terme
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type

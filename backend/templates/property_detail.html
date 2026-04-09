@@ -25,7 +25,7 @@
                     {% endif %}
                 </div>
                 <span class="status-badge 
-                    {% if property.status == 'ON_CHAIN' %}bg-success text-white
+                    {% if property.status == 'VALIDATED' %}bg-success text-white
                     {% elif property.status == 'VALIDATING' %}bg-warning text-dark
                     {% elif property.status == 'DISPUTED' %}bg-danger text-white
                     {% else %}bg-light text-muted{% endif %}">
@@ -46,7 +46,8 @@
                     <div
                         class="p-2 px-3 bg-white rounded-3 shadow-sm border small d-flex justify-content-between align-items-center">
                         <div>
-                            📍 <strong>Centroïde:</strong> <span class="text-primary fw-bold">{{ property.gps_centroid.lat }}, {{ property.gps_centroid.lng }}</span>
+                            📍 <strong>Centroïde:</strong> <span class="text-primary fw-bold">{{
+                                property.gps_centroid.lat }}, {{ property.gps_centroid.lng }}</span>
                         </div>
                         <div class="text-muted">
                             <span class="badge bg-success bg-opacity-10 text-success">Vue Satellite HD</span>
@@ -137,29 +138,22 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="fw-bold text-muted small mb-3">CERTIFICATION BLOCKCHAIN</h6>
-                    {% if property.on_chain_id %}
+                    <h6 class="fw-bold text-muted small mb-3">CERTIFICATION NUMÉRIQUE</h6>
                     <div class="p-3 bg-primary bg-opacity-5 rounded-4 border border-primary border-opacity-10">
-                        <small class="text-muted d-block mb-1">Token ID (ERC-721)</small>
-                        <span class="fw-bold text-primary">#{{ property.on_chain_id }}</span>
+                        <small class="text-muted d-block mb-1">Identifiant Unique (iLôt)</small>
+                        <span class="fw-bold text-primary">#{{ property.id|stringformat:"s"|slice:":8" }}</span>
                         <hr class="my-2">
-                        <small class="text-muted d-block mb-1">Contrat de Registre</small>
-                        <code class="small text-break">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</code>
+                        <small class="text-muted d-block mb-1">Statut de Sécurisation</small>
+                        <span class="badge bg-success rounded-pill px-3">{{ property.get_status_display }}</span>
                     </div>
-                    {% else %}
-                    <div class="p-3 bg-light rounded-4 text-center">
-                        <span class="d-block mb-2">⏳</span>
-                        <small class="text-muted">En attente de validation finale pour inscription sur la
-                            blockchain.</small>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
 
         <!-- Section: Témoins -->
         <div class="citizen-card mb-4">
-            <h5 class="fw-bold mb-4">Témoins du Dossier <span class="badge bg-danger ms-2">{{ property.witnesses.count }}</span></h5>
+            <h5 class="fw-bold mb-4">Témoins du Dossier <span class="badge bg-danger ms-2">{{ property.witnesses.count
+                    }}</span></h5>
             <div class="row g-3">
                 {% for w in property.witnesses.all %}
                 <div class="col-md-6">
@@ -202,7 +196,8 @@
 
         <!-- Galerie Médias -->
         <div class="citizen-card">
-            <h5 class="fw-bold mb-4">Documents & Preuves Visuelles <span class="badge bg-secondary ms-2">{{ media|length }}</span></h5>
+            <h5 class="fw-bold mb-4">Documents & Preuves Visuelles <span class="badge bg-secondary ms-2">{{ media|length
+                    }}</span></h5>
             <div class="row g-3">
                 {% for m in media %}
                 <div class="col-md-4">

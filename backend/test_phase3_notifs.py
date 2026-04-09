@@ -39,7 +39,7 @@ def test_notifications():
     notify_transaction_update(folio)
 
     # 4. Verify in database
-    buyer_notifs = Notification.objects.filter(user_wallet=buyer, type='TRANSACTION_UPDATE').order_by('-created_at')
+    buyer_notifs = Notification.objects.filter(user=buyer, type='TRANSACTION_UPDATE').order_by('-created_at')
     if buyer_notifs.exists():
         last_notif = buyer_notifs.first()
         print(f"✅ Notification created for Buyer: {last_notif.payload['title']}")
@@ -47,7 +47,7 @@ def test_notifications():
     else:
         print("❌ Notification NOT created for Buyer")
 
-    seller_notifs = Notification.objects.filter(user_wallet=seller, type='TRANSACTION_UPDATE').order_by('-created_at')
+    seller_notifs = Notification.objects.filter(user=seller, type='TRANSACTION_UPDATE').order_by('-created_at')
     if seller_notifs.exists():
         print(f"✅ Notification created for Seller: {seller_notifs.first().payload['title']}")
     else:

@@ -32,14 +32,11 @@ class Property(models.Model):
         DRAFT = 'DRAFT', _('Brouillon / En attente')
         PENDING_SURVEYOR = 'PENDING_SURVEYOR', _('En attente attestation géomètre')
         VALIDATING = 'VALIDATING', _('En cours de validation communautaire')
-        ON_CHAIN = 'ON_CHAIN', _('Sécurisé sur Blockchain')
+        VALIDATED = 'VALIDATED', _('Sécurisé / Validé')
         DISPUTED = 'DISPUTED', _('En litige')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    # Blockchain Link
-    on_chain_id = models.DecimalField(max_digits=78, decimal_places=0, unique=True, null=True, blank=True, help_text="Token ID (uint256) sur le contrat")
-    owner_wallet = models.ForeignKey(User, on_delete=models.PROTECT, related_name='properties', to_field='wallet_address', db_column='owner_wallet')
+    owner_wallet = models.ForeignKey(User, on_delete=models.PROTECT, related_name='properties')
     country = models.CharField(max_length=100, default='Benin', help_text="Pays de la parcelle")
     
     # Geospatial Data (Fallback JSON for No-GDAL env)
@@ -76,7 +73,7 @@ class Property(models.Model):
             return first_photo.file.url
         return None
 
-    last_sync_block = models.BigIntegerField(null=True, blank=True, help_text="Dernier bloc synchronisé")
+
 
     class Meta:
         db_table = 'properties'
@@ -106,9 +103,7 @@ class PropertyMedia(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='media')
     
     file = models.FileField(upload_to="property_media/", null=True, blank=True)
-    ipfs_cid = models.CharField(max_length=64, help_text="Content ID IPFS (ex: Qm...)")
     media_type = models.CharField(max_length=20, choices=MediaType.choices)
-    is_verified = models.BooleanField(default=False, help_text="Hash confirmé sur la blockchain ?")
     
     class Meta:
         db_table = 'property_media'
@@ -116,25 +111,6 @@ class PropertyMedia(models.Model):
     def __str__(self):
         return f"{self.media_type} for {self.property_id}"
 
-class BlockchainSyncStatus(models.Model):
-    """
-    État de santé de l'Indexeur.
-    """
-    class SyncStatus(models.TextChoices):
-        OK = 'OK', _('Synchronisé')
-        LAGGING = 'LAGGING', _('En retard')
-        STOPPED = 'STOPPED', _('Arrêté / Erreur')
-
-    contract_address = models.CharField(max_length=42, primary_key=True)
-    chain_id = models.IntegerField(default=137, help_text="Chain ID (ex: 137 Polygon)")
-    last_processed_block = models.BigIntegerField(default=0)
-    sync_status = models.CharField(max_length=20, choices=SyncStatus.choices, default=SyncStatus.OK)
-
-    class Meta:
-        db_table = 'blockchain_sync_status'
-
-    def __str__(self):
-        return f"Sync {self.contract_address}: {self.last_processed_block}"
 
 class PropertyWitness(models.Model):
     """
@@ -156,7 +132,6 @@ class PropertyWitness(models.Model):
     email = models.EmailField(null=True, blank=True)
     is_confirmed = models.BooleanField(default=False, help_text="Le témoin a-t-il validé son implication ?")
     id_card_photo = models.FileField(upload_to="witness_ids/", null=True, blank=True)
-    ipfs_cid = models.CharField(max_length=64, null=True, blank=True, help_text="CID de la pièce d'identité")
 
     class Meta:
         db_table = 'property_witnesses'

@@ -6,7 +6,7 @@
         <h6 class="text-primary fw-bold text-uppercase mb-2" style="letter-spacing: 0.1em;">RÉPUBLIQUE DU BÉNIN -
             CONTRÔLE FONCIER</h6>
         <h1 class="h2 fw-bold mb-1">Portail de Supervision d'État</h1>
-        <p class="text-muted mb-0">Surveillance de l'intégrité foncière et certification par blockchain.</p>
+        <p class="text-muted mb-0">Surveillance de l'intégrité foncière et certification par infrastructure numérique sécurisée.</p>
     </div>
     <div class="text-end">
         <button class="btn btn-outline-primary btn-sm px-3 mb-2" onclick="location.reload()">
@@ -14,7 +14,7 @@
         </button>
         <div class="d-flex gap-2">
             <span
-                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-2">Blockchain:
+                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-2">iLôt Sécurité:
                 Opérationnelle</span>
             <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 py-2">Indexeur: Sync
                 100%</span>
@@ -103,14 +103,14 @@
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="d-flex align-items-center">
                             <span
-                                class="dot me-2 {% if stat.status == 'ON_CHAIN' %}bg-success{% elif stat.status == 'VALIDATING' %}bg-warning{% elif stat.status == 'DISPUTED' %}bg-danger{% elif stat.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}"></span>
+                                class="dot me-2 {% if stat.status == 'VALIDATED' %}bg-success{% elif stat.status == 'VALIDATING' %}bg-warning{% elif stat.status == 'DISPUTED' %}bg-danger{% elif stat.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}"></span>
                             <span class="fw-bold small text-dark">{{ stat.label }}</span>
                         </div>
                         <span class="fw-bold small">{{ stat.count }}</span>
                     </div>
                     {% widthratio stat.count total_properties 100 as pct %}
                     <div class="progress" style="height: 6px;">
-                        <div class="progress-bar {% if stat.status == 'ON_CHAIN' %}bg-success{% elif stat.status == 'VALIDATING' %}bg-warning{% elif stat.status == 'DISPUTED' %}bg-danger{% elif stat.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}"
+                        <div class="progress-bar {% if stat.status == 'VALIDATED' %}bg-success{% elif stat.status == 'VALIDATING' %}bg-warning{% elif stat.status == 'DISPUTED' %}bg-danger{% elif stat.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}"
                             role="progressbar" style="width: {{ pct }}%"></div>
                     </div>
                 </div>
@@ -182,7 +182,7 @@
                             </td>
                             <td>
                                 <span
-                                    class="badge {% if p.status == 'ON_CHAIN' %}bg-success{% elif p.status == 'VALIDATING' %}bg-warning{% elif p.status == 'DISPUTED' %}bg-danger{% elif p.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}">
+                                    class="badge {% if p.status == 'VALIDATED' %}bg-success{% elif p.status == 'VALIDATING' %}bg-warning{% elif p.status == 'DISPUTED' %}bg-danger{% elif p.status == 'PENDING_SURVEYOR' %}bg-info{% else %}bg-secondary{% endif %}">
                                     {{ p.status }}
                                 </span>
                             </td>
@@ -219,7 +219,7 @@
         data.forEach(item => {
             if (item.lat && item.lng) {
                 let color = '#6b7280'; // gray
-                if (item.status === 'ON_CHAIN') color = '#059669'; // green
+                if (item.status === 'VALIDATED') color = '#059669'; // green
                 if (item.status === 'VALIDATING') color = '#d97706'; // orange
                 if (item.status === 'PENDING_SURVEYOR') color = '#0284c7'; // blue
                 if (item.status === 'DISPUTED') color = '#dc2626'; // red

@@ -95,20 +95,11 @@ def web_start_transaction(request, property_id, notary_id):
         status=TransactionFolio.Step.STEP1_NOTARY_SELECTED
     )
 
-    # Simulation déploiement Escrow (Layer 2)
-    try:
-        from marketplace.models import Listing
-        active_listing = Listing.objects.filter(property=prop, status=Listing.Status.ACTIVE).first()
-        if active_listing:
-            import hashlib
-            # Génération d'une adresse de contrat fictive basée sur le folio
-            mock_address = "0x" + hashlib.sha256(str(folio.id).encode()).hexdigest()[:40]
-            active_listing.escrow_contract = mock_address
-            active_listing.save()
-    except Exception as e:
-        print(f"Erreur simulation Escrow: {e}")
-    
-    messages.success(request, f"Dossier ouvert chez Me {notary.name}. Votre achat est maintenant sécurisé par un contrat séquestre numérique.")
+    # Simulation de la mise en séquestre des fonds (Processus fiduciaire sécurisé)
+    from marketplace.models import Listing
+    active_listing = Listing.objects.filter(property=prop, status=Listing.Status.ACTIVE).first()
+
+    messages.success(request, f"Dossier ouvert chez Me {notary.name}. Votre achat est maintenant sécurisé par notre plateforme.")
     return redirect('web_transaction_status', folio_id=folio.id)
 
 @login_required
@@ -130,7 +121,7 @@ def web_transaction_status(request, folio_id):
     # Marquer les notifications de type TRANSACTION_UPDATE pour ce folio comme lues
     from django.utils import timezone
     Notification.objects.filter(
-        user_wallet=request.user,
+        user=request.user,
         type='TRANSACTION_UPDATE',
         payload__folio_id=str(folio.id),
         read_at__isnull=True

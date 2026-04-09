@@ -91,8 +91,8 @@ def test_witness_full_flow():
     assert val_req.status == ValidationRequest.Status.COMPLETED
     
     prop.refresh_from_db()
-    assert prop.status == Property.Status.ON_CHAIN
-    print("✅ Consensus atteint et statut ON_CHAIN mis à jour.")
+    assert prop.status == Property.Status.VALIDATED
+    print("✅ Consensus atteint et statut VALIDATED mis à jour.")
 
     # --- TEST 5: Lien invalide ---
     print("Testing Invalid Link...")

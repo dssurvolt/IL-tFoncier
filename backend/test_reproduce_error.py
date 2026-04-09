@@ -44,7 +44,7 @@ def test_reproduce_notary_error():
         owner_wallet=seller,
         village="Village Reproduce",
         district="District",
-        status=Property.Status.ON_CHAIN,
+        status=Property.Status.VALIDATED,
         gps_centroid={"lat": 1, "lng": 1},
         gps_boundaries=[{"lat": 1, "lng": 1}]
     )

@@ -93,11 +93,10 @@ class ListingListAPI(View):
                 'property_id': str(l.property.id),
                 'listing_type': l.listing_type,
                 'price_fiat': str(l.price_fiat),
-                'price_crypto': str(l.price_crypto),
                 'is_negotiable': l.is_negotiable,
                 'description': l.description,
                 'views_count': l.views_count,
-                'seller': l.property.owner_wallet.wallet_address,
+                'seller': l.property.owner_wallet.email,
                 'created_at': l.created_at.isoformat()
             })
         return JsonResponse({'count': len(data), 'results': data})
@@ -106,9 +105,8 @@ class ListingListAPI(View):
         try:
             body = json.loads(request.body)
             property_id = body.get('property_id')
-            seller_wallet = body.get('seller_wallet')
+            seller_id = body.get('seller_id')
             price_fiat = body.get('price_fiat')
-            price_crypto = body.get('price_crypto')
 
             # 1. Vérifier l'existence de la propriété
             try:
@@ -117,11 +115,11 @@ class ListingListAPI(View):
                 return JsonResponse({'error': 'Property not found'}, status=404)
 
             # 2. RÈGLE MÉTIER : Seules les propriétés validées ou en attestation peuvent être listées
-            if prop.status not in [Property.Status.ON_CHAIN, Property.Status.PENDING_SURVEYOR]:
+            if prop.status not in [Property.Status.VALIDATED, Property.Status.PENDING_SURVEYOR]:
                 return JsonResponse({'error': 'Only validated or pending surveyor properties can be listed for sale'}, status=400)
 
             # 3. RÈGLE MÉTIER : Le vendeur doit être le propriétaire
-            if prop.owner_wallet.wallet_address != seller_wallet:
+            if str(prop.owner_wallet.id) != str(seller_id):
                 return JsonResponse({'error': 'Only the owner can list this property'}, status=403)
             
             # 4. RÈGLE D'INTÉGRITÉ iLÔT : Témoins obligatoires
@@ -137,7 +135,6 @@ class ListingListAPI(View):
                 property=prop,
                 listing_type=body.get('listing_type', 'SALE'),
                 price_fiat=price_fiat,
-                price_crypto=price_crypto,
                 is_negotiable=body.get('is_negotiable', False),
                 description=body.get('description', ''),
                 status=Listing.Status.ACTIVE
@@ -298,7 +295,7 @@ def web_chat_room(request, room_id):
     # Marquer les notifications de type NEW_MESSAGE pour cette room comme lues
     from marketplace.models import Notification
     Notification.objects.filter(
-        user_wallet=request.user, 
+        user=request.user, 
         type='NEW_MESSAGE',
         payload__room_id=str(room.id),
         read_at__isnull=True
@@ -375,7 +372,7 @@ class SendMessageAPI(View):
             receiver = room.seller if request.user == room.buyer else room.buyer
             notif_msg = clean_content if clean_content else "📷 Pièce jointe envoyée"
             Notification.objects.create(
-                user_wallet=receiver,
+                user=receiver,
                 type='NEW_MESSAGE',
                 payload={
                     'title': f"💬 Message de {request.user.full_name}",
@@ -397,7 +394,7 @@ class SendMessageAPI(View):
 @login_required
 def api_unread_notifications_count(request):
     """API ultra-légère pour le polling des notifications."""
-    count = Notification.objects.filter(user_wallet=request.user, read_at__isnull=True).count()
+    count = Notification.objects.filter(user=request.user, read_at__isnull=True).count()
     return JsonResponse({'count': count})
 
 @login_required

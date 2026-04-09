@@ -15,7 +15,7 @@ class ValidationRequest(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='validation_requests')
-    requester_wallet = models.CharField(max_length=42, help_text="Wallet du demandeur")
+    requester_email = models.CharField(max_length=150, help_text="Email du demandeur")
     
     # Proof of Presence (Fallback JSON)
     gps_at_request = models.JSONField(help_text="Localisation {lat, lng}")
@@ -43,14 +43,13 @@ class WitnessVote(models.Model):
     witness_id_number = models.CharField(max_length=100, help_text="Numéro de Passeport ou Carte d'Identité Nationale")
     witness_phone = models.CharField(max_length=20, help_text="Numéro de téléphone")
     
-    # Optionnel: Wallet si disponible
-    witness_wallet = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, to_field='wallet_address', db_column='witness_wallet')
+    # Optionnel: User si disponible
+    witness_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='witness_votes')
     
     # Proof of Presence (CRITIQUE)
     witness_gps = models.JSONField(help_text="Localisation {lat, lng}")
     
     vote_result = models.BooleanField(help_text="True=Valide, False=Fraude")
-    signature = models.CharField(max_length=255, help_text="Signature (Digitale ou USSD Hash)")
 
     class Meta:
         db_table = 'witness_votes'
@@ -66,7 +65,7 @@ class GeoFence(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     boundary = models.JSONField(help_text="Polygone GeoJSON")
-    chief_wallet = models.CharField(max_length=42, help_text="Wallet du chef de zone responsable")
+    chief_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, help_text="Chef de zone responsable")
 
     class Meta:
         db_table = 'geo_fences'

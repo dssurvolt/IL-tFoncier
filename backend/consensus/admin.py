@@ -3,9 +3,9 @@ from .models import ValidationRequest, WitnessVote, GeoFence
 
 @admin.register(ValidationRequest)
 class ValidationRequestAdmin(admin.ModelAdmin):
-    list_display = ('id', 'property', 'requester_wallet', 'min_witnesses', 'status')
+    list_display = ('id', 'property', 'requester_email', 'min_witnesses', 'status')
     list_filter = ('status',)
-    search_fields = ('requester_wallet', 'property__id')
+    search_fields = ('requester_email', 'property__id')
 
 @admin.register(WitnessVote)
 class WitnessVoteAdmin(admin.ModelAdmin):
@@ -15,5 +15,5 @@ class WitnessVoteAdmin(admin.ModelAdmin):
 
 @admin.register(GeoFence)
 class GeoFenceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'chief_wallet')
-    search_fields = ('name', 'chief_wallet')
+    list_display = ('name', 'chief_user')
+    search_fields = ('name', 'chief_user__email')

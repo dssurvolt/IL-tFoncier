@@ -18,18 +18,15 @@ class Listing(models.Model):
 
     class ListingType(models.TextChoices):
         SALE = 'SALE', _('À vendre')
-        RENT = 'RENT', _('À louer')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='listings')
     
     listing_type = models.CharField(max_length=10, choices=ListingType.choices, default=ListingType.SALE)
     price_fiat = models.DecimalField(max_digits=15, decimal_places=2, help_text="Prix affiché en FCFA")
-    price_crypto = models.DecimalField(max_digits=18, decimal_places=6, help_text="Équivalent stablecoin (cUSD)")
     is_negotiable = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
     
-    escrow_contract = models.CharField(max_length=42, blank=True, help_text="Adresse du contrat séquestre déployé")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, db_index=True)
     views_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
@@ -55,32 +52,12 @@ class Listing(models.Model):
     def __str__(self):
         return f"Annonce {self.property.village or 'Parcelle'} - {self.price_fiat} FCFA"
 
-class TransactionsHistory(models.Model):
-    """
-    Journal d'activité enrichi (Off-chain + On-chain).
-    """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tx_hash = models.CharField(max_length=66, unique=True, help_text="Hash de la transaction blockchain")
-    
-    event_type = models.CharField(max_length=50, db_index=True, help_text="MINT, TRANSFER, VALIDATE, DISPUTE")
-    from_address = models.CharField(max_length=42)
-    to_address = models.CharField(max_length=42, null=True, blank=True)
-    
-    metadata = models.JSONField(default=dict, blank=True)
-
-    class Meta:
-        db_table = 'transactions_history'
-        verbose_name_plural = "Transactions History"
-
-    def __str__(self):
-        return f"{self.event_type} - {self.tx_hash}"
-
 class Notification(models.Model):
     """
     Système d'alerte utilisateur.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_wallet = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', to_field='wallet_address', db_column='user_wallet')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
     
     type = models.CharField(max_length=50)
     payload = models.JSONField(default=dict)
@@ -90,11 +67,11 @@ class Notification(models.Model):
     class Meta:
         db_table = 'notifications'
         indexes = [
-            models.Index(fields=['user_wallet', 'read_at']),
+            models.Index(fields=['user', 'read_at']),
         ]
 
     def __str__(self):
-        return f"Notif for {self.user_wallet}: {self.type}"
+        return f"Notif for {self.user}: {self.type}"
 
 class MarketplaceInquiry(models.Model):
     """

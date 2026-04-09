@@ -17,7 +17,8 @@
                 Trouvez votre terrain <br><span class="text-secondary">en toute sécurité.</span>
             </h1>
             <p class="lead text-white text-opacity-75 mb-5 col-lg-10">
-                iLôt Foncier connecte acheteurs, vendeurs et notaires sur une infrastructure décentralisée pour éliminer
+                iLôt Foncier connecte acheteurs, vendeurs et notaires sur une infrastructure numérique sécurisée pour
+                éliminer
                 la fraude et simplifier vos transactions immobilières.
             </p>
 
@@ -159,12 +160,14 @@
                                 <span
                                     class="badge {% if listing.is_negotiable %}bg-success{% else %}bg-primary{% endif %} bg-opacity-10 text-{% if listing.is_negotiable %}success{% else %}primary{% endif %} small fw-bold px-2 py-1"
                                     style="font-size: 0.65rem;">
-                                    <i class="bi bi-tag-fill me-1"></i>{% if listing.is_negotiable %}Prix négociable{%                   else %}Prix fixe{% endif %}
+                                    <i class="bi bi-tag-fill me-1"></i>{% if listing.is_negotiable %}Prix négociable{%
+                                    else %}Prix fixe{% endif %}
                                 </span>
                             </div>
                         </div>
                         <div class="text-end position-relative" style="z-index: 10;">
-                            <div class="fw-bold text-citizen-muted small" style="font-size: 0.8rem;">{{                 listing.property.owner_wallet.full_name|default:listing.property.owner_wallet.wallet_address|truncatechars:12                 }}</div>
+                            <div class="fw-bold text-citizen-muted small" style="font-size: 0.8rem;">{{
+                                listing.property.owner_wallet.full_name|default:"Propriétaire" }}</div>
                             {% if listing.property.owner_wallet.is_verified %}
                             <div class="text-success small fw-bold" style="font-size: 0.7rem;">
                                 <i class="bi bi-patch-check-fill me-1"></i>Vérifié
@@ -176,7 +179,8 @@
                     <h5 class="fw-bold text-citizen mb-2 mt-3">{{ listing.property.village|default:"Parcelle iLôt" }}
                     </h5>
                     <div class="text-citizen-muted small mb-3">
-                        <i class="bi bi-geo-alt me-1"></i>{{ listing.property.district }}, {{ listing.property.country             }}
+                        <i class="bi bi-geo-alt me-1"></i>{{ listing.property.district }}, {{ listing.property.country
+                        }}
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="text-muted small">
@@ -231,10 +235,10 @@
                                     <i class="bi bi-cpu text-success fs-4"></i>
                                 </div>
                                 <div>
-                                    <h6 class="fw-bold text-citizen mb-1">S&#233;questre Blockchain</h6>
-                                    <p class="text-citizen-muted small mb-0">Vos fonds sont prot&#233;g&#233;s par un
-                                        contrat intelligent
-                                        jusqu'&#224; la signature finale.</p>
+                                    <h6 class="fw-bold text-citizen mb-1">Séquestre Numérique</h6>
+                                    <p class="text-citizen-muted small mb-0">Vos fonds sont protégés par un
+                                        compte séquestre sécurisé
+                                        jusqu'à la signature finale.</p>
                                 </div>
                             </div>
                         </div>
@@ -401,7 +405,7 @@
             setTimeout(() => {
                 btn.innerHTML = originalContent;
                 btn.disabled = false;
-                alert("Recherche en cours sur iLôt Node... Les résultats seront mis à jour en temps réel.");
+                alert("Recherche en cours... Les résultats seront mis à jour en temps réel.");
             }, 800);
         });
     </script>

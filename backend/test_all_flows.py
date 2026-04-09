@@ -79,10 +79,10 @@ def test_full_backend_cycle():
             return
         print(f"✅ Vote {i} recorded: {res.json()['consensus']}")
 
-    # Check Property Status (Should be ON_CHAIN now)
+    # Check Property Status (Should be VALIDATED now)
     prop = Property.objects.get(id=prop_id)
     print(f"📊 Property Status after 3 votes: {prop.status}")
-    assert prop.status == Property.Status.ON_CHAIN, "Property should be ON_CHAIN after consensus"
+    assert prop.status == Property.Status.VALIDATED, "Property should be VALIDATED after consensus"
 
     # 3. Marketplace
     print("\n--- Testing Marketplace ---")

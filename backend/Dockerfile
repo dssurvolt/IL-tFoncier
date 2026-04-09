@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     libpq-dev \
     gcc \
+    libmagic1 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,11 +23,18 @@ WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Variables pour Django
+ENV STATIC_ROOT=/app/staticfiles
+
 # Copie du code source
 COPY . /app/
+
+# Collecte des fichiers statiques
+RUN python manage.py collectstatic --noinput
 
 # Port d'écoute (Render utilise souvent 10000)
 EXPOSE 10000
 
-# Script de démarrage
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "config.wsgi:application"]
+# Script de démarrage : Migrations + Gunicorn
+# On utilise la forme 'shell' pour permettre l'enchaînement des commandes
+CMD python manage.py migrate && gunicorn --bind 0.0.0.0:10000 config.wsgi:application

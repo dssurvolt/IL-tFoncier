@@ -7,7 +7,8 @@
     <div class="col-md-10 col-lg-8">
         <div class="text-center mb-5">
             <h1 class="display-5 fw-bold mb-2">Ajouter une Parcelle</h1>
-            <p class="text-muted lead">Sécurisez une nouvelle parcelle sur la blockchain pour votre compte.</p>
+            <p class="text-muted lead">Sécurisez une nouvelle parcelle sur notre infrastructure numérique pour votre
+                compte.</p>
         </div>
 
         <!--
@@ -41,7 +42,7 @@
             <form id="addPropertyForm">
                 <!-- Champs cachés pour l'utilisateur connecté -->
                 <input type="hidden" id="ownerName" value="{{ user.full_name }}">
-                <input type="hidden" id="ownerWallet" value="{{ user.wallet_address }}">
+                <input type="hidden" id="ownerId" value="{{ user.id }}">
 
                 <!-- Section: Identité (Affichage seulement) -->
                 <div class="mb-5">
@@ -58,8 +59,8 @@
                                 <span class="fw-bold">{{ user.full_name }}</span>
                             </div>
                             <div class="col-md-6">
-                                <small class="text-muted d-block">Wallet</small>
-                                <code class="text-primary">{{ user.wallet_address }}</code>
+                                <small class="text-muted d-block">Identifiant</small>
+                                <code class="text-primary">{{ user.email }}</code>
                             </div>
                         </div>
                     </div>
@@ -740,9 +741,8 @@
         }
 
         const formData = new FormData();
-        formData.append('owner_name', name);
-        formData.append('owner_wallet', wallet);
-        formData.append('country', country);
+        const owner_id = document.getElementById('ownerId').value.trim();
+        // country is already defined above as "Benin"
         formData.append('departement', departement);
         formData.append('commune', commune);
         formData.append('district', district);
@@ -775,7 +775,7 @@
 
             if (res.ok) {
                 alert('Parcelle ajoutée avec succès ! Redirection vers votre tableau de bord...');
-                window.location.href = `/dashboard/${wallet}/`;
+                window.location.href = `/dashboard/`;
             } else {
                 const err = await res.json();
                 alert('Erreur : ' + err.error);
@@ -783,7 +783,7 @@
                 btn.innerText = originalText;
             }
         } catch (err) {
-            alert('Erreur de connexion au réseau iLôt.');
+            alert('Erreur de connexion au serveur iLôt.');
             btn.disabled = false;
             btn.innerText = originalText;
         }

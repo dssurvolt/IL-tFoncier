@@ -32,7 +32,7 @@
 
                     <div class="alert alert-info border-0 rounded-4 small">
                         <span class="fs-5 me-2">🛡️</span>
-                        Seules les propriétés certifiées et inscrites sur la blockchain peuvent être mises en vente.
+                        Seules les propriétés certifiées et validées par nos services peuvent être mises en vente.
                     </div>
                 </div>
 
@@ -65,16 +65,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Équivalent Crypto (Estimation cUSD)</label>
-                            <div class="p-3 bg-primary bg-opacity-5 border border-primary border-opacity-10 rounded-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="h4 mb-0 text-primary fw-bold" id="price_crypto_display">0.00</span>
-                                    <span class="badge bg-primary rounded-pill">cUSD (Celo Stablecoin)</span>
-                                </div>
-                                <input type="hidden" id="price_crypto" value="0.00">
-                            </div>
-                        </div>
+                        <input type="hidden" id="price_crypto" value="0.00">
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Description de l'annonce</label>
@@ -84,8 +75,8 @@
 
                         <div class="p-3 bg-warning bg-opacity-10 rounded-4 mb-4 small text-warning-emphasis">
                             <span class="me-2">⚠️</span>
-                            En mettant ce terrain en vente, vous autorisez le déploiement d'un contrat séquestre qui
-                            bloquera la propriété durant la transaction.
+                            En mettant ce terrain en vente, vous autorisez l'ouverture d'un dossier de transaction
+                            sécurisé sur la plateforme iLôt Foncier.
                         </div>
 
                         <button type="submit" class="btn btn-citizen btn-lg w-100 py-3 shadow-sm">
@@ -107,10 +98,7 @@
     const CONVERSION_RATE = 655;
 
     priceFiatInput.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value) || 0;
-        const cryptoVal = (val / CONVERSION_RATE).toFixed(2);
-        priceCryptoDisplay.innerText = cryptoVal;
-        priceCryptoInput.value = cryptoVal;
+        // Logique de conversion supprimée (Plus de crypto)
     });
 
     document.getElementById('listingForm').addEventListener('submit', async (e) => {
@@ -118,7 +106,7 @@
 
         const data = {
             property_id: "{{ property.id }}",
-            seller_wallet: "{{ user.wallet_address|default:'' }}",
+            seller_id: "{{ user.id }}",
             listing_type: document.getElementById('listing_type').value,
             price_fiat: priceFiatInput.value,
             price_crypto: priceCryptoInput.value,

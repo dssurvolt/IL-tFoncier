@@ -33,7 +33,7 @@ def test_transfer():
         owner_wallet=seller,
         village="Village Transfer",
         district="District Test",
-        status=Property.Status.ON_CHAIN,
+        status=Property.Status.VALIDATED,
         gps_centroid={"lat": 6.36, "lng": 2.43},
         gps_boundaries=[{"lat": 6.36, "lng": 2.43}, {"lat": 6.37, "lng": 2.43}]
     )

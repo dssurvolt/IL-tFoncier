@@ -72,18 +72,13 @@ class AuthAPI(View):
                     'error': 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*)'
                 }, status=400)
             
-            # Créer l'utilisateur
-            import secrets
-            wallet_address = f'0x{secrets.token_hex(20)}'
-            
             user_data = {
                 'email': email,
                 'password': password,
                 'full_name': full_name,
                 'country': country,
                 'district': district,
-                'role': User.Role.USER,
-                'wallet_address': wallet_address
+                'role': User.Role.USER
             }
             if village: user_data['village'] = village
             if birth_date: user_data['birth_date'] = birth_date
@@ -127,11 +122,6 @@ class AuthAPI(View):
             user = authenticate(request, username=email, password=password)
             
             if user is not None:
-                # Auto-fix wallet address for Legacy Users
-                if not user.wallet_address:
-                    import secrets
-                    user.wallet_address = f'0x{secrets.token_hex(20)}'
-                    user.save()
                 
                 # Create Django Session and Login
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')

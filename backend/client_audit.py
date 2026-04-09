@@ -110,8 +110,8 @@ def run_rigorous_audit():
     
     prop = Property.objects.get(id=prop_id)
     prop.refresh_from_db()
-    assert prop.status == 'ON_CHAIN'
-    print("✅ Consensus reached, property is now ON_CHAIN")
+    assert prop.status == 'VALIDATED'
+    print("✅ Consensus reached, property is now VALIDATED")
 
     # Test: Vote on CLOSED request
     res = client.post('/api/validation/vote/', 
@@ -141,7 +141,7 @@ def run_rigorous_audit():
     assert res.status_code in [400, 403], f"Should reject listing DRAFT properties (Got {res.status_code})"
     print("✅ Prevented listing of unvalidated (DRAFT) property")
 
-    # Test: List ON_CHAIN property (Should succeed)
+    # Test: List VALIDATED property (Should succeed)
     res = client.post('/api/marketplace/listings/', 
         data=json.dumps({
             'property_id': prop_id,
@@ -150,7 +150,7 @@ def run_rigorous_audit():
             'price_crypto': 1.0
         }), content_type='application/json')
     assert res.status_code == 201
-    print("✅ Successfully listed ON_CHAIN property")
+    print("✅ Successfully listed VALIDATED property")
 
     # --- 4. USSD ROBUSTNESS ---
     print("\n[4] Testing USSD Robustness & State Machine")

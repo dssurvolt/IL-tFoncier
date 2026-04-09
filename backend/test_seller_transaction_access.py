@@ -42,7 +42,7 @@ def test_seller_flow():
         owner_wallet=seller,
         village="Village Seller",
         district="District Seller",
-        status=Property.Status.ON_CHAIN,
+        status=Property.Status.VALIDATED,
         gps_centroid={"lat": 6.36, "lng": 2.43},
         gps_boundaries=[{"lat": 6.36, "lng": 2.43}, {"lat": 6.37, "lng": 2.43}]
     )
@@ -65,7 +65,7 @@ def test_seller_flow():
     client.login(username=seller_email, password=password)
     
     # Check if notification exists
-    notifs = Notification.objects.filter(user_wallet=seller, type='TRANSACTION_UPDATE')
+    notifs = Notification.objects.filter(user=seller, type='TRANSACTION_UPDATE')
     assert notifs.count() == 1
     print(f"✅ Seller received In-App Notification: {notifs.first().payload['title']}")
 
@@ -76,7 +76,7 @@ def test_seller_flow():
     print("✅ Seller successfully accessed transaction status page")
 
     # 5. Check if notification is marked as read after visiting the page
-    notifs = Notification.objects.filter(user_wallet=seller, type='TRANSACTION_UPDATE', read_at__isnull=False)
+    notifs = Notification.objects.filter(user=seller, type='TRANSACTION_UPDATE', read_at__isnull=False)
     assert notifs.count() == 1
     print("✅ Seller notification marked as read after visiting status page")
 

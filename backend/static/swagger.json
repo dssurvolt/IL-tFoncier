@@ -323,7 +323,7 @@
                         "enum": [
                             "DRAFT",
                             "VALIDATING",
-                            "ON_CHAIN"
+                            "VALIDATED"
                         ]
                     },
                     "gps_centroid": {

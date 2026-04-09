@@ -62,7 +62,7 @@ def setup_rakib_test():
         defaults={
             'owner_wallet': ousmane,
             'district': "Cotonou 12e",
-            'status': Property.Status.ON_CHAIN,
+            'status': Property.Status.VALIDATED,
             'gps_centroid': {"lat": 6.353, "lng": 2.392},
             'gps_boundaries': [{"lat": 6.353, "lng": 2.392}, {"lat": 6.354, "lng": 2.392}]
         }

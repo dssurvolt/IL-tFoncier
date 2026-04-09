@@ -28,7 +28,7 @@ def test_start_transaction():
         owner_wallet=seller,
         gps_centroid={'lat': 6.3, 'lng': 2.4},
         gps_boundaries=[],
-        status='ON_CHAIN',
+        status='VALIDATED',
         defaults={'village': 'Test Village', 'district': 'Cotonou'}
     )
     

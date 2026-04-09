@@ -1,23 +1,17 @@
 from django.contrib import admin
-from .models import Listing, TransactionsHistory, Notification, MarketplaceInquiry, MarketplaceView
+from .models import Listing, Notification, MarketplaceInquiry, MarketplaceView
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
     list_display = ('id', 'property', 'price_fiat', 'status')
     list_filter = ('status',)
-    search_fields = ('property__id', 'escrow_contract')
-
-@admin.register(TransactionsHistory)
-class TransactionsHistoryAdmin(admin.ModelAdmin):
-    list_display = ('tx_hash', 'event_type', 'from_address', 'to_address')
-    list_filter = ('event_type',)
-    search_fields = ('tx_hash', 'from_address', 'to_address')
+    search_fields = ('property__id',)
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user_wallet', 'type', 'read_at')
+    list_display = ('user', 'type', 'read_at')
     list_filter = ('type', 'read_at')
-    search_fields = ('user_wallet__wallet_address', 'user_wallet__email')
+    search_fields = ('user__email',)
 
 @admin.register(MarketplaceInquiry)
 class MarketplaceInquiryAdmin(admin.ModelAdmin):

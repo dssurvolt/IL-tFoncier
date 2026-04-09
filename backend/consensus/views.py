@@ -56,10 +56,8 @@ def web_witness_confirmation(request):
                     witness_full_name=f"{witness.first_name} {witness.last_name}",
                     witness_phone=witness.phone,
                     witness_id_number=id_number,
-                    witness_birth_date=witness.birth_date,
                     witness_gps={'lat': 6.36, 'lng': 2.42}, # Simulation GPS
-                    vote_result=vote_result,
-                    signature='EMAIL_LINK_CONFIRMATION'
+                    vote_result=vote_result
                 )
 
                 # 2. Marquer le témoin comme confirmé dans le dossier de parcelle
@@ -76,7 +74,7 @@ def web_witness_confirmation(request):
                     val_req.save()
                     
                     prop = val_req.property
-                    prop.status = Property.Status.ON_CHAIN
+                    prop.status = Property.Status.VALIDATED
                     prop.save()
                     
                     context = {
@@ -140,7 +138,7 @@ class ValidationRequestAPI(View):
             # 2. Créer la demande
             val_req = ValidationRequest.objects.create(
                 property=prop,
-                requester_wallet=requester_wallet,
+                requester_email=request.user.email if request.user.is_authenticated else "anonymous@ilot.bj",
                 gps_at_request=gps_at_request,
                 status=ValidationRequest.Status.OPEN
             )
@@ -190,19 +188,18 @@ class ValidationRequestAPI(View):
             
             vote_result = body.get('vote_result')
             witness_gps = body.get('witness_gps', {})
-            witness_wallet_addr = body.get('witness_wallet') # Optionnel
-            signature = body.get('signature', 'WEB_SIGNATURE_PENDING')
+            witness_user_id = body.get('witness_user_id') # Optionnel
             
             if not all([witness_name, witness_phone, witness_id_number]):
                 return JsonResponse({'error': 'Missing legal identity information (Name, Phone, ID Number)'}, status=400)
 
-            # 1. Gérer l'utilisateur (Optionnel/Lien Wallet)
+            # 1. Gérer l'utilisateur (Optionnel)
             witness_user = None
-            if witness_wallet_addr:
-                witness_user, _ = User.objects.get_or_create(
-                    wallet_address=witness_wallet_addr, 
-                    defaults={'role': User.Role.WITNESS, 'full_name': witness_name}
-                )
+            if witness_user_id:
+                try:
+                    witness_user = User.objects.get(id=witness_user_id)
+                except User.DoesNotExist:
+                    pass
             
             # 2. Vérifier si la demande est toujours ouverte
             val_req = ValidationRequest.objects.get(id=request_id)
@@ -217,10 +214,9 @@ class ValidationRequestAPI(View):
                     witness_phone=witness_phone,
                     witness_id_number=witness_id_number,
                     witness_birth_date=witness_birth_date,
-                    witness_wallet=witness_user,
+                    witness_user=witness_user,
                     witness_gps=witness_gps,
-                    vote_result=vote_result,
-                    signature=signature
+                    vote_result=vote_result
                 )
             except Exception as e:
                 return JsonResponse({'error': f'Witness (ID {witness_id_number}) has already voted for this request'}, status=400)
@@ -234,7 +230,7 @@ class ValidationRequestAPI(View):
                 
                 # Mettre à jour la propriété -> Prêt pour Blockchain
                 prop = val_req.property
-                prop.status = Property.Status.ON_CHAIN
+                prop.status = Property.Status.VALIDATED
                 prop.save()
                 
                 return JsonResponse({'status': 'VOTE_RECORDED', 'consensus': 'REACHED'}, status=200)

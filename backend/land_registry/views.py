@@ -15,10 +15,6 @@ from consensus.models import ValidationRequest
 from marketplace.models import MarketplaceView
 from utils.id_document_extractor import extract_from_upload
 
-def health_check(request):
-    """Simple view for Render health checks."""
-    return JsonResponse({'status': 'ok'})
-
 # --- DASHBOARD VIEW (HTML) ---
 
 @admin_required
@@ -89,7 +85,7 @@ def user_dashboard(request, wallet):
         
         # Récupérer les notifications récentes (In-App)
         from marketplace.models import Notification
-        notifications = Notification.objects.filter(user_wallet=user).order_by('-created_at')[:15]
+        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:15]
 
         context = {
             'user': user,
@@ -266,7 +262,7 @@ class PropertyListAPI(View):
         properties = Property.objects.annotate(media_count=Count('media')).all()[:50]
         data = []
         for p in properties:
-            owner_name = p.owner_wallet.full_name if p.owner_wallet.full_name else p.owner_wallet.wallet_address
+            owner_name = p.owner_wallet.full_name if p.owner_wallet.full_name else p.owner_wallet.email
             data.append({
                 'id': str(p.id),
                 'owner': owner_name,
@@ -327,22 +323,11 @@ class PropertyListAPI(View):
                     w_email = w_data.get('email', '').strip().lower()
                     if not w_email or not re.match(email_regex, w_email):
                          return JsonResponse({'error': f"Format d'email invalide pour le témoin #{i+1}"}, status=400)
-
-                # Si le wallet n'est pas fourni (cas de l'inscription), on le génère
-                if not owner_wallet:
-                    if not owner_name or not birth_date:
-                        return JsonResponse({'error': 'owner_name et birth_date requis pour la création de compte'}, status=400)
-                    
-                    # Génération d'un wallet déterministe simple (prefix + hash du nom + date)
-                    import hashlib
-                    raw_id = f"{owner_name}{birth_date}".lower().strip()
-                    fingerprint = hashlib.sha256(raw_id.encode()).hexdigest()[:10]
-                    owner_wallet = f"0xilot_{fingerprint}"
-                else:
-                    owner_wallet = owner_wallet.lower().strip()
                 
-                if not owner_name:
-                    return JsonResponse({'error': 'owner_name requis'}, status=400)
+                # Récupération de l'utilisateur (Propriétaire)
+                owner = request.user if request.user.is_authenticated else None
+                if not owner:
+                     return JsonResponse({'error': 'Authentification requise'}, status=401)
 
                 # 1. Validation Géométrique - Ordre et Convexité
                 if len(gps_boundaries) < 3:
@@ -398,24 +383,6 @@ class PropertyListAPI(View):
                 if not re.match(r"^[a-zA-Z\s\.\-]+$", owner_name) or len(owner_name) < 3:
                     return JsonResponse({'error': 'Nom invalide'}, status=400)
                 
-                owner, _ = User.objects.get_or_create(wallet_address=owner_wallet)
-                owner.full_name = owner_name
-                if birth_date:
-                    owner.birth_date = birth_date
-                
-                # Nouvelles informations d'identité
-                owner.country = user_country
-                owner.departement = departement
-                owner.commune = commune
-                owner.district = district
-                owner.village = village
-                
-                owner.save()
-                
-                # Génération d'un ID blockchain aléatoire (simulé)
-                import random
-                simulated_on_chain_id = str(random.randint(100000, 999999))
-
                 prop = Property.objects.create(
                     owner_wallet=owner,
                     gps_centroid=gps_centroid,
@@ -429,7 +396,6 @@ class PropertyListAPI(View):
                     surveyor_name=surveyor_name,
                     area_sqm=float(area_sqm) if area_sqm else None,
                     area_cadastral=area_cadastral,
-                    on_chain_id=simulated_on_chain_id,
                     status=Property.Status.PENDING_SURVEYOR if surveyor_id else Property.Status.DRAFT
                 )
                 
@@ -461,8 +427,7 @@ class PropertyListAPI(View):
                         gender=w_data.get('gender'),
                         phone=w_data.get('phone'),
                         email=w_email,
-                        id_card_photo=w_file,
-                        ipfs_cid=fake_w_cid
+                        id_card_photo=w_file
                     )
 
                 # Sauvegarde des médias
@@ -484,11 +449,10 @@ class PropertyListAPI(View):
                     PropertyMedia.objects.create(
                         property=prop, 
                         file=f,
-                        ipfs_cid=fake_cid, 
                         media_type=m_type
                     )
 
-                return JsonResponse({'id': str(prop.id), 'status': prop.status, 'wallet_address': owner_wallet}, status=201)
+                return JsonResponse({'id': str(prop.id), 'status': prop.status}, status=201)
             except Exception as e:
                 return JsonResponse({'error': str(e)}, status=500)
 
@@ -503,11 +467,10 @@ class PropertyDetailAPI(View):
             p = Property.objects.get(pk=pk)
             data = {
                 'id': str(p.id),
-                'owner': p.owner_wallet.wallet_address,
+                'owner': p.owner_wallet.email,
                 'status': p.status,
                 'gps_centroid': p.gps_centroid,
-                'gps_boundaries': p.gps_boundaries,
-                'on_chain_id': p.on_chain_id
+                'gps_boundaries': p.gps_boundaries
             }
             return JsonResponse(data)
         except Property.DoesNotExist:
@@ -527,38 +490,18 @@ from utils.land_title_extractor import extract_land_title_data
 class IdentityExtractionAPI(View):
     """
     API pour extraire les données d'identité à partir d'un fichier uploadé (PDF/Image).
-    Optimisée pour Render avec remontée d'erreurs précise.
     """
     def post(self, request):
         if 'file' not in request.FILES:
-            return JsonResponse({'error': 'Aucun fichier fourni dans la requête (clé "file" manquante).'}, status=400)
+            return JsonResponse({'error': 'Aucun fichier fourni.'}, status=400)
             
         uploaded_file = request.FILES['file']
+        data = extract_from_upload(uploaded_file)
         
-        try:
-            data = extract_from_upload(uploaded_file)
+        if 'raw_text' in data:
+            del data['raw_text']
             
-            # Si le moteur d'extraction renvoie une erreur interne
-            if 'error' in data:
-                return JsonResponse(data, status=500)
-            
-            # Vérifier si on a trouvé au moins un champ important (Nom ou Prénom)
-            if not data.get('last_name') and not data.get('first_name'):
-                return JsonResponse({
-                    'error': "Aucune information lisible n'a été détectée. Essayez une photo plus claire ou plus lumineuse du document."
-                }, status=422)
-                
-            # Nettoyage des données pour le front-end
-            if 'raw_text' in data:
-                del data['raw_text']
-                
-            return JsonResponse(data)
-            
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"CRASH API Extraction: {str(e)}")
-            return JsonResponse({'error': f"Erreur système lors de l'analyse : {str(e)}"}, status=500)
+        return JsonResponse(data)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class LandTitleExtractionAPI(View):

@@ -47,7 +47,7 @@ def notify_transaction_update(folio):
     # 2. Notification In-App (Dashboard) pour l'acheteur et le vendeur
     for party in [folio.buyer, folio.seller]:
         Notification.objects.create(
-            user_wallet=party,
+            user=party,
             type='TRANSACTION_UPDATE',
             payload={
                 'title': msg_data['title'],

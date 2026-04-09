@@ -41,7 +41,7 @@ def test_notary_as_client_prevention():
         owner_wallet=seller,
         village="Village Role Test",
         district="District Role Test",
-        status=Property.Status.ON_CHAIN,
+        status=Property.Status.VALIDATED,
         gps_centroid={"lat": 6.36, "lng": 2.43},
         gps_boundaries=[{"lat": 6.36, "lng": 2.43}]
     )
@@ -81,7 +81,7 @@ def test_synchronous_status():
         owner_wallet=seller,
         village="Village Sync",
         district="District Sync",
-        status=Property.Status.ON_CHAIN,
+        status=Property.Status.VALIDATED,
         gps_centroid={"lat": 6.36, "lng": 2.43},
         gps_boundaries=[{"lat": 6.36, "lng": 2.43}, {"lat": 6.37, "lng": 2.43}]
     )

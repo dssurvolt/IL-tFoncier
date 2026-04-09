@@ -49,7 +49,7 @@ def run_simulation():
         owner_wallet=seller,
         village="Village Test",
         district="District Test",
-        status=Property.Status.ON_CHAIN, # Force on-chain for listing
+        status=Property.Status.VALIDATED, # Force on-chain for listing
         gps_centroid={"lat": 6.36, "lng": 2.43},
         gps_boundaries=[{"lat": 6.36, "lng": 2.43}, {"lat": 6.37, "lng": 2.43}, {"lat": 6.37, "lng": 2.44}]
     )

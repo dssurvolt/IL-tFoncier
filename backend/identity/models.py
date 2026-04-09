@@ -38,11 +38,7 @@ class User(AbstractUser):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True, help_text="Email de connexion")
-    wallet_address = models.CharField(max_length=42, unique=True, null=True, blank=True, help_text="Adresse publique Ethereum/Polygon (0x...) - Optionnel")
-    
-    # Privacy & Security
-    phone_hash = models.CharField(max_length=64, unique=True, null=True, blank=True, help_text="SHA-256 du numéro de téléphone")
-    encrypted_phone = models.CharField(max_length=255, null=True, blank=True, help_text="Numéro chiffré pour notifications")
+    phone = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Numéro de téléphone")
     
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, db_index=True)
     full_name = models.CharField(max_length=255, null=True, blank=True, help_text="Nom et Prénom (pas de chiffres)")
@@ -52,7 +48,6 @@ class User(AbstractUser):
     commune = models.CharField(max_length=100, null=True, blank=True, help_text="Commune")
     district = models.CharField(max_length=100, null=True, blank=True, help_text="Arrondissement")
     village = models.CharField(max_length=100, null=True, blank=True, help_text="Quartier / Village")
-    reputation_score = models.IntegerField(default=50, help_text="Score 0-100 basé sur la fiabilité")
     is_verified = models.BooleanField(default=False, help_text="Compte vérifié par l'administration iLôt")
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -70,28 +65,9 @@ class User(AbstractUser):
         verbose_name = _("Utilisateur")
         verbose_name_plural = _("Utilisateurs")
         indexes = [
-            models.Index(fields=['phone_hash']),
             models.Index(fields=['role']),
-            models.Index(fields=['wallet_address']),
         ]
 
-class AuthNonce(models.Model):
-    """
-    Sécurité pour le 'Sign-in with Ethereum'.
-    Empêche les attaques par rejeu.
-    """
-    wallet_address = models.CharField(max_length=42, primary_key=True)
-    nonce = models.CharField(max_length=32, help_text="Chaîne aléatoire à signer")
-    expires_at = models.DateTimeField()
-
-    class Meta:
-        db_table = 'auth_nonces'
-
-    def is_valid(self):
-        return timezone.now() < self.expires_at
-
-    def __str__(self):
-        return f"Nonce for {self.wallet_address}"
 
 class USSDSession(models.Model):
     """

@@ -26,10 +26,10 @@
                     <span class="fs-4">🔗</span>
                 </div>
                 <div class="text-start">
-                    <small class="text-citizen-muted d-block fw-bold" style="font-size: 0.6rem;">BLOCKCHAIN
-                        ADDRESS</small>
+                    <small class="text-citizen-muted d-block fw-bold" style="font-size: 0.6rem;">IDENTIFIANT
+                        UNIQUE</small>
                     <code class="text-primary fw-bold"
-                        style="font-size: 0.85rem;">{{ user.wallet_address|default:"0x...NON_BIND"|truncatechars:18 }}</code>
+                        style="font-size: 0.85rem;">{{ user.id|stringformat:"s"|slice:":18" }}</code>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                             <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
                                 <span class="text-success fw-bold">✔</span>
                             </div>
-                            <span class="fw-bold">Contrats Intelligents Actifs</span>
+                            <span class="fw-bold">Algorithmes de Sécurité Actifs</span>
                         </div>
                     </div>
                     <div class="col-sm-5 text-center border-start border-citizen">
@@ -100,7 +100,7 @@
                         <div class="flex-shrink-0 me-4">
                             <div class="rounded-4 {% if n.type == 'TRANSACTION_UPDATE' %}bg-info{% else %}bg-primary{% endif %} bg-opacity-10 p-3 text-center"
                                 style="width: 56px;">
-                                <span class="fs-4">{% if n.type == 'TRANSACTION_UPDATE' %}🏗️{% else %}📧{% endif %}</span>
+                                <span class="fs-4">{% if n.type == "TRANSACTION_UPDATE" %}🏗️{% else %}📧{% endif %}</span>
                             </div>
                         </div>
                         <div class="flex-grow-1">
@@ -151,7 +151,7 @@
                             <h5 class="fw-bold mb-0">{{ prop.name|default:"Propriété iLôt" }}</h5>
                         </div>
                         <span class="status-badge 
-                            {% if prop.status == 'ON_CHAIN' %}bg-success text-white shadow-sm
+                            {% if prop.status == 'VALIDATED' %}bg-success text-white shadow-sm
                             {% elif prop.status == 'VALIDATING' %}bg-warning text-dark
                             {% elif prop.status == 'DISPUTED' %}bg-danger text-white
                             {% else %}bg-citizen-light text-citizen-muted{% endif %}">
@@ -193,7 +193,7 @@
                         </div>
                         <div class="col-6">
                             <a href="{% url 'web_create_listing' prop.id %}"
-                                class="btn {% if prop.status == 'ON_CHAIN' %}btn-success{% else %}btn-outline-success{% endif %} w-100 rounded-3 py-2 fw-bold small">
+                                class="btn {% if prop.status == 'VALIDATED' %}btn-success{% else %}btn-outline-success{% endif %} w-100 rounded-3 py-2 fw-bold small">
                                 Mettre en Vente
                             </a>
                         </div>

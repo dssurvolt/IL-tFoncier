@@ -66,7 +66,7 @@
             <thead>
                 <tr>
                     <th>ID INTERNE</th>
-                    <th>ON-CHAIN ID</th>
+                    <th>ID SÉCURISÉ</th>
                     <th>PROPRIÉTAIRE</th>
                     <th>STATUT</th>
                     <th>LOCALISATION (GPS)</th>
@@ -91,8 +91,8 @@
                 <small class="text-muted">En attente de consensus communautaire.</small>
             </div>
             <div class="d-flex align-items-center">
-                <span class="badge me-2" style="background-color: #22c55e; color: #ffffff;">ON_CHAIN</span>
-                <small class="text-muted">Sécurisé et certifié sur la Blockchain.</small>
+                <span class="badge me-2" style="background-color: #22c55e; color: #ffffff;">VALIDATED</span>
+                <small class="text-muted">Sécurisé et certifié sur la iLôt Sécurité.</small>
             </div>
             <div class="d-flex align-items-center">
                 <span class="badge me-2" style="background-color: #ef4444; color: #ffffff;">DISPUTED</span>
@@ -116,8 +116,8 @@
 
                 // Amélioration de la visibilité des statuts (Contraste maximal)
                 let statusBadge = '';
-                if (p.status === 'ON_CHAIN') {
-                    statusBadge = `<span class="badge" style="background-color: #22c55e; color: #ffffff; border: 1px solid #16a34a;">ON_CHAIN</span>`;
+                if (p.status === 'VALIDATED') {
+                    statusBadge = `<span class="badge" style="background-color: #22c55e; color: #ffffff; border: 1px solid #16a34a;">VALIDATED</span>`;
                 } else if (p.status === 'VALIDATING') {
                     statusBadge = `<span class="badge" style="background-color: #eab308; color: #000000; border: 1px solid #ca8a04;">VALIDATING</span>`;
                 } else if (p.status === 'DISPUTED') {
