@@ -11,14 +11,11 @@ from io import BytesIO
 import pytesseract
 from PIL import Image
 
-# Forçage du chemin Tesseract sur Linux/Render si nécessaire
-if os.name != 'nt':
-    if os.path.exists('/usr/bin/tesseract'):
-        pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
-    elif os.path.exists('/usr/local/bin/tesseract'):
-        pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
-
 logger = logging.getLogger(__name__)
+
+# Diagnostic path for Render/Linux
+TESSERACT_CMD = os.getenv('TESSERACT_CMD', 'tesseract')
+pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
 
 # Mois français → numéro
 MOIS_FR = {
@@ -113,37 +110,23 @@ def _extract_from_image_bytes(file_bytes: bytes) -> dict:
 
 def _process_image(img: Image.Image) -> dict:
     """
-    Pipeline principal : Image → Prétraitement (Grayscale/Contraste) → OCR → Parsing.
-    Optimisé pour les photos de smartphones (souvent sombres ou floues).
+    Pipeline principal : Image → OCR → Parsing → Données structurées.
     """
-    from PIL import ImageOps, ImageEnhance
-    
     try:
-        # 1. Prétraitement pour améliorer l'OCR
-        # Conversion en niveaux de gris (aide Tesseract à séparer le texte du fond)
-        processed_img = ImageOps.grayscale(img)
-        
-        # Augmentation du contraste (rend les lettres plus noires et le fond plus blanc)
-        enhancer = ImageEnhance.Contrast(processed_img)
-        processed_img = enhancer.enhance(2.0)
-        
-        # Correction de l'orientation si EXIF présent
-        processed_img = ImageOps.exif_transpose(processed_img)
-
-        # 2. Extraction du texte
         try:
-            # Langue française privilégiée
-            raw_text = pytesseract.image_to_string(processed_img, lang='fra')
-        except Exception as e:
-            logger.warning(f"Échec OCR 'fra', repli sur 'eng': {e}")
-            raw_text = pytesseract.image_to_string(processed_img)
-            
-        if len(raw_text.strip()) < 10:
-            # Si le texte est trop court, on tente sur l'image originale (au cas où)
             raw_text = pytesseract.image_to_string(img, lang='fra')
-
+        except Exception as e:
+            logger.warning(f"OCR en français a échoué, tentative sans langue spécifique: {e}")
+            raw_text = pytesseract.image_to_string(img)
+    except pytesseract.TesseractNotFoundError:
+        logger.error("Tesseract n'est pas installé ou n'est pas dans le PATH.")
+        return {
+            'error': "Erreur d'analyse : Tesseract OCR n'est pas installé sur le serveur. "
+                     "Veuillez installer 'tesseract-ocr' et 'tesseract-ocr-fra' via votre script de build "
+                     "(ex: apt-get install tesseract-ocr)."
+        }
     except Exception as e:
-        logger.error(f"Erreur lors du traitement d'image : {e}")
+        logger.error(f"Erreur technique lors de l'OCR : {e}")
         return {'error': f"Erreur technique lors du traitement de l'image : {str(e)}"}
     
     logger.info(f"Texte OCR extrait ({len(raw_text)} chars)")
