@@ -61,7 +61,7 @@ class User(AbstractUser):
         return f"{name} ({self.role})"
 
     class Meta:
-        db_table = 'users'
+        db_table = 'app_users'
         verbose_name = _("Utilisateur")
         verbose_name_plural = _("Utilisateurs")
         indexes = [
