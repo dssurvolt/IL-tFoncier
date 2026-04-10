@@ -85,7 +85,10 @@ def user_dashboard(request, wallet):
         
         # Récupérer les notifications récentes (In-App)
         from marketplace.models import Notification
-        notifications = Notification.objects.filter(user=user).order_by('-created_at')[:15]
+        try:
+            notifications = Notification.objects.filter(user=user).order_by('-created_at')[:15]
+        except Exception:
+            notifications = []
 
         context = {
             'user': user,
