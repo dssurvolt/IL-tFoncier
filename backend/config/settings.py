@@ -108,22 +108,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database Configuration (Supabase/PostgreSQL ready)
-if dj_database_url:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+# Database Configuration (Hardcodée pour succès immédiat sur Render)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres.zdheryarqxqpgxirbqkh', # Nom d'utilisateur Pooler pour Supabase
+        'PASSWORD': 'V8oknSECpa1AKPZ0',
+        'HOST': 'aws-1-eu-west-1.pooler.supabase.com',
+        'PORT': '6543',
+        'OPTIONS': {
+            'sslmode': 'require',
+            'connect_timeout': 10,
         }
     }
+}
 
 
 # Password validation
