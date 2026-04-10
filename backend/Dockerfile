@@ -32,9 +32,11 @@ COPY . /app/
 # Collecte des fichiers statiques
 RUN python manage.py collectstatic --noinput
 
-# Port d'écoute (Render utilise souvent 10000)
+# Permissions pour le script d'entrée
+RUN chmod +x /app/entrypoint.sh
+
+# Port d'écoute
 EXPOSE 10000
 
-# Script de démarrage : Migrations + Gunicorn
-# On utilise la forme 'shell' pour permettre l'enchaînement des commandes
-CMD python manage.py migrate && gunicorn --bind 0.0.0.0:10000 config.wsgi:application
+# Utilisation du script d'entrée
+ENTRYPOINT ["/app/entrypoint.sh"]

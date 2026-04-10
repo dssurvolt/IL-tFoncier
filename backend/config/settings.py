@@ -113,13 +113,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres.zdheryarqxqpgxirbqkh', # Utilisateur Pooler INDISPENSABLE pour IPv4
+        'USER': 'postgres.zdheryarqxqpgxirbqkh', # Utilisateur Pooler INDISPENSABLE
         'PASSWORD': 'V8oknSECpa1AKPZ0',
-        'HOST': '18.202.64.2', # IP Directe IPv4 (aws-1-eu-west-1.pooler.supabase.com)
+        'HOST': 'aws-1-eu-west-1.pooler.supabase.com',
         'PORT': '6543',
         'OPTIONS': {
             'sslmode': 'require',
-            'connect_timeout': 20,
+            'connect_timeout': 30,
         }
     }
 }
