@@ -318,14 +318,22 @@ class PropertyListAPI(View):
                     gps_boundaries = body.get('gps_boundaries', [])
                     files = []
 
-                # VALIDATION PRÉALABLE DES TÉMOINS (Format Email)
+                # VALIDATION PRÉALABLE DES TÉMOINS (Minimum 3 Requis)
                 import re
                 email_regex = r'^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'
                 witnesses_data = json.loads(witnesses_json)
+                
+                if len(witnesses_data) < 3:
+                    return JsonResponse({'error': 'Un dossier doit comporter au moins 3 témoins pour être recevable.'}, status=400)
+
                 for i, w_data in enumerate(witnesses_data):
                     w_email = w_data.get('email', '').strip().lower()
                     if not w_email or not re.match(email_regex, w_email):
                          return JsonResponse({'error': f"Format d'email invalide pour le témoin #{i+1}"}, status=400)
+                
+                # VALIDATION DES DOCUMENTS (Minimum 1 requis)
+                if not files or len(files) == 0:
+                    return JsonResponse({'error': 'Un dossier sans preuve visuelle ou document est irrecevable.'}, status=400)
                 
                 # Récupération de l'utilisateur (Propriétaire)
                 owner = request.user if request.user.is_authenticated else None
