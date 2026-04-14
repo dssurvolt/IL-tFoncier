@@ -152,8 +152,7 @@
 
         <!-- Section: Témoins -->
         <div class="citizen-card mb-4">
-            <h5 class="fw-bold mb-4">Témoins du Dossier <span class="badge bg-danger ms-2">{{ property.witnesses.count
-                    }}</span></h5>
+            <h5 class="fw-bold mb-4">Témoins du Dossier <span class="badge bg-danger ms-2">{{ property.witnesses.count }}</span></h5>
             <div class="row g-3">
                 {% for w in property.witnesses.all %}
                 <div class="col-md-6">
@@ -196,8 +195,7 @@
 
         <!-- Galerie Médias -->
         <div class="citizen-card">
-            <h5 class="fw-bold mb-4">Documents & Preuves Visuelles <span class="badge bg-secondary ms-2">{{ media|length
-                    }}</span></h5>
+            <h5 class="fw-bold mb-4">Documents & Preuves Visuelles <span class="badge bg-secondary ms-2">{{ media|length }}</span></h5>
             <div class="row g-3">
                 {% for m in media %}
                 <div class="col-md-4">
