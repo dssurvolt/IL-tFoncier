@@ -85,6 +85,24 @@ class AuthAPI(View):
             
             user = User.objects.create_user(**user_data)
             
+            # Envoi de l'email de bienvenue (Tentative)
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = "Bienvenue sur iLôt Foncier ! 🌍"
+                message = f"Bonjour {user.full_name},\n\nVotre compte a été créé avec succès sur iLôt Foncier. Vous pouvez désormais sécuriser vos terres et participer à la marketplace foncière.\n\nIdentifiant : {user.email}\n\nÉquipe iLôt Foncier."
+                
+                send_mail(
+                    subject,
+                    message,
+                    settings.EMAIL_HOST_USER,
+                    [user.email],
+                    fail_silently=True, # On ne bloque pas l'inscription si le mail échoue
+                )
+            except Exception as e:
+                print(f"Erreur d'envoi d'email : {e}")
+            
             # Auto-login
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return JsonResponse({
