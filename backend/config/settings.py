@@ -156,6 +156,15 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Session and Cookie Security (Production)
+SESSION_COOKIE_AGE = 1209600 # 2 semaines
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Nécessaire pour JS si besoin
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
