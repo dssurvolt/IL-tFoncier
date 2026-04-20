@@ -23,8 +23,15 @@ class SupabaseAuthBackend(BaseBackend):
             try:
                 # Reconstruction de la Clé Publique depuis le JWK (x, y)
                 jwk = settings.SUPABASE_JWK
-                x_bytes = base64.urlsafe_b64decode(jwk["x"] + "==")
-                y_bytes = base64.urlsafe_b64decode(jwk["y"] + "==")
+                
+                def b64_decode(data):
+                    missing_padding = len(data) % 4
+                    if missing_padding:
+                        data += '=' * (4 - missing_padding)
+                    return base64.urlsafe_b64decode(data)
+
+                x_bytes = b64_decode(jwk["x"])
+                y_bytes = b64_decode(jwk["y"])
                 
                 x = int.from_bytes(x_bytes, "big")
                 y = int.from_bytes(y_bytes, "big")
