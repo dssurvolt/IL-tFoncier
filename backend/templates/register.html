@@ -139,10 +139,19 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // Initialisation Supabase
-    const supabaseUrl = '{{ SUPABASE_URL }}';
-    const supabaseKey = '{{ SUPABASE_KEY }}';
-    const supabase = supabaseUrl && supabaseKey ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+    // Initialisation Supabase (on évite le nom 'supabase' pour la variable pour éviter les conflits avec la lib)
+    const sbUrl = '{{ SUPABASE_URL }}';
+    const sbKey = '{{ SUPABASE_KEY }}';
+    let supabaseClient = null;
+
+    try {
+        if (sbUrl && sbKey) {
+            // Utilisation de l'objet global défini par le script CDN
+            supabaseClient = supabase.createClient(sbUrl, sbKey);
+        }
+    } catch (e) {
+        console.error("Erreur d'initialisation Supabase:", e);
+    }
 
     let passwordValid = false;
     let passwordsMatch = false;
@@ -150,8 +159,13 @@
     function togglePassword(fieldId) {
         const inp = document.getElementById(fieldId);
         const icon = document.getElementById(fieldId === 'password' ? 'eyeIcon1' : 'eyeIcon2');
-        if (inp.type === 'password') { inp.type = 'text'; icon.textContent = '🙈'; }
-        else { inp.type = 'password'; icon.textContent = '👁️'; }
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.textContent = '🙈';
+        } else {
+            inp.type = 'password';
+            icon.textContent = '👁️';
+        }
     }
 
     function checkPasswordStrength(password) {
@@ -170,10 +184,12 @@
         let color = 'bg-danger'; let width = score * 20;
         if (score >= 4) color = 'bg-success'; else if (score >= 3) color = 'bg-warning';
 
-        bar.className = `progress-bar ${color}`;
-        bar.style.width = width + '%';
-        txt.textContent = ['Invalide', 'Très Faible', 'Faible', 'Moyen', 'Bon', 'SÉCURISÉ'][score];
-        ind.textContent = score + '/5';
+        if (bar) {
+            bar.className = `progress-bar ${color}`;
+            bar.style.width = width + '%';
+        }
+        if (txt) txt.textContent = ['Invalide', 'Très Faible', 'Faible', 'Moyen', 'Bon', 'SÉCURISÉ'][score];
+        if (ind) ind.textContent = score + '/5';
 
         passwordValid = (score >= 4);
         updateSubmitButton();
@@ -183,9 +199,19 @@
         const p1 = document.getElementById('password').value;
         const p2 = document.getElementById('confirmPassword').value;
         const msg = document.getElementById('passwordMatchMessage');
-        if (!p2) { msg.textContent = ''; passwordsMatch = false; }
-        else if (p1 === p2) { msg.textContent = '✓ MOTS DE PASSE IDENTIQUES'; msg.className = 'x-small text-success fw-bold'; passwordsMatch = true; }
-        else { msg.textContent = '✗ LES MOTS DE PASSE NE CORRESPONDENT PAS'; msg.className = 'x-small text-danger fw-bold'; passwordsMatch = false; }
+
+        if (!p2) {
+            msg.textContent = '';
+            passwordsMatch = false;
+        } else if (p1 === p2) {
+            msg.textContent = '✓ MOTS DE PASSE IDENTIQUES';
+            msg.className = 'x-small text-success fw-bold';
+            passwordsMatch = true;
+        } else {
+            msg.textContent = '✗ LES MOTS DE PASSE NE CORRESPONDENT PAS';
+            msg.className = 'x-small text-danger fw-bold';
+            passwordsMatch = false;
+        }
         updateSubmitButton();
     }
 
@@ -193,7 +219,8 @@
         const btn = document.getElementById('registerBtn');
         const email = document.getElementById('email').value;
         const name = document.getElementById('fullName').value;
-        btn.disabled = !(passwordValid && passwordsMatch && email && name && supabase);
+        // On permet le clic même si supabaseClient n'est pas prêt (pour afficher l'erreur au clic)
+        btn.disabled = !(passwordValid && passwordsMatch && email && name);
     }
 
     async function performOCR() {
@@ -210,25 +237,45 @@
                 if (d.birth_date) document.getElementById('birthDate').value = d.birth_date;
                 if (d.birth_place) document.getElementById('district').value = d.birth_place;
             }
-        } catch (e) { } finally {
+        } catch (e) {
+            console.error("Erreur OCR:", e);
+        } finally {
             document.getElementById('ocrLoading').classList.add('d-none');
             document.getElementById('ocrContent').classList.remove('opacity-25');
             updateSubmitButton();
         }
     }
 
-    document.getElementById('password').addEventListener('input', e => { checkPasswordStrength(e.target.value); checkPasswordMatch(); });
-    document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
-    document.getElementById('email').addEventListener('input', updateSubmitButton);
-    document.getElementById('fullName').addEventListener('input', updateSubmitButton);
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const passInp = document.getElementById('password');
+        const confirmInp = document.getElementById('confirmPassword');
+        const emailInp = document.getElementById('email');
+        const nameInp = document.getElementById('fullName');
+
+        if (passInp) passInp.addEventListener('input', e => { checkPasswordStrength(e.target.value); checkPasswordMatch(); });
+        if (confirmInp) confirmInp.addEventListener('input', checkPasswordMatch);
+        if (emailInp) emailInp.addEventListener('input', updateSubmitButton);
+        if (nameInp) nameInp.addEventListener('input', updateSubmitButton);
+    });
 
     document.getElementById('registerForm').onsubmit = async e => {
         e.preventDefault();
         const err = document.getElementById('errorMessage');
         const ok = document.getElementById('successMessage');
         const btn = document.getElementById('registerBtn');
-        err.classList.add('d-none'); ok.classList.add('d-none');
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>SÉCURISATION DU COMPTE...';
+
+        err.classList.add('d-none');
+        ok.classList.add('d-none');
+
+        if (!supabaseClient) {
+            err.textContent = "Erreur de configuration du service de sécurité (Supabase).";
+            err.classList.remove('d-none');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>SÉCURISATION DU COMPTE...';
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -236,7 +283,7 @@
 
         try {
             // 1. Inscription côté Supabase
-            const { data, error } = await supabase.auth.signUp({
+            const { data, error } = await supabaseClient.auth.signUp({
                 email: email,
                 password: password,
                 options: {
@@ -247,7 +294,7 @@
             if (error) throw error;
 
             if (data.session) {
-                // 2. Échange du token avec Django pour créer la session locale
+                // 2. Échange du token avec Django
                 const loginRes = await fetch('/api/auth/supabase-login/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -263,14 +310,17 @@
                     throw new Error(djangoData.error || 'Erreur de synchronisation Django');
                 }
             } else {
-                ok.textContent = 'Veuillez vérifier vos emails pour confirmer votre inscription avant de vous connecter.';
+                ok.textContent = 'Inscription réussie ! Veuillez vérifier vos emails pour confirmer votre compte.';
                 ok.classList.remove('d-none');
+                btn.disabled = false;
+                btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
             }
 
         } catch (e) {
             err.textContent = e.message || 'ERREUR DURANT L\'INSCRIPTION';
             err.classList.remove('d-none');
-            btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
+            btn.disabled = false;
+            btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
         }
     };
 </script>

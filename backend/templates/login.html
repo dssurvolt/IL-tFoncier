@@ -63,9 +63,17 @@
 
 <script>
     // Initialisation Supabase
-    const supabaseUrl = '{{ SUPABASE_URL }}';
-    const supabaseKey = '{{ SUPABASE_KEY }}';
-    const supabase = supabaseUrl && supabaseKey ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+    const sbUrl = '{{ SUPABASE_URL }}';
+    const sbKey = '{{ SUPABASE_KEY }}';
+    let supabaseClient = null;
+
+    try {
+        if (sbUrl && sbKey) {
+            supabaseClient = supabase.createClient(sbUrl, sbKey);
+        }
+    } catch (e) {
+        console.error("Erreur d'initialisation:", e);
+    }
 
     function togglePassword() {
         const passwordInput = document.getElementById('password');
@@ -90,7 +98,7 @@
         loginBtn.disabled = true;
         loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification...';
 
-        if (!supabase) {
+        if (!supabaseClient) {
             errorDiv.textContent = "Supabase n'est pas configuré.";
             errorDiv.classList.remove('d-none');
             loginBtn.disabled = false;
@@ -99,7 +107,7 @@
 
         try {
             // 1. Connexion côté Supabase
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });

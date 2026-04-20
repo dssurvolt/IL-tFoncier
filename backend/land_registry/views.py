@@ -461,19 +461,24 @@ class PropertyListAPI(View):
                     f.seek(0) # Reset position for saving
                     fake_cid = "Qm" + hashlib.sha256(content).hexdigest()[:44]
                     
-                    m_type = PropertyMedia.MediaType.OTHER_MEDIA
-                    if f.content_type.startswith('image/'): 
-                        m_type = PropertyMedia.MediaType.PHOTO_LAND
-                    elif f.content_type.startswith('video/'): 
-                        m_type = PropertyMedia.MediaType.VIDEO_DRONE
-                    elif f.content_type == 'application/pdf': 
-                        m_type = PropertyMedia.MediaType.LEGAL_DOC
-
-                    PropertyMedia.objects.create(
-                        property=prop, 
-                        file=f,
-                        media_type=m_type
-                    )
+                # Enregistrement des Médias (Cloud Storage)
+                for file in files:
+                    m_type = PropertyMedia.MediaType.LEGAL_DOC if file.name.endswith('.pdf') else PropertyMedia.MediaType.PHOTO_LAND
+                    
+                    # Téléchargement vers Supabase
+                    ext = file.name.split('.')[-1]
+                    path = f"properties/{prop.id}/{uuid.uuid4()}.{ext}"
+                    public_url = storage_manager.upload_file(file, path)
+                    
+                    if public_url:
+                        pm = PropertyMedia.objects.create(
+                            property=prop,
+                            media_type=m_type
+                        )
+                        # On stocke l'URL directement dans le champ file si on veut, 
+                        # mais ici on va garder la trace de l'URL publique
+                        pm.file = public_url # Django accepte l'URL sous forme de chaîne pour les FileFields
+                        pm.save()
 
                 return JsonResponse({'id': str(prop.id), 'status': prop.status}, status=201)
             except Exception as e:
