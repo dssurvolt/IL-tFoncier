@@ -17,6 +17,14 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://zdheryarqxqpgxirbqkh.supa
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaGVyeWFycXhxcGd4aXJicWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2ODUsImV4cCI6MjA4OTc2MzY4NX0.WZSTzm02DuOCqAyOjkVNyibdQ5WFV_ynyEpOCmIUkXI')
 SUPABASE_JWT_SECRET = os.environ.get('SUPABASE_JWT_SECRET', 'BqiCCeyLQhnOzKaVy7xJjJWX81fRZfEPbr2l4EphePIIh4ypQcWGdLkHGaiyHTbeQHeyFLPDJ4q1+QDVIG5m5Q==')
 
+# Nouveaux paramètres pour signature ECC (P-256)
+SUPABASE_JWK = {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "fdeZ1TbWcus48eYqnkwBTWw2mYIJxCSDQvvX4StGOHA",
+    "y": "NMMHGBH2sSYu9rf33rCk2egUGaH2zEJ3la5d6uSxCHA"
+}
+
 try:
     import dj_database_url
 except ImportError:

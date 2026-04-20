@@ -14,18 +14,44 @@ class SupabaseAuthBackend(BaseBackend):
             return None
         
         try:
-            # 2. Valider le JWT avec le Secret Supabase
+            # 2. Valider le JWT (Support de ES256 / ECC P-256)
             import jwt
+            from cryptography.hazmat.primitives.asymmetric import ec
+            from cryptography.hazmat.backends import default_backend
+            import base64
+            
             try:
+                # Reconstruction de la Clé Publique depuis le JWK (x, y)
+                jwk = settings.SUPABASE_JWK
+                x_bytes = base64.urlsafe_b64decode(jwk["x"] + "==")
+                y_bytes = base64.urlsafe_b64decode(jwk["y"] + "==")
+                
+                x = int.from_bytes(x_bytes, "big")
+                y = int.from_bytes(y_bytes, "big")
+                
+                public_numbers = ec.EllipticCurvePublicNumbers(x, y, ec.SECP256R1())
+                public_key = public_numbers.public_key(default_backend())
+
+                # Décodage avec l'algorithme ES256 de Supabase
                 payload = jwt.decode(
                     token, 
-                    settings.SUPABASE_JWT_SECRET, 
-                    algorithms=["HS256"], 
+                    public_key, 
+                    algorithms=["ES256"], 
                     options={"verify_aud": False}
                 )
-            except Exception as jwt_err:
-                print(f"❌ Erreur Décodage JWT : {jwt_err}")
-                return None
+            except Exception as ecc_err:
+                # Fallback sur HS256 au cas où
+                print(f"⚠️ ECC failed ({ecc_err}), attempting HS256 fallback...")
+                try:
+                    payload = jwt.decode(
+                        token, 
+                        settings.SUPABASE_JWT_SECRET, 
+                        algorithms=["HS256"], 
+                        options={"verify_aud": False}
+                    )
+                except Exception as hs_err:
+                    print(f"❌ Tous les décodages ont échoué. ECC: {ecc_err} | HS256: {hs_err}")
+                    return None
 
             user_id = payload.get("sub")
             email = payload.get("email")
