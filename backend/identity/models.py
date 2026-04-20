@@ -36,7 +36,7 @@ class User(AbstractUser):
 
     username = None  # On désactive le username par défaut
     
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
     email = models.EmailField(unique=True, help_text="Email de connexion")
     phone = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Numéro de téléphone")
     

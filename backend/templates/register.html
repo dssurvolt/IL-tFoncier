@@ -135,7 +135,15 @@
     }
 </style>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+    // Initialisation Supabase
+    const supabaseUrl = '{{ SUPABASE_URL }}';
+    const supabaseKey = '{{ SUPABASE_KEY }}';
+    const supabase = supabaseUrl && supabaseKey ? supabase.createClient(supabaseUrl, supabaseKey) : null;
+
     let passwordValid = false;
     let passwordsMatch = false;
 
@@ -185,7 +193,7 @@
         const btn = document.getElementById('registerBtn');
         const email = document.getElementById('email').value;
         const name = document.getElementById('fullName').value;
-        btn.disabled = !(passwordValid && passwordsMatch && email && name);
+        btn.disabled = !(passwordValid && passwordsMatch && email && name && supabase);
     }
 
     async function performOCR() {
@@ -222,36 +230,45 @@
         err.classList.add('d-none'); ok.classList.add('d-none');
         btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>SÉCURISATION DU COMPTE...';
 
-        const payload = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            full_name: document.getElementById('fullName').value,
-            country: document.getElementById('country').value,
-            district: document.getElementById('district').value || null,
-            village: document.getElementById('village').value || null,
-            birth_date: document.getElementById('birthDate').value || null
-        };
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const full_name = document.getElementById('fullName').value;
 
         try {
-            const res = await fetch('/api/auth/register/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            // 1. Inscription côté Supabase
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: { full_name: full_name }
+                }
             });
-            const data = await res.json();
-            if (res.ok) {
-                ok.textContent = 'COMPTE CRÉÉ AVEC SUCCÈS ! REDIRECTION...';
-                ok.classList.remove('d-none');
-                localStorage.setItem('ilot_user_id', data.user_id);
-                localStorage.setItem('ilot_user_email', payload.email);
-                setTimeout(() => { window.location.href = `/dashboard/${data.user_id}/`; }, 1500);
+
+            if (error) throw error;
+
+            if (data.session) {
+                // 2. Échange du token avec Django pour créer la session locale
+                const loginRes = await fetch('/api/auth/supabase-login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: data.session.access_token })
+                });
+
+                const djangoData = await loginRes.json();
+                if (loginRes.ok) {
+                    ok.textContent = 'COMPTE CRÉÉ ET SÉCURISÉ ! REDIRECTION...';
+                    ok.classList.remove('d-none');
+                    setTimeout(() => { window.location.href = `/dashboard/${djangoData.user_id}/`; }, 1500);
+                } else {
+                    throw new Error(djangoData.error || 'Erreur de synchronisation Django');
+                }
             } else {
-                err.textContent = data.error || 'ERREUR DURANT L\'INSCRIPTION';
-                err.classList.remove('d-none');
-                btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
+                ok.textContent = 'Veuillez vérifier vos emails pour confirmer votre inscription avant de vous connecter.';
+                ok.classList.remove('d-none');
             }
+
         } catch (e) {
-            err.textContent = 'ERREUR RÉSEAU. VEUILLEZ RÉESSAYER.';
+            err.textContent = e.message || 'ERREUR DURANT L\'INSCRIPTION';
             err.classList.remove('d-none');
             btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE SÉCURISÉ';
         }

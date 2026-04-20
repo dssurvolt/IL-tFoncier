@@ -10,6 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+from pathlib import Path
+
+# Supabase Auth Settings
+SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://zdheryarqxqpgxirbqkh.supabase.co')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkaGVyeWFycXhxcGd4aXJicWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODc2ODUsImV4cCI6MjA4OTc2MzY4NX0.WZSTzm02DuOCqAyOjkVNyibdQ5WFV_ynyEpOCmIUkXI')
+SUPABASE_JWT_SECRET = os.environ.get('SUPABASE_JWT_SECRET', 'BqiCCeyLQhnOzKaVy7xJjJWX81fRZfEPbr2l4EphePIIh4ypQcWGdLkHGaiyHTbeQHeyFLPDJ4q1+QDVIG5m5Q==')
+
 try:
     import dj_database_url
 except ImportError:
@@ -183,6 +190,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'identity.User'
+
+AUTHENTICATION_BACKENDS = [
+    'identity.supabase_backend.SupabaseAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 LOGIN_URL = 'web_login'
 LOGIN_REDIRECT_URL = 'login_home'
 

@@ -15,6 +15,8 @@ class AuthAPI(View):
             return self.register(request)
         elif action == 'login':
             return self.login(request)
+        elif action == 'supabase-login':
+            return self.supabase_login(request)
         elif action == 'logout':
             return self.logout(request)
         else:
@@ -157,5 +159,35 @@ class AuthAPI(View):
                 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def supabase_login(self, request):
+        """
+        Méthode pour échanger un jeton Supabase contre une session Django.
+        """
+        try:
+            body = json.loads(request.body)
+            access_token = body.get('access_token')
+            
+            if not access_token:
+                return JsonResponse({'error': 'Token manquant'}, status=400)
+            
+            # Authentifier via notre nouveau backend
+            from django.contrib.auth import authenticate, login
+            user = authenticate(request, token=access_token)
+            
+            if user is not None:
+                login(request, user, backend='identity.supabase_backend.SupabaseAuthBackend')
+                return JsonResponse({
+                    'success': True,
+                    'user_id': str(user.id),
+                    'email': user.email,
+                    'full_name': user.full_name,
+                    'role': user.role
+                })
+            else:
+                return JsonResponse({'error': 'Token invalide ou utilisateur non trouvé'}, status=401)
+                
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)

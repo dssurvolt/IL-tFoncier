@@ -230,14 +230,21 @@ def web_profile(request, wallet):
 
 def web_register_user(request):
     """Vue pour l'inscription avec email/mot de passe."""
+    from django.conf import settings
     if request.user.is_authenticated:
         if request.user.role == User.Role.NOTARY:
             return redirect('notary_dashboard')
         return redirect('user_dashboard', wallet=str(request.user.id))
-    return render(request, 'register.html')
+    
+    context = {
+        'SUPABASE_URL': settings.SUPABASE_URL,
+        'SUPABASE_KEY': settings.SUPABASE_KEY
+    }
+    return render(request, 'register.html', context)
 
 def web_login(request):
     """Vue pour la connexion citoyenne."""
+    from django.conf import settings
     if request.user.is_authenticated:
         next_url = request.GET.get('next')
         if next_url:
@@ -245,7 +252,12 @@ def web_login(request):
         if request.user.role == User.Role.NOTARY:
             return redirect('notary_dashboard')
         return redirect('user_dashboard', wallet=str(request.user.id))
-    return render(request, 'login.html')
+    
+    context = {
+        'SUPABASE_URL': settings.SUPABASE_URL,
+        'SUPABASE_KEY': settings.SUPABASE_KEY
+    }
+    return render(request, 'login.html', context)
 
 def web_logout(request):
     """Vue pour la déconnexion."""
