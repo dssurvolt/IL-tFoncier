@@ -14,20 +14,24 @@ class SupabaseAuthBackend(BaseBackend):
             return None
         
         try:
-            # 1. Décoder le JWT Supabase
-            # Note: Supabase utilise la JWT_SECRET pour signer ses tokens (HS256 par défaut)
-            payload = jwt.decode(
-                token, 
-                settings.SUPABASE_JWT_SECRET, 
-                algorithms=["HS256"],
-                audience="authenticated"
-            )
-            
-            # 2. Récupérer les infos de l'utilisateur
+            # 2. Valider le JWT avec le Secret Supabase
+            import jwt
+            try:
+                payload = jwt.decode(
+                    token, 
+                    settings.SUPABASE_JWT_SECRET, 
+                    algorithms=["HS256"], 
+                    options={"verify_aud": False}
+                )
+            except Exception as jwt_err:
+                print(f"❌ Erreur Décodage JWT : {jwt_err}")
+                return None
+
             user_id = payload.get("sub")
             email = payload.get("email")
             
-            if not user_id:
+            if not user_id or not email:
+                print("❌ JWT incomplet : sub ou email manquant")
                 return None
             
             # 3. Récupérer ou créer l'utilisateur dans Django
