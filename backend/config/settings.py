@@ -21,8 +21,8 @@ SUPABASE_JWT_SECRET = os.environ.get('SUPABASE_JWT_SECRET', 'BqiCCeyLQhnOzKaVy7x
 SUPABASE_JWK = {
     "kty": "EC",
     "crv": "P-256",
-    "x": "fdeZ1TbWcus48eYqnkwBTWw2mYIJxCSDQvvX4StGOHA",
-    "y": "NMMHGBH2sSYu9rf33rCk2egUGaH2zEJ3la5d6uSxCHA"
+    "x": "fdeZ1TbWcus48eYqnkwBTWw2mYIJxCSDQvvX4StgOHA",
+    "y": "NMMHGBH2sSYu9rf33rCk2egUGaH2zEJ3la5d6uSxcHA"
 }
 
 try:
