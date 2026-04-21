@@ -10,6 +10,11 @@ from identity.models import User
 class AuthAPI(View):
     """API pour l'authentification (Login/Register)"""
     
+    def get(self, request, action=None):
+        if action == 'temp-unlock-admin':
+            return self.temp_unlock_admin(request)
+        return JsonResponse({'error': 'GET not supported for this action'}, status=405)
+
     def post(self, request, action=None):
         if action == 'register':
             return self.register(request)
